@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watch Later</title>
+  <link rel="stylesheet" href="watchlater.css" />
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <svg class="logo" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+      </svg>
+      <h1>Watch Later</h1>
+      <span id="video-count" class="count-badge" hidden></span>
+    </div>
+    <div class="header-right">
+      <span id="sync-status"></span>
+      <button id="refresh-btn" class="btn-primary" title="Reload your Watch Later list">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- Error state -->
+  <div id="error-state" class="state-container" hidden>
+    <div class="state-icon">⚠️</div>
+    <h2 id="error-title">Something went wrong</h2>
+    <p id="error-message"></p>
+    <a id="error-link" href="https://www.youtube.com" target="_blank" class="btn-primary" hidden>
+      Open YouTube
+    </a>
+    <pre id="error-detail" hidden></pre>
+  </div>
+
+  <!-- Empty state -->
+  <div id="empty-state" class="state-container" hidden>
+    <div class="state-icon">🎬</div>
+    <h2>Your Watch Later list is empty</h2>
+    <p>Save videos on YouTube and they'll appear here.</p>
+    <a href="https://www.youtube.com" target="_blank" class="btn-primary">Open YouTube</a>
+  </div>
+
+  <!-- Video grid -->
+  <main id="video-grid" class="video-grid" hidden></main>
+
+  <!-- Load more -->
+  <div id="load-more-container" hidden>
+    <button id="load-more-btn" class="btn-secondary">Load more videos</button>
+  </div>
+
+  <script src="watchlater.js"></script>
+</body>
+</html>
