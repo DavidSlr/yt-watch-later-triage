@@ -2,6 +2,56 @@
 // real youtube.com tab. Requests originating from that context are
 // indistinguishable from YouTube's own JS, avoiding bot-detection 403s.
 
+// ---------------------------------------------------------------------------
+// Embed referrer fix
+// ---------------------------------------------------------------------------
+// YouTube requires a valid HTTP Referer on /embed/ requests (error 153
+// otherwise). Extension pages (moz-extension://) never send one, so we inject
+// a youtube.com Referer on embed sub_frame requests.
+const debugState = {
+  startedAt: new Date().toISOString(),
+  webRequestListenerRegistered: false,
+  embedRequestsModified: 0,
+  lastEmbedUrl: null,
+  lastEmbedModifiedAt: null,
+  errors: [],
+};
+
+try {
+  browser.webRequest.onBeforeSendHeaders.addListener(
+    (details) => {
+      // The page selects the Referer per embed strategy via the wla_ref param
+      let referer = "https://www.youtube.com/";
+      try {
+        const custom = new URL(details.url).searchParams.get("wla_ref");
+        if (custom && /^https:\/\//.test(custom)) referer = custom;
+      } catch (_) {}
+
+      const headers = details.requestHeaders.filter(
+        (h) => h.name.toLowerCase() !== "referer"
+      );
+      headers.push({ name: "Referer", value: referer });
+      debugState.embedRequestsModified++;
+      debugState.lastEmbedUrl = details.url;
+      debugState.lastRefererUsed = referer;
+      debugState.lastEmbedModifiedAt = new Date().toISOString();
+      return { requestHeaders: headers };
+    },
+    {
+      urls: [
+        "*://www.youtube-nocookie.com/embed/*",
+        "*://www.youtube.com/embed/*",
+      ],
+      types: ["sub_frame"],
+    },
+    ["blocking", "requestHeaders"]
+  );
+  debugState.webRequestListenerRegistered = true;
+} catch (err) {
+  debugState.errors.push(`webRequest listener registration failed: ${err.message}`);
+  console.error("[WLA background] webRequest listener:", err);
+}
+
 // Open the Watch Later tab when the toolbar icon is clicked.
 browser.action.onClicked.addListener(async () => {
   const tabUrl = browser.runtime.getURL("pages/watchlater.html");
@@ -18,6 +68,11 @@ browser.action.onClicked.addListener(async () => {
 // Message handler — proxy to YouTube tab content script
 // ---------------------------------------------------------------------------
 browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.type === "get_debug") {
+    sendResponse({ ok: true, debug: debugState });
+    return false;
+  }
+
   if (message.type === "fetch_wl") {
     proxyViaYouTubeTab({ type: "cs_fetch_wl", continuation: message.continuation ?? null })
       .then(r => sendResponse(r))

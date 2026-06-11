@@ -3,8 +3,8 @@
   "name": "YT Watch Later Triage",
   "version": "0.1.0",
   "description": "View and manage your YouTube Watch Later list in a dedicated tab.",
-  "permissions": ["cookies", "tabs"],
-  "host_permissions": ["*://*.youtube.com/*"],
+  "permissions": ["cookies", "tabs", "webRequest", "webRequestBlocking", "storage"],
+  "host_permissions": ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"],
   "background": {
     "scripts": ["background.js"]
   },
@@ -25,5 +25,8 @@
   "icons": {
     "48": "icons/icon-48.png",
     "96": "icons/icon-96.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; frame-src https://www.youtube-nocookie.com https://www.youtube.com;"
   }
 }

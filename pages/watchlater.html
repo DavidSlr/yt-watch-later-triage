@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="watchlater.css" />
 </head>
 <body>
+
   <header>
     <div class="header-left">
       <svg class="logo" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -16,6 +17,9 @@
       <span id="video-count" class="count-badge" hidden></span>
     </div>
     <div class="header-right">
+      <button id="debug-btn" class="btn-secondary debug-btn" hidden title="Copy debug data and recent errors to the clipboard">
+        ⚠ Copy debug info
+      </button>
       <span id="sync-status"></span>
       <button id="refresh-btn" class="btn-primary" title="Reload your Watch Later list">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -25,6 +29,12 @@
       </button>
     </div>
   </header>
+
+  <!-- Loading state -->
+  <div id="loading-state" class="state-container" hidden>
+    <div class="spinner"></div>
+    <p>Loading your Watch Later list…</p>
+  </div>
 
   <!-- Error state -->
   <div id="error-state" class="state-container" hidden>
@@ -45,13 +55,118 @@
     <a href="https://www.youtube.com" target="_blank" class="btn-primary">Open YouTube</a>
   </div>
 
-  <!-- Video grid -->
-  <main id="video-grid" class="video-grid" hidden></main>
+  <!-- ── Player view ── -->
+  <div id="player-view" hidden>
 
-  <!-- Load more -->
-  <div id="load-more-container" hidden>
-    <button id="load-more-btn" class="btn-secondary">Load more videos</button>
-  </div>
+    <!-- Player + info panel -->
+    <div class="player-section">
+
+      <div class="player-wrapper">
+        <iframe id="yt-player"
+          src="about:blank"
+          frameborder="0"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+      <!-- Info panel: sticky info + actions on top, scrollable accordion below -->
+      <aside class="info-panel">
+
+        <div class="info-sticky">
+          <h2 id="info-title" class="info-title"></h2>
+          <div id="info-channel" class="info-channel"></div>
+          <div id="info-duration" class="info-duration"></div>
+          <div class="info-actions">
+            <button id="btn-remove-next" class="btn-primary">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+              Remove &amp; Next
+            </button>
+            <div class="info-actions-row">
+              <button id="btn-keep" class="btn-secondary">
+                Keep
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                </svg>
+              </button>
+              <a id="btn-open-yt" href="#" target="_blank" rel="noopener" class="btn-secondary">
+                Open on YouTube
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc-scroll">
+
+          <button class="acc-header open" data-acc="summary">
+            <span class="acc-title">Summary</span>
+            <svg class="acc-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+          <div class="acc-body open" id="acc-summary">
+            <p class="placeholder-note">Placeholder — AI-generated summary coming soon.</p>
+            <p class="summary-p">The creator walks through building a complete full-stack application over a single weekend, starting from an empty repository and ending with a deployed product. The stack centers on Next.js with tRPC for type-safe APIs and Prisma as the ORM layer.</p>
+            <p class="summary-p">A significant portion covers the decisions that didn't age well: choosing Prisma over Drizzle led to migration friction, authentication was bolted on too late, and the database schema churned heavily once real data arrived. Each misstep is paired with what the creator would do differently today.</p>
+            <p class="summary-p">The middle section dives into deployment trade-offs — serverless vs. a traditional VPS — with concrete latency and cost numbers from both setups running the same workload over two weeks.</p>
+            <p class="summary-p">The final ten minutes are a structured retrospective: when a full-stack framework is justified, when a simpler static site with a thin API wins, and a checklist the creator now uses before starting any new side project.</p>
+          </div>
+
+          <button class="acc-header open" data-acc="sentiment">
+            <span class="acc-title">Comment Sentiment</span>
+            <svg class="acc-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+          <div class="acc-body open" id="acc-sentiment">
+            <p class="placeholder-note">Comment analysis coming soon.</p>
+            <div class="sentiment-bars">
+              <div class="sentiment-row">
+                <span class="sentiment-label">Positive</span>
+                <div class="sentiment-track"><div class="sentiment-fill placeholder-fill" style="width:60%"></div></div>
+              </div>
+              <div class="sentiment-row">
+                <span class="sentiment-label">Neutral</span>
+                <div class="sentiment-track"><div class="sentiment-fill placeholder-fill" style="width:28%"></div></div>
+              </div>
+              <div class="sentiment-row">
+                <span class="sentiment-label">Critical</span>
+                <div class="sentiment-track"><div class="sentiment-fill placeholder-fill" style="width:12%"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <button class="acc-header open" data-acc="tags">
+            <span class="acc-title">Contextual Tags</span>
+            <svg class="acc-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+          <div class="acc-body open" id="acc-tags">
+            <p class="placeholder-note">Auto-tagging coming soon.</p>
+            <div class="placeholder-chips">
+              <span class="placeholder-chip">⚡ Quick watch</span>
+              <span class="placeholder-chip">🎓 Deep dive</span>
+              <span class="placeholder-chip">🎧 Passive</span>
+            </div>
+          </div>
+
+        </div><!-- /acc-scroll -->
+
+      </aside>
+    </div><!-- /player-section -->
+
+    <!-- Queue -->
+    <div class="queue-section">
+      <div class="queue-header">
+        <span class="queue-label">Queue</span>
+        <span id="queue-count" class="queue-count"></span>
+      </div>
+      <div id="queue-scroll" class="queue-scroll"></div>
+    </div>
+
+  </div><!-- /player-view -->
 
   <script src="watchlater.js"></script>
 </body>
