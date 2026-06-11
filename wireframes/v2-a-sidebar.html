@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wireframe v2-A — Player + Right Sidebar (tabs)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: monospace;
+      background: #1a1a1a;
+      color: #ccc;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: #111;
+      border-bottom: 2px dashed #333;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .topbar-logo {
+      width: 26px; height: 26px;
+      background: #333; border: 2px dashed #555; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: #777;
+    }
+    .topbar-title { font-size: 13px; color: #aaa; font-weight: bold; }
+    .topbar-badge {
+      background: #2a2a2a; border: 1px dashed #444; border-radius: 10px;
+      padding: 2px 8px; font-size: 10px; color: #666;
+    }
+    .topbar-spacer { flex: 1; }
+    .topbar-btn {
+      background: #222; border: 2px dashed #444; border-radius: 4px;
+      padding: 4px 10px; font-size: 11px; color: #777;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── LEFT COLUMN ── */
+    .left-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 14px 16px 12px;
+      gap: 10px;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* Player */
+    .player-box {
+      flex: 1;
+      background: #0d0d0d;
+      border: 3px dashed #4a4a4a;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 0;
+    }
+    .player-play {
+      width: 60px; height: 60px;
+      border: 3px dashed #555; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; color: #555;
+    }
+    .player-badge {
+      position: absolute; top: 8px; left: 10px;
+      background: #1a1a1a; border: 1px dashed #444;
+      padding: 2px 8px; border-radius: 3px;
+      font-size: 10px; color: #666;
+    }
+    .player-dur {
+      position: absolute; bottom: 8px; right: 10px;
+      font-size: 11px; color: #555;
+    }
+
+    /* Progress */
+    .progress-row {
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+    .progress-track {
+      flex: 1; height: 6px;
+      background: #222; border: 1px dashed #3a3a3a; border-radius: 3px;
+    }
+    .progress-fill { width: 35%; height: 100%; background: #555; border-radius: 3px; }
+    .progress-time { font-size: 10px; color: #555; white-space: nowrap; }
+
+    /* Controls */
+    .controls {
+      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+    }
+    .ctrl-btn {
+      background: #222; border: 2px dashed #444; border-radius: 4px;
+      padding: 5px 11px; font-size: 11px; color: #888;
+      cursor: pointer; white-space: nowrap; user-select: none;
+    }
+    .ctrl-btn.primary { border-style: solid; color: #bbb; }
+    .ctrl-spacer { flex: 1; }
+
+    /* ── DETAIL PANEL with TABS ── */
+    .detail-panel {
+      flex-shrink: 0;
+      background: #191919;
+      border: 2px dashed #333;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      /* fixed height so it doesn't push player too small */
+      height: 210px;
+    }
+
+    .tab-bar {
+      display: flex;
+      border-bottom: 2px dashed #2e2e2e;
+      flex-shrink: 0;
+      background: #141414;
+    }
+    .tab {
+      padding: 7px 14px;
+      font-size: 10px; color: #555;
+      cursor: pointer;
+      border-right: 1px dashed #2a2a2a;
+      user-select: none;
+      transition: color .15s, background .15s;
+      white-space: nowrap;
+    }
+    .tab:hover { color: #888; background: #1c1c1c; }
+    .tab.active { color: #bbb; background: #191919; border-bottom: 2px solid #666; margin-bottom: -2px; }
+
+    .tab-content { display: none; flex: 1; overflow-y: auto; padding: 12px; }
+    .tab-content.active { display: block; }
+
+    /* Info tab */
+    .info-title { font-size: 13px; color: #bbb; font-weight: bold; margin-bottom: 8px; line-height: 1.4; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
+    .chip {
+      background: #222; border: 1px dashed #3a3a3a; border-radius: 10px;
+      padding: 2px 8px; font-size: 10px; color: #666;
+    }
+
+    /* Summary tab */
+    .summary-text {
+      font-size: 10px; color: #777; line-height: 1.7;
+    }
+    .summary-text .bullet { color: #555; margin-right: 6px; }
+
+    /* Sentiment tab */
+    .sentiment-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .sentiment-bar-wrap { flex: 1; }
+    .sentiment-label { font-size: 9px; color: #555; margin-bottom: 3px; }
+    .sentiment-track {
+      height: 8px; background: #222; border: 1px dashed #333; border-radius: 4px; overflow: hidden;
+    }
+    .sentiment-fill { height: 100%; border-radius: 4px; }
+    .s-positive .sentiment-fill { width: 62%; background: #3a6a3a; }
+    .s-neutral  .sentiment-fill { width: 25%; background: #555; }
+    .s-negative .sentiment-fill { width: 13%; background: #6a3a3a; }
+    .sentiment-note { font-size: 9px; color: #444; margin-top: 6px; font-style: italic; }
+
+    /* Tags tab */
+    .tag-group { margin-bottom: 10px; }
+    .tag-group-label { font-size: 9px; color: #444; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .06em; }
+    .tag-chip {
+      display: inline-block;
+      margin: 3px 3px 0 0;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-size: 10px;
+      cursor: pointer;
+      user-select: none;
+      border: 1px dashed #3a3a3a;
+      background: #222; color: #666;
+      transition: border-color .15s, color .15s;
+    }
+    .tag-chip.selected { border-style: solid; border-color: #666; color: #aaa; background: #2a2a2a; }
+    .tag-chip:hover:not(.selected) { color: #888; }
+
+    /* ── RIGHT SIDEBAR (queue) ── */
+    .sidebar {
+      width: 290px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      border-left: 2px dashed #2e2e2e;
+      background: #161616;
+      overflow: hidden;
+    }
+    .sidebar-header {
+      padding: 9px 12px;
+      border-bottom: 2px dashed #2a2a2a;
+      display: flex; align-items: center; gap: 8px;
+      flex-shrink: 0;
+    }
+    .sidebar-title { font-size: 11px; color: #888; font-weight: bold; flex: 1; }
+    .sidebar-count { font-size: 10px; color: #444; }
+    .queue-list {
+      flex: 1; overflow-y: auto; padding: 8px;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .queue-item {
+      display: flex; gap: 7px; padding: 6px;
+      border: 1px dashed #272727; border-radius: 4px;
+      background: #1a1a1a; align-items: flex-start; cursor: pointer;
+    }
+    .queue-item:hover { background: #1f1f1f; border-color: #333; }
+    .queue-item.active { border-color: #4a4a4a; background: #222; }
+    .queue-thumb {
+      width: 72px; height: 44px;
+      background: #252525; border: 1px dashed #333; border-radius: 3px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: #444;
+    }
+    .queue-info { flex: 1; min-width: 0; }
+    .queue-title {
+      font-size: 10px; color: #999;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .queue-meta { font-size: 9px; color: #555; }
+    .queue-remove {
+      font-size: 9px; color: #444;
+      background: #1e1e1e; border: 1px dashed #2e2e2e;
+      border-radius: 3px; padding: 2px 5px;
+      cursor: pointer; flex-shrink: 0; align-self: flex-start;
+    }
+    .queue-remove:hover { color: #888; border-color: #555; }
+    .sidebar-footer { padding: 8px; border-top: 2px dashed #2a2a2a; flex-shrink: 0; }
+    .load-more {
+      width: 100%; padding: 6px;
+      background: #1c1c1c; border: 2px dashed #2e2e2e; border-radius: 4px;
+      font-size: 10px; color: #555; text-align: center; cursor: pointer;
+    }
+    .load-more:hover { color: #888; border-color: #444; }
+
+    .watermark {
+      position: fixed; bottom: 6px; left: 8px;
+      font-size: 9px; color: #252525; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">▶</div>
+    <span class="topbar-title">Watch Later</span>
+    <span class="topbar-badge">47 videos</span>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-btn">↻ Refresh</div>
+  </div>
+
+  <div class="main">
+
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+
+      <div class="label">Player</div>
+
+      <div class="player-box">
+        <div class="player-badge">▶ Now playing</div>
+        <div class="player-play">▶</div>
+        <div class="player-dur">12:34 / 36:01</div>
+      </div>
+
+      <div class="progress-row">
+        <div class="progress-track"><div class="progress-fill"></div></div>
+        <span class="progress-time">12:34 / 36:01</span>
+      </div>
+
+      <div class="controls">
+        <div class="ctrl-btn">⏮ Prev</div>
+        <div class="ctrl-btn primary">⏸ Pause</div>
+        <div class="ctrl-btn">⏭ Next</div>
+        <div class="ctrl-spacer"></div>
+        <div class="ctrl-btn primary">✓ Remove &amp; next</div>
+        <div class="ctrl-btn">⊞ Keep</div>
+        <div class="ctrl-btn">↗ Open on YT</div>
+      </div>
+
+      <!-- TABBED DETAIL PANEL -->
+      <div class="detail-panel">
+        <div class="tab-bar">
+          <div class="tab active" data-tab="info">Info</div>
+          <div class="tab" data-tab="summary">Summary</div>
+          <div class="tab" data-tab="sentiment">Comments</div>
+          <div class="tab" data-tab="tags">Tags</div>
+        </div>
+
+        <!-- Info -->
+        <div class="tab-content active" id="tab-info">
+          <div class="info-title">How I built a full-stack app in a weekend (and what I'd do differently)</div>
+          <div class="chip-row">
+            <span class="chip">Theo - t3.gg</span>
+            <span class="chip">36:01</span>
+            <span class="chip">3 weeks ago</span>
+            <span class="chip">142K views</span>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="tab-content" id="tab-summary">
+          <div class="summary-text">
+            <div><span class="bullet">·</span>Developer builds a T3 Stack app (Next.js, tRPC, Prisma) over a single weekend as a side project experiment.</div>
+            <div style="margin-top:6px"><span class="bullet">·</span>Covers the decisions he'd change: chose Prisma over Drizzle, skipped proper auth, underestimated DB schema churn.</div>
+            <div style="margin-top:6px"><span class="bullet">·</span>Last 10 min is a retrospective with concrete takeaways on when to use a full stack vs. a simpler approach.</div>
+          </div>
+        </div>
+
+        <!-- Sentiment -->
+        <div class="tab-content" id="tab-sentiment">
+          <div class="sentiment-row">
+            <div class="sentiment-bar-wrap s-positive">
+              <div class="sentiment-label">Positive — 62%</div>
+              <div class="sentiment-track"><div class="sentiment-fill"></div></div>
+            </div>
+          </div>
+          <div class="sentiment-row">
+            <div class="sentiment-bar-wrap s-neutral">
+              <div class="sentiment-label">Neutral — 25%</div>
+              <div class="sentiment-track"><div class="sentiment-fill"></div></div>
+            </div>
+          </div>
+          <div class="sentiment-row">
+            <div class="sentiment-bar-wrap s-negative">
+              <div class="sentiment-label">Critical — 13%</div>
+              <div class="sentiment-track"><div class="sentiment-fill"></div></div>
+            </div>
+          </div>
+          <div class="sentiment-note">Top theme: "great pacing, wished the DB section was longer"</div>
+        </div>
+
+        <!-- Tags -->
+        <div class="tab-content" id="tab-tags">
+          <div class="tag-group">
+            <div class="tag-group-label">Watch context</div>
+            <span class="tag-chip" data-group="context">⚡ Quick watch</span>
+            <span class="tag-chip selected" data-group="context">🎓 Deep dive</span>
+            <span class="tag-chip" data-group="context">🎧 Passive listening</span>
+          </div>
+          <div class="tag-group">
+            <div class="tag-group-label">Content type</div>
+            <span class="tag-chip selected" data-group="type">Tutorial</span>
+            <span class="tag-chip" data-group="type">Commentary</span>
+            <span class="tag-chip" data-group="type">Demo</span>
+            <span class="tag-chip" data-group="type">Talk</span>
+          </div>
+        </div>
+      </div><!-- /detail-panel -->
+
+    </div><!-- /left-col -->
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Up next</span>
+        <span class="sidebar-count">46 remaining</span>
+      </div>
+      <div class="queue-list">
+
+        <div class="queue-item active">
+          <div class="queue-thumb">▶ now</div>
+          <div class="queue-info">
+            <div class="queue-title">How I built a full-stack app in a weekend…</div>
+            <div class="queue-meta">Theo · 36:01 · 3 wks ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb">thumb</div>
+          <div class="queue-info">
+            <div class="queue-title">The problem with modern JavaScript tooling</div>
+            <div class="queue-meta">Fireship · 12:44 · 5 days ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb">thumb</div>
+          <div class="queue-info">
+            <div class="queue-title">I rewrote my entire backend in Rust</div>
+            <div class="queue-meta">ThePrimeagen · 48:20 · 2 wks ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb">thumb</div>
+          <div class="queue-info">
+            <div class="queue-title">PostgreSQL vs SQLite in 2025 — which to pick?</div>
+            <div class="queue-meta">Syntax · 24:15 · 1 mo ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb">thumb</div>
+          <div class="queue-info">
+            <div class="queue-title">Stop using useEffect for everything</div>
+            <div class="queue-meta">Jack Herrington · 18:02 · 3 days ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb">thumb</div>
+          <div class="queue-info">
+            <div class="queue-title">5 terminal tricks I use every day</div>
+            <div class="queue-meta">Dreams of Code · 9:30 · 1 wk ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb">thumb</div>
+          <div class="queue-info">
+            <div class="queue-title">What even is a monad? (explained for devs)</div>
+            <div class="queue-meta">Computerphile · 22:11 · 8 mos ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+      </div>
+      <div class="sidebar-footer">
+        <div class="load-more">Load more videos…</div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <div class="watermark">Wireframe v2-A — tabs in detail panel · rough layout only</div>
+
+  <script>
+    // Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const panel = tab.closest('.detail-panel');
+        panel.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        panel.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        panel.querySelector('#tab-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Tag chips — single-select per group
+    document.querySelectorAll('.tag-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const group = chip.dataset.group;
+        document.querySelectorAll(`.tag-chip[data-group="${group}"]`).forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+      });
+    });
+  </script>
+
+</body>
+</html>

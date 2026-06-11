@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wireframe v2-B — Player + Bottom Queue (accordion)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: monospace;
+      background: #1a1a1a;
+      color: #ccc;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #555;
+      margin-bottom: 4px;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: #111;
+      border-bottom: 2px dashed #333;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .topbar-logo {
+      width: 26px; height: 26px;
+      background: #333; border: 2px dashed #555; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: #777;
+    }
+    .topbar-title { font-size: 13px; color: #aaa; font-weight: bold; }
+    .topbar-badge {
+      background: #2a2a2a; border: 1px dashed #444; border-radius: 10px;
+      padding: 2px 8px; font-size: 10px; color: #666;
+    }
+    .topbar-spacer { flex: 1; }
+    .topbar-btn {
+      background: #222; border: 2px dashed #444; border-radius: 4px;
+      padding: 4px 10px; font-size: 11px; color: #777;
+    }
+
+    /* ── PLAYER SECTION ── */
+    .player-section {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* Player column */
+    .player-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 14px 16px 10px;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .player-box {
+      flex: 1;
+      background: #0d0d0d;
+      border: 3px dashed #4a4a4a;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      min-height: 0;
+    }
+    .player-play {
+      width: 62px; height: 62px;
+      border: 3px dashed #555; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; color: #555;
+    }
+    .player-badge {
+      position: absolute; top: 8px; left: 10px;
+      background: #1a1a1a; border: 1px dashed #444;
+      padding: 2px 8px; border-radius: 3px;
+      font-size: 10px; color: #666;
+    }
+    .player-dur {
+      position: absolute; bottom: 8px; right: 10px;
+      font-size: 11px; color: #555;
+    }
+
+    /* Progress */
+    .progress-row {
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+    .progress-track {
+      flex: 1; height: 6px;
+      background: #222; border: 1px dashed #3a3a3a; border-radius: 3px;
+    }
+    .progress-fill { width: 28%; height: 100%; background: #555; border-radius: 3px; }
+    .progress-time { font-size: 10px; color: #555; white-space: nowrap; }
+
+    /* Controls */
+    .controls {
+      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+    }
+    .ctrl-btn {
+      background: #222; border: 2px dashed #444; border-radius: 4px;
+      padding: 5px 11px; font-size: 11px; color: #888;
+      cursor: pointer; white-space: nowrap; user-select: none;
+    }
+    .ctrl-btn.primary { border-style: solid; color: #bbb; }
+    .ctrl-spacer { flex: 1; }
+
+    /* ── ACCORDION PANEL (right of player) ── */
+    .accordion-panel {
+      width: 250px;
+      flex-shrink: 0;
+      border-left: 2px dashed #2e2e2e;
+      background: #161616;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .accordion-item { border-bottom: 1px dashed #252525; }
+
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      padding: 9px 12px;
+      cursor: pointer;
+      user-select: none;
+      background: #161616;
+      gap: 8px;
+      transition: background .15s;
+    }
+    .accordion-header:hover { background: #1d1d1d; }
+    .accordion-header.open { background: #1c1c1c; }
+
+    .accordion-title {
+      font-size: 11px; color: #888; font-weight: bold; flex: 1;
+    }
+    .accordion-header.open .accordion-title { color: #bbb; }
+
+    .accordion-arrow {
+      font-size: 9px; color: #444;
+      transition: transform .2s;
+    }
+    .accordion-header.open .accordion-arrow { transform: rotate(90deg); color: #666; }
+
+    .accordion-body {
+      display: none;
+      padding: 10px 12px 12px;
+      background: #191919;
+    }
+    .accordion-body.open { display: block; }
+
+    /* Info section */
+    .info-title {
+      font-size: 11px; color: #bbb; font-weight: bold;
+      line-height: 1.5; margin-bottom: 8px;
+    }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 4px; }
+    .chip {
+      background: #222; border: 1px dashed #3a3a3a; border-radius: 10px;
+      padding: 2px 7px; font-size: 9px; color: #666;
+    }
+
+    /* Summary */
+    .summary-text {
+      font-size: 10px; color: #777; line-height: 1.7;
+    }
+    .summary-text .bullet { color: #555; margin-right: 5px; }
+
+    /* Sentiment */
+    .sentiment-row { margin-bottom: 8px; }
+    .sentiment-label { font-size: 9px; color: #555; margin-bottom: 3px; }
+    .sentiment-track {
+      height: 7px; background: #222; border: 1px dashed #333; border-radius: 4px; overflow: hidden;
+    }
+    .sentiment-fill { height: 100%; border-radius: 4px; }
+    .s-pos .sentiment-fill { width: 62%; background: #3a6a3a; }
+    .s-neu .sentiment-fill { width: 25%; background: #555; }
+    .s-neg .sentiment-fill { width: 13%; background: #6a3a3a; }
+    .sentiment-note { font-size: 9px; color: #444; margin-top: 6px; font-style: italic; }
+
+    /* Tags */
+    .tag-group-label {
+      font-size: 9px; color: #444; margin-bottom: 5px;
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .tag-chip {
+      display: inline-block;
+      margin: 3px 3px 0 0;
+      padding: 3px 9px;
+      border-radius: 10px;
+      font-size: 10px;
+      cursor: pointer; user-select: none;
+      border: 1px dashed #3a3a3a;
+      background: #222; color: #666;
+      transition: border-color .15s, color .15s;
+    }
+    .tag-chip.selected { border-style: solid; border-color: #666; color: #aaa; background: #2a2a2a; }
+    .tag-chip:hover:not(.selected) { color: #888; }
+    .tag-group-sep { margin-top: 10px; }
+
+    /* ── BOTTOM QUEUE ── */
+    .queue-section {
+      height: 185px;
+      flex-shrink: 0;
+      border-top: 2px dashed #2e2e2e;
+      background: #141414;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .queue-header {
+      padding: 6px 14px;
+      display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px dashed #252525;
+      flex-shrink: 0;
+    }
+    .queue-header-title { font-size: 11px; color: #777; font-weight: bold; flex: 1; }
+    .queue-header-count { font-size: 10px; color: #444; }
+    .queue-scroll {
+      flex: 1;
+      display: flex; gap: 8px;
+      padding: 8px 12px;
+      overflow-x: auto;
+      align-items: flex-start;
+    }
+    .queue-card {
+      width: 150px; flex-shrink: 0;
+      border: 1px dashed #272727; border-radius: 5px;
+      background: #1a1a1a; overflow: hidden;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .queue-card:hover { border-color: #3a3a3a; }
+    .queue-card.active { border-color: #4a4a4a; background: #222; }
+    .queue-thumb {
+      width: 100%; height: 72px;
+      background: #232323; border-bottom: 1px dashed #2a2a2a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: #444;
+      position: relative;
+    }
+    .queue-thumb-dur {
+      position: absolute; bottom: 4px; right: 5px;
+      font-size: 9px; color: #666;
+      background: #111; padding: 1px 4px; border-radius: 2px;
+    }
+    .queue-card-body { padding: 5px 6px; }
+    .queue-card-title {
+      font-size: 9px; color: #999;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; margin-bottom: 3px; line-height: 1.4;
+    }
+    .queue-card-meta { font-size: 8px; color: #555; }
+    .queue-card-remove {
+      display: block; width: 100%; margin-top: 4px; padding: 3px;
+      background: #1e1e1e; border: 1px dashed #2e2e2e; border-radius: 3px;
+      font-size: 8px; color: #555; text-align: center; cursor: pointer;
+    }
+    .queue-card-remove:hover { color: #888; border-color: #555; }
+    .queue-load-card {
+      width: 72px; flex-shrink: 0;
+      border: 1px dashed #252525; border-radius: 5px;
+      background: #161616;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: #444; text-align: center; padding: 8px;
+      align-self: stretch; cursor: pointer;
+    }
+    .queue-load-card:hover { color: #777; border-color: #3a3a3a; }
+
+    .watermark {
+      position: fixed; bottom: 6px; left: 8px;
+      font-size: 9px; color: #222; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">▶</div>
+    <span class="topbar-title">Watch Later</span>
+    <span class="topbar-badge">47 videos</span>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-btn">↻ Refresh</div>
+  </div>
+
+  <!-- PLAYER + ACCORDION PANEL -->
+  <div class="player-section">
+
+    <div class="player-col">
+      <div class="label">Player</div>
+
+      <div class="player-box">
+        <div class="player-badge">▶ Now playing</div>
+        <div class="player-play">▶</div>
+        <div class="player-dur">10:08 / 36:01</div>
+      </div>
+
+      <div class="progress-row">
+        <div class="progress-track"><div class="progress-fill"></div></div>
+        <span class="progress-time">10:08 / 36:01</span>
+      </div>
+
+      <div class="controls">
+        <div class="ctrl-btn">⏮ Prev</div>
+        <div class="ctrl-btn primary">⏸ Pause</div>
+        <div class="ctrl-btn">⏭ Next</div>
+        <div class="ctrl-spacer"></div>
+        <div class="ctrl-btn primary">✓ Remove &amp; next</div>
+        <div class="ctrl-btn">⊞ Keep</div>
+        <div class="ctrl-btn">↗ Open on YT</div>
+      </div>
+    </div>
+
+    <!-- ACCORDION DETAIL PANEL -->
+    <div class="accordion-panel">
+
+      <!-- Info -->
+      <div class="accordion-item">
+        <div class="accordion-header open" data-acc="info">
+          <span class="accordion-title">Info</span>
+          <span class="accordion-arrow">▶</span>
+        </div>
+        <div class="accordion-body open" id="acc-info">
+          <div class="info-title">How I built a full-stack app in a weekend (and what I'd do differently)</div>
+          <div class="chip-row">
+            <span class="chip">Theo - t3.gg</span>
+            <span class="chip">36:01</span>
+            <span class="chip">3 wks ago</span>
+            <span class="chip">142K views</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="accordion-item">
+        <div class="accordion-header" data-acc="summary">
+          <span class="accordion-title">Summary</span>
+          <span class="accordion-arrow">▶</span>
+        </div>
+        <div class="accordion-body" id="acc-summary">
+          <div class="summary-text">
+            <div><span class="bullet">·</span>Developer builds a T3 Stack app (Next.js, tRPC, Prisma) over a single weekend.</div>
+            <div style="margin-top:6px"><span class="bullet">·</span>Decisions he'd change: Prisma over Drizzle, skipped proper auth, underestimated DB schema churn.</div>
+            <div style="margin-top:6px"><span class="bullet">·</span>Last 10 min is a retrospective on when to use a full stack vs. a simpler approach.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments sentiment -->
+      <div class="accordion-item">
+        <div class="accordion-header" data-acc="sentiment">
+          <span class="accordion-title">Comment Sentiment</span>
+          <span class="accordion-arrow">▶</span>
+        </div>
+        <div class="accordion-body" id="acc-sentiment">
+          <div class="sentiment-row s-pos">
+            <div class="sentiment-label">Positive — 62%</div>
+            <div class="sentiment-track"><div class="sentiment-fill"></div></div>
+          </div>
+          <div class="sentiment-row s-neu">
+            <div class="sentiment-label">Neutral — 25%</div>
+            <div class="sentiment-track"><div class="sentiment-fill"></div></div>
+          </div>
+          <div class="sentiment-row s-neg">
+            <div class="sentiment-label">Critical — 13%</div>
+            <div class="sentiment-track"><div class="sentiment-fill"></div></div>
+          </div>
+          <div class="sentiment-note">"Great pacing, wished the DB section was longer"</div>
+        </div>
+      </div>
+
+      <!-- Contextual tags -->
+      <div class="accordion-item">
+        <div class="accordion-header" data-acc="tags">
+          <span class="accordion-title">Contextual Tags</span>
+          <span class="accordion-arrow">▶</span>
+        </div>
+        <div class="accordion-body" id="acc-tags">
+          <div class="tag-group-label">Watch context</div>
+          <span class="tag-chip" data-group="context">⚡ Quick watch</span>
+          <span class="tag-chip selected" data-group="context">🎓 Deep dive</span>
+          <span class="tag-chip" data-group="context">🎧 Passive</span>
+
+          <div class="tag-group-sep">
+            <div class="tag-group-label">Content type</div>
+            <span class="tag-chip selected" data-group="type">Tutorial</span>
+            <span class="tag-chip" data-group="type">Commentary</span>
+            <span class="tag-chip" data-group="type">Demo</span>
+            <span class="tag-chip" data-group="type">Talk</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /accordion-panel -->
+
+  </div><!-- /player-section -->
+
+  <!-- BOTTOM QUEUE -->
+  <div class="queue-section">
+    <div class="queue-header">
+      <span class="queue-header-title">Queue</span>
+      <span class="queue-header-count">46 remaining</span>
+    </div>
+    <div class="queue-scroll">
+
+      <div class="queue-card active">
+        <div class="queue-thumb">▶ playing<div class="queue-thumb-dur">36:01</div></div>
+        <div class="queue-card-body">
+          <div class="queue-card-title">How I built a full-stack app in a weekend…</div>
+          <div class="queue-card-meta">Theo · 3 wks ago</div>
+          <span class="queue-card-remove">✕ Remove</span>
+        </div>
+      </div>
+
+      <div class="queue-card">
+        <div class="queue-thumb">thumb<div class="queue-thumb-dur">12:44</div></div>
+        <div class="queue-card-body">
+          <div class="queue-card-title">The problem with modern JavaScript tooling</div>
+          <div class="queue-card-meta">Fireship · 5 days ago</div>
+          <span class="queue-card-remove">✕ Remove</span>
+        </div>
+      </div>
+
+      <div class="queue-card">
+        <div class="queue-thumb">thumb<div class="queue-thumb-dur">48:20</div></div>
+        <div class="queue-card-body">
+          <div class="queue-card-title">I rewrote my entire backend in Rust</div>
+          <div class="queue-card-meta">ThePrimeagen · 2 wks ago</div>
+          <span class="queue-card-remove">✕ Remove</span>
+        </div>
+      </div>
+
+      <div class="queue-card">
+        <div class="queue-thumb">thumb<div class="queue-thumb-dur">24:15</div></div>
+        <div class="queue-card-body">
+          <div class="queue-card-title">PostgreSQL vs SQLite in 2025 — which to pick?</div>
+          <div class="queue-card-meta">Syntax · 1 mo ago</div>
+          <span class="queue-card-remove">✕ Remove</span>
+        </div>
+      </div>
+
+      <div class="queue-card">
+        <div class="queue-thumb">thumb<div class="queue-thumb-dur">18:02</div></div>
+        <div class="queue-card-body">
+          <div class="queue-card-title">Stop using useEffect for everything</div>
+          <div class="queue-card-meta">Jack Herrington · 3 days ago</div>
+          <span class="queue-card-remove">✕ Remove</span>
+        </div>
+      </div>
+
+      <div class="queue-card">
+        <div class="queue-thumb">thumb<div class="queue-thumb-dur">9:30</div></div>
+        <div class="queue-card-body">
+          <div class="queue-card-title">5 terminal tricks I use every day</div>
+          <div class="queue-card-meta">Dreams of Code · 1 wk ago</div>
+          <span class="queue-card-remove">✕ Remove</span>
+        </div>
+      </div>
+
+      <div class="queue-card">
+        <div class="queue-thumb">thumb<div class="queue-thumb-dur">22:11</div></div>
+        <div class="queue-card-body">
+          <div class="queue-card-title">What even is a monad? (explained for devs)</div>
+          <div class="queue-card-meta">Computerphile · 8 mos ago</div>
+          <span class="queue-card-remove">✕ Remove</span>
+        </div>
+      </div>
+
+      <div class="queue-load-card">Load more…</div>
+
+    </div>
+  </div>
+
+  <div class="watermark">Wireframe v2-B — accordion detail panel · rough layout only</div>
+
+  <script>
+    // Accordion — allow multiple open or toggle individually
+    document.querySelectorAll('.accordion-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const body = document.getElementById('acc-' + header.dataset.acc);
+        const isOpen = header.classList.contains('open');
+        header.classList.toggle('open', !isOpen);
+        body.classList.toggle('open', !isOpen);
+      });
+    });
+
+    // Tag chips — single-select per group
+    document.querySelectorAll('.tag-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const group = chip.dataset.group;
+        document.querySelectorAll(`.tag-chip[data-group="${group}"]`).forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+      });
+    });
+  </script>
+
+</body>
+</html>

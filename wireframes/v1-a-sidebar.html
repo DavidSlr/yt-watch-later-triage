@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wireframe A — Player + Right Sidebar</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: monospace;
+      background: #1a1a1a;
+      color: #ccc;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── LABEL HELPER ── */
+    .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: #111;
+      border-bottom: 2px dashed #444;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    .topbar-logo {
+      width: 28px; height: 28px;
+      background: #444;
+      border: 2px dashed #666;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: #888;
+    }
+    .topbar-title {
+      font-size: 14px; color: #aaa; font-weight: bold;
+    }
+    .topbar-badge {
+      background: #333;
+      border: 1px dashed #555;
+      border-radius: 10px;
+      padding: 2px 8px;
+      font-size: 10px; color: #888;
+    }
+    .topbar-spacer { flex: 1; }
+    .topbar-btn {
+      background: #2a2a2a;
+      border: 2px dashed #555;
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: 11px; color: #888;
+      cursor: default;
+    }
+
+    /* ── MAIN AREA ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── LEFT COLUMN (player + info) ── */
+    .left-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    /* Player */
+    .player-box {
+      background: #0d0d0d;
+      border: 3px dashed #555;
+      border-radius: 6px;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 0;
+    }
+    .player-play {
+      width: 60px; height: 60px;
+      border: 3px dashed #666;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; color: #555;
+    }
+    .player-badge {
+      position: absolute;
+      top: 8px; left: 8px;
+      background: #222;
+      border: 1px dashed #555;
+      padding: 2px 8px;
+      font-size: 10px; color: #777;
+      border-radius: 3px;
+    }
+    .player-time {
+      position: absolute;
+      bottom: 8px; right: 10px;
+      font-size: 11px; color: #666;
+    }
+
+    /* Progress bar */
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .progress-track {
+      flex: 1;
+      height: 6px;
+      background: #2a2a2a;
+      border: 1px dashed #444;
+      border-radius: 3px;
+      position: relative;
+    }
+    .progress-fill {
+      width: 35%;
+      height: 100%;
+      background: #555;
+      border-radius: 3px;
+    }
+    .progress-time {
+      font-size: 10px; color: #666;
+      white-space: nowrap;
+    }
+
+    /* Player controls */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .ctrl-btn {
+      background: #2a2a2a;
+      border: 2px dashed #555;
+      border-radius: 4px;
+      padding: 5px 12px;
+      font-size: 11px; color: #888;
+      cursor: default;
+      white-space: nowrap;
+    }
+    .ctrl-btn.primary {
+      border-style: solid;
+      color: #bbb;
+    }
+    .ctrl-spacer { flex: 1; }
+
+    /* Video meta */
+    .meta-box {
+      background: #1e1e1e;
+      border: 2px dashed #3a3a3a;
+      border-radius: 6px;
+      padding: 12px;
+      flex-shrink: 0;
+    }
+    .meta-title {
+      font-size: 14px; color: #bbb; font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .meta-row {
+      display: flex;
+      gap: 16px;
+      font-size: 10px; color: #666;
+    }
+    .meta-chip {
+      background: #2a2a2a;
+      border: 1px dashed #444;
+      border-radius: 10px;
+      padding: 2px 8px;
+    }
+
+    /* ── RIGHT SIDEBAR (queue) ── */
+    .sidebar {
+      width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      border-left: 2px dashed #333;
+      background: #161616;
+      overflow: hidden;
+    }
+    .sidebar-header {
+      padding: 10px 12px;
+      border-bottom: 2px dashed #2e2e2e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .sidebar-title {
+      font-size: 12px; color: #999; font-weight: bold; flex: 1;
+    }
+    .sidebar-count {
+      font-size: 10px; color: #555;
+    }
+    .queue-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .queue-item {
+      display: flex;
+      gap: 8px;
+      padding: 6px;
+      border: 1px dashed #2e2e2e;
+      border-radius: 4px;
+      background: #1a1a1a;
+      align-items: flex-start;
+    }
+    .queue-item.active {
+      border-color: #555;
+      background: #222;
+    }
+    .queue-thumb {
+      width: 72px; height: 44px;
+      background: #2a2a2a;
+      border: 1px dashed #3a3a3a;
+      border-radius: 3px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: #555;
+    }
+    .queue-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .queue-title {
+      font-size: 10px; color: #aaa;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .queue-meta {
+      font-size: 9px; color: #555;
+    }
+    .queue-remove {
+      font-size: 9px; color: #555;
+      background: #222;
+      border: 1px dashed #333;
+      border-radius: 3px;
+      padding: 2px 5px;
+      cursor: default;
+      flex-shrink: 0;
+      align-self: flex-start;
+    }
+    .sidebar-footer {
+      padding: 8px;
+      border-top: 2px dashed #2e2e2e;
+      flex-shrink: 0;
+    }
+    .load-more {
+      width: 100%;
+      padding: 6px;
+      background: #222;
+      border: 2px dashed #3a3a3a;
+      border-radius: 4px;
+      font-size: 10px; color: #666;
+      text-align: center; cursor: default;
+    }
+
+    /* annotation watermark */
+    .watermark {
+      position: fixed;
+      bottom: 8px; left: 8px;
+      font-size: 9px; color: #333;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">▶</div>
+    <span class="topbar-title">Watch Later</span>
+    <span class="topbar-badge">47 videos</span>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-btn">↻ Refresh</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- LEFT: player + controls + meta -->
+    <div class="left-col">
+
+      <div class="label">Player</div>
+      <div class="player-box">
+        <div class="player-badge">▶ Now playing</div>
+        <div class="player-play">▶</div>
+        <div class="player-time">12:34 / 36:01</div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-row">
+        <div class="progress-track">
+          <div class="progress-fill"></div>
+        </div>
+        <span class="progress-time">12:34 / 36:01</span>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <div class="ctrl-btn">⏮ Prev</div>
+        <div class="ctrl-btn primary">⏸ Pause</div>
+        <div class="ctrl-btn">⏭ Next</div>
+        <div class="ctrl-spacer"></div>
+        <div class="ctrl-btn">✓ Remove &amp; next</div>
+        <div class="ctrl-btn">⊞ Keep</div>
+        <div class="ctrl-btn">↗ Open on YT</div>
+      </div>
+
+      <!-- Meta -->
+      <div class="meta-box">
+        <div class="label">Video info</div>
+        <div class="meta-title">How I built a full-stack app in a weekend (and what I'd do differently)</div>
+        <div class="meta-row">
+          <span class="meta-chip">Theo - t3.gg</span>
+          <span class="meta-chip">36:01</span>
+          <span class="meta-chip">3 weeks ago</span>
+          <span class="meta-chip">142K views</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: queue sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Up next</span>
+        <span class="sidebar-count">46 remaining</span>
+      </div>
+      <div class="queue-list">
+
+        <div class="queue-item active">
+          <div class="queue-thumb">▶ playing</div>
+          <div class="queue-info">
+            <div class="queue-title">How I built a full-stack app in a weekend…</div>
+            <div class="queue-meta">Theo · 36:01 · 3 wks ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb">thumb</div>
+          <div class="queue-info">
+            <div class="queue-title">The problem with modern JavaScript tooling</div>
+            <div class="queue-meta">Fireship · 12:44 · 5 days ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb">thumb</div>
+          <div class="queue-info">
+            <div class="queue-title">I rewrote my entire backend in Rust</div>
+            <div class="queue-meta">ThePrimeagen · 48:20 · 2 wks ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb">thumb</div>
+          <div class="queue-info">
+            <div class="queue-title">PostgreSQL vs SQLite in 2025 — which to pick?</div>
+            <div class="queue-meta">Syntax · 24:15 · 1 mo ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb">thumb</div>
+          <div class="queue-info">
+            <div class="queue-title">Stop using useEffect for everything</div>
+            <div class="queue-meta">Jack Herrington · 18:02 · 3 days ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb">thumb</div>
+          <div class="queue-info">
+            <div class="queue-title">5 terminal tricks I use every day</div>
+            <div class="queue-meta">Dreams of Code · 9:30 · 1 wk ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+        <div class="queue-item">
+          <div class="queue-thumb">thumb</div>
+          <div class="queue-info">
+            <div class="queue-title">What even is a monad? (explained for devs)</div>
+            <div class="queue-meta">Computerphile · 22:11 · 8 mos ago</div>
+          </div>
+          <div class="queue-remove">✕</div>
+        </div>
+
+      </div>
+      <div class="sidebar-footer">
+        <div class="load-more">Load more videos…</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="watermark">Wireframe A — Player + Right Sidebar · rough layout only</div>
+
+</body>
+</html>
