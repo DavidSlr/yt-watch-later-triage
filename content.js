@@ -90,6 +90,26 @@ browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       .catch(err => sendResponse({ ok: false, error: err.message }));
     return true;
   }
+  if (message.type === "cs_fetch_comments") {
+    handleFetchComments(message.videoId, message.limit ?? 30)
+      .then(comments => sendResponse({ ok: true, comments }))
+      .catch(err => {
+        // Comments are best-effort: report ok with empty list so the caller
+        // can still run summary/tags, but include the reason for debugging.
+        console.warn("[WLA content] fetch_comments failed:", err);
+        sendResponse({ ok: true, comments: [], error: err.message });
+      });
+    return true;
+  }
+  if (message.type === "cs_fetch_transcript") {
+    handleFetchTranscript(message.videoId)
+      .then(transcript => sendResponse({ ok: true, transcript }))
+      .catch(err => {
+        console.warn("[WLA content] fetch_transcript failed:", err);
+        sendResponse({ ok: true, transcript: null, error: err.message });
+      });
+    return true;
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -232,6 +252,136 @@ async function handleRemoveVideo(videoId, setVideoId, removeEndpoint) {
       `Remove failed — YouTube responded with: ${JSON.stringify(json).slice(0, 600)}`
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Fetch top comments for a video (two-step InnerTube /next dance)
+// ---------------------------------------------------------------------------
+async function handleFetchComments(videoId, limit) {
+  const cfg = getConfig();
+
+  // Step 1: the watch-page /next response contains the comments-section
+  // continuation token.
+  const first = await innertubeNext({ videoId }, cfg);
+  const token = findCommentsContinuation(first);
+  if (!token) throw new Error("No comments continuation found (comments may be disabled)");
+
+  // Step 2: fetch the actual comments.
+  const second = await innertubeNext({ continuation: token }, cfg);
+  const comments = extractCommentTexts(second);
+  return comments.slice(0, limit);
+}
+
+async function innertubeNext(body, cfg) {
+  const resp = await fetch("https://www.youtube.com/youtubei/v1/next?prettyPrint=false", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "X-YouTube-Client-Name": "1",
+      "X-YouTube-Client-Version": cfg.clientVersion,
+      "X-Origin": "https://www.youtube.com",
+    },
+    body: JSON.stringify({ context: buildContext(cfg), ...body }),
+  });
+  if (!resp.ok) throw new Error(`InnerTube next returned HTTP ${resp.status}`);
+  return resp.json();
+}
+
+// The comments continuation lives in an itemSectionRenderer with
+// sectionIdentifier "comment-item-section" (location varies by layout).
+function findCommentsContinuation(data) {
+  let found = null;
+  (function walk(obj, depth) {
+    if (found || !obj || typeof obj !== "object" || depth > 14) return;
+    const isr = obj.itemSectionRenderer;
+    if (isr && /comment/i.test(isr.sectionIdentifier ?? "")) {
+      const token = isr.contents?.[0]?.continuationItemRenderer
+        ?.continuationEndpoint?.continuationCommand?.token;
+      if (token) { found = token; return; }
+    }
+    for (const key of Object.keys(obj)) walk(obj[key], depth + 1);
+  })(data, 0);
+  return found;
+}
+
+// Comment text lives in two places depending on YouTube's rollout:
+//   old: commentThreadRenderer.comment.commentRenderer.contentText.runs
+//   new: frameworkUpdates...mutations[].payload.commentEntityPayload
+function extractCommentTexts(data) {
+  const texts = [];
+
+  const mutations = data?.frameworkUpdates?.entityBatchUpdate?.mutations ?? [];
+  for (const m of mutations) {
+    const content = m?.payload?.commentEntityPayload?.properties?.content?.content;
+    if (content) texts.push(content);
+  }
+
+  if (texts.length === 0) {
+    (function walk(obj, depth) {
+      if (!obj || typeof obj !== "object" || depth > 16) return;
+      const runs = obj.commentRenderer?.contentText?.runs;
+      if (runs) {
+        const t = runs.map(r => r.text ?? "").join("");
+        if (t) texts.push(t);
+      }
+      for (const key of Object.keys(obj)) walk(obj[key], depth + 1);
+    })(data, 0);
+  }
+
+  // Normalize: collapse whitespace, drop empties, cap length per comment
+  return texts
+    .map(t => t.replace(/\s+/g, " ").trim().slice(0, 500))
+    .filter(Boolean);
+}
+
+// ---------------------------------------------------------------------------
+// Fetch video transcript via InnerTube player API + timedtext endpoint
+// ---------------------------------------------------------------------------
+async function handleFetchTranscript(videoId) {
+  const cfg = getConfig();
+
+  // Step 1: get the player response — it includes caption track URLs
+  const resp = await fetch("https://www.youtube.com/youtubei/v1/player?prettyPrint=false", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "X-YouTube-Client-Name": "1",
+      "X-YouTube-Client-Version": cfg.clientVersion,
+      "X-Origin": "https://www.youtube.com",
+    },
+    body: JSON.stringify({ context: buildContext(cfg), videoId }),
+  });
+  if (!resp.ok) throw new Error(`InnerTube player returned HTTP ${resp.status}`);
+  const playerData = await resp.json();
+
+  // Step 2: pick an English caption track (prefer manual, accept auto-generated)
+  const tracks = playerData?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? [];
+  if (tracks.length === 0) return null;
+
+  const track =
+    tracks.find(t => t.languageCode === "en" && t.kind !== "asr") ??
+    tracks.find(t => t.languageCode === "en") ??
+    tracks.find(t => t.languageCode?.startsWith("en")) ??
+    tracks[0];
+
+  if (!track?.baseUrl) return null;
+
+  // Step 3: fetch the timedtext in JSON3 format
+  const ttResp = await fetch(`${track.baseUrl}&fmt=json3`, { credentials: "include" });
+  if (!ttResp.ok) throw new Error(`Timedtext returned HTTP ${ttResp.status}`);
+  const ttData = await ttResp.json();
+
+  // Step 4: join segments into a single string (cap at 8 000 chars for token budget)
+  const lines = [];
+  for (const event of ttData?.events ?? []) {
+    if (!event.segs) continue;
+    const text = event.segs.map(s => s.utf8 ?? "").join("").replace(/\n/g, " ").trim();
+    if (text) lines.push(text);
+  }
+  const full = lines.join(" ").replace(/\s+/g, " ").trim();
+  return full ? full.slice(0, 8000) : null;
 }
 
 // ---------------------------------------------------------------------------

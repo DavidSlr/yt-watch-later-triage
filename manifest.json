@@ -4,7 +4,12 @@
   "version": "0.1.0",
   "description": "View and manage your YouTube Watch Later list in a dedicated tab.",
   "permissions": ["cookies", "tabs", "webRequest", "webRequestBlocking", "storage"],
-  "host_permissions": ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"],
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "*://*.youtube-nocookie.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.anthropic.com/*"
+  ],
   "background": {
     "scripts": ["background.js"]
   },

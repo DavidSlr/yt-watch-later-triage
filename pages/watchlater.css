@@ -345,6 +345,22 @@ h1 {
   margin-bottom: 10px;
 }
 
+.btn-setup-ai {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 0.8125rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+}
+.btn-setup-ai:hover {
+  border-color: #4a5a75;
+  color: var(--text);
+}
+
 /* Sentiment bars (placeholder) */
 .sentiment-bars {
   display: flex;
@@ -543,6 +559,235 @@ h1 {
   transition: border-color 0.12s, color 0.12s;
 }
 .queue-load-more-btn:hover { border-color: #444; color: var(--text); }
+
+/* ------------------------------------------------------------------ */
+/* Settings button                                                      */
+/* ------------------------------------------------------------------ */
+.settings-btn { padding: 7px 9px; }
+.settings-btn svg { width: 17px; height: 17px; }
+
+
+/* ------------------------------------------------------------------ */
+/* Settings modal                                                       */
+/* ------------------------------------------------------------------ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  width: min(460px, 92vw);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-header h2 { font-size: 1.0625rem; font-weight: 700; }
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+.modal-close:hover { color: var(--text); }
+
+.modal-body {
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Provider radio cards */
+.provider-radios {
+  display: flex;
+  gap: 8px;
+}
+
+.provider-radio-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+.provider-radio-card:has(input:checked) {
+  border-color: #4a5a75;
+  background: rgba(74, 90, 117, 0.18);
+}
+.provider-radio-card input[type="radio"] {
+  accent-color: #9fc1ff;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.provider-radio-name {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.provider-radio-sub {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Provider-specific config fieldset */
+.provider-config {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 14px 14px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.provider-config-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+.provider-config .form-label { margin-top: 8px; }
+
+.form-label {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: 10px;
+  margin-bottom: 2px;
+}
+
+.form-input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 0.9375rem;
+  width: 100%;
+}
+.form-input:focus { outline: none; border-color: #4a5a75; }
+
+.form-key-row { display: flex; gap: 6px; }
+.form-key-row .form-input { flex: 1; }
+
+.form-hint { font-size: 0.8125rem; color: #777; margin-top: 4px; }
+.form-hint a { color: #9fc1ff; }
+
+.form-test-result {
+  margin-top: 10px;
+  font-size: 0.875rem;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+.form-test-result.ok  { background: #10241a; color: #4ade80; border: 1px solid #1c4a32; }
+.form-test-result.err { background: #241010; color: #f87171; border: 1px solid #4a1c1c; }
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+}
+
+/* ------------------------------------------------------------------ */
+/* AI panel content                                                     */
+/* ------------------------------------------------------------------ */
+.ai-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 8px;
+}
+.ai-status:empty { display: none; margin: 0; }
+.ai-status.error { color: #f87171; }
+
+.ai-refresh {
+  background: none;
+  border: none;
+  color: #9fc1ff;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0;
+}
+.ai-refresh:hover { text-decoration: underline; }
+
+.ai-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.ai-chip {
+  background: #26303f;
+  border: 1px solid #3a4a63;
+  color: #bcd3f5;
+  border-radius: 99px;
+  padding: 3px 10px;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+.ai-chip-group-label {
+  width: 100%;
+  font-size: 0.75rem;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 6px 0 2px;
+}
+
+/* Compact sentiment headline: one stacked bar + legend line */
+.sentiment-mini {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 5px;
+  background: #252525;
+}
+.sentiment-mini .seg-pos { background: #3a8a4a; }
+.sentiment-mini .seg-neu { background: #555; }
+.sentiment-mini .seg-neg { background: #a04444; }
+
+.sentiment-legend {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* Comment themes */
+.theme-list { display: flex; flex-direction: column; gap: 10px; }
+.theme-item { font-size: 0.875rem; line-height: 1.45; color: var(--text-muted); }
+.theme-tone { font-weight: 700; margin-right: 6px; }
+.theme-tone.positive { color: #4ade80; }
+.theme-tone.negative { color: #f87171; }
+.theme-quote {
+  display: block;
+  margin: 4px 0 0 14px;
+  font-style: italic;
+  color: #888;
+  font-size: 0.8125rem;
+  border-left: 2px solid var(--border);
+  padding-left: 8px;
+}
 
 /* ------------------------------------------------------------------ */
 /* Persistent error banner                                              */

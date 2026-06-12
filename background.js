@@ -83,6 +83,26 @@ browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true;
   }
 
+  if (message.type === "fetch_comments") {
+    proxyViaYouTubeTab({ type: "cs_fetch_comments", videoId: message.videoId, limit: message.limit })
+      .then(r => sendResponse(r))
+      .catch(err => {
+        console.error("[WLA background] fetch_comments:", err);
+        sendResponse({ ok: false, error: err.message });
+      });
+    return true;
+  }
+
+  if (message.type === "fetch_transcript") {
+    proxyViaYouTubeTab({ type: "cs_fetch_transcript", videoId: message.videoId })
+      .then(r => sendResponse(r))
+      .catch(err => {
+        console.error("[WLA background] fetch_transcript:", err);
+        sendResponse({ ok: true, transcript: null, error: err.message });
+      });
+    return true;
+  }
+
   if (message.type === "remove_video") {
     proxyViaYouTubeTab({
       type: "cs_remove_video",

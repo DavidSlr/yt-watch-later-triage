@@ -200,6 +200,273 @@ window.addEventListener("message", (e) => {
   }
 });
 
+// ── AI analysis ───────────────────────────────────────────────────────────────
+const ANALYSIS_CACHE_MAX = 200;
+let analysisInFlightFor = null;
+
+async function ensureAnalysis(videoId, force = false) {
+  if (!(await WLA_AI.isConfigured())) { setAiPanelsNoKey(); return; }
+
+  if (!force) {
+    const cached = await getCachedAnalysis(videoId);
+    if (cached) {
+      renderAnalysis(cached.data);
+      setAiStatus(`Generated ${formatRelativeTime(new Date(cached.ts))}`, { refresh: videoId });
+      return;
+    }
+  }
+
+  if (analysisInFlightFor === videoId) return;
+  analysisInFlightFor = videoId;
+  setAiStatus("Analyzing…");
+  setAiPanelsLoading();
+
+  try {
+    const video = allVideos.find(v => v.videoId === videoId);
+    if (!video) throw new Error("Video no longer in list");
+
+    // Transcript and comments are both best-effort; fetch in parallel
+    let comments = [];
+    let transcript = null;
+    await Promise.allSettled([
+      sendMessage({ type: "fetch_comments", videoId, limit: 30 }).then(r => {
+        comments = r.comments ?? [];
+        if (r.error) dbg("WARN", `Comments unavailable for ${videoId}: ${r.error}`);
+      }).catch(e => dbg("WARN", `Comment fetch failed for ${videoId}: ${e.message}`)),
+      sendMessage({ type: "fetch_transcript", videoId }).then(r => {
+        transcript = r.transcript ?? null;
+        if (r.error) dbg("WARN", `Transcript unavailable for ${videoId}: ${r.error}`);
+      }).catch(e => dbg("WARN", `Transcript fetch failed for ${videoId}: ${e.message}`)),
+    ]);
+    dbg("INFO", `Analyzing ${videoId} — transcript: ${transcript ? `${transcript.length} chars` : "none"}, comments: ${comments.length}`);
+
+    const data = await WLA_AI.analyze(video, comments, transcript);
+    await setCachedAnalysis(videoId, data);
+    dbg("INFO", `Analysis complete for ${videoId}`);
+
+    // Don't clobber the panels if the user has moved on to another video
+    if (currentVideoId === videoId) {
+      renderAnalysis(data);
+      setAiStatus("Generated just now", { refresh: videoId });
+    }
+  } catch (err) {
+    dbg("ERROR", `AI analysis failed for ${videoId}: ${err.message}`);
+    if (currentVideoId === videoId) {
+      if (err.message === "NO_API_KEY") {
+        setAiPanelsNoKey();
+      } else {
+        setAiStatus(`Analysis failed: ${err.message}`, { error: true, refresh: videoId });
+      }
+    }
+  } finally {
+    if (analysisInFlightFor === videoId) analysisInFlightFor = null;
+  }
+}
+
+// ── Analysis cache (storage.local, bounded) ───────────────────────────────────
+async function getCachedAnalysis(videoId) {
+  const key = `analysis:${videoId}`;
+  const obj = await browser.storage.local.get(key);
+  return obj[key] ?? null;
+}
+
+async function setCachedAnalysis(videoId, data) {
+  const settings = await WLA_AI.getSettings();
+  await browser.storage.local.set({
+    [`analysis:${videoId}`]: { data, ts: Date.now(), provider: settings.provider, model: settings.model },
+  });
+
+  const { analysisIndex = [] } = await browser.storage.local.get("analysisIndex");
+  const idx = analysisIndex.filter(id => id !== videoId);
+  idx.push(videoId);
+  while (idx.length > ANALYSIS_CACHE_MAX) {
+    const evict = idx.shift();
+    await browser.storage.local.remove(`analysis:${evict}`);
+  }
+  await browser.storage.local.set({ analysisIndex: idx });
+}
+
+// ── AI panel rendering ────────────────────────────────────────────────────────
+function aiContent(section) {
+  return document.querySelector(`.ai-content[data-section="${section}"]`);
+}
+
+function setAiStatus(text, opts = {}) {
+  document.querySelectorAll(".ai-status").forEach(el => {
+    el.classList.toggle("error", !!opts.error);
+    el.innerHTML = "";
+    if (!text) return;
+    const span = document.createElement("span");
+    span.textContent = text;
+    el.appendChild(span);
+    if (opts.refresh) {
+      const btn = document.createElement("button");
+      btn.className = "ai-refresh";
+      btn.textContent = "↻ Refresh";
+      btn.title = "Re-run the AI analysis for this video";
+      btn.addEventListener("click", () => ensureAnalysis(opts.refresh, true));
+      el.appendChild(btn);
+    }
+  });
+}
+
+function setAiPanelsNoKey() {
+  setAiStatus("");
+  for (const [section, label] of [
+    ["summary",   "Generate a summary"],
+    ["sentiment", "Analyze comment sentiment"],
+    ["tags",      "Tag this video"],
+  ]) {
+    const btn = document.createElement("button");
+    btn.className = "btn-setup-ai";
+    btn.textContent = "Set up AI…";
+    btn.title = label;
+    btn.addEventListener("click", () => document.getElementById("settings-btn").click());
+    const wrap = aiContent(section);
+    wrap.innerHTML = "";
+    wrap.appendChild(btn);
+  }
+}
+
+function setAiPanelsLoading() {
+  for (const s of ["summary", "sentiment", "tags"]) {
+    aiContent(s).innerHTML = `<p class="placeholder-note">Analyzing…</p>`;
+  }
+}
+
+function renderAnalysis(data) {
+  // Summary
+  aiContent("summary").innerHTML = data.summary
+    .split(/\n+/)
+    .filter(Boolean)
+    .map(p => `<p class="summary-p">${escHtml(p)}</p>`)
+    .join("");
+
+  // Tags
+  const chip = t => `<span class="ai-chip">${escHtml(t)}</span>`;
+  aiContent("tags").innerHTML = `
+    <div class="ai-chips">
+      <div class="ai-chip-group-label">Watch context</div>
+      ${data.tags.context.map(chip).join("") || `<span class="placeholder-note">none</span>`}
+      <div class="ai-chip-group-label">Content type</div>
+      ${data.tags.type.map(chip).join("") || `<span class="placeholder-note">none</span>`}
+    </div>`;
+
+  // Sentiment: brief headline bar + legend, then the themes
+  const s = data.sentiment;
+  if (!s) {
+    aiContent("sentiment").innerHTML = `<p class="placeholder-note">No comments available for this video.</p>`;
+    return;
+  }
+  const themes = (s.themes ?? []).map(t => `
+    <div class="theme-item">
+      <span class="theme-tone ${t.tone}">${t.tone === "negative" ? "−" : "+"}</span>${escHtml(t.theme)}
+      ${t.quote ? `<span class="theme-quote">“${escHtml(t.quote)}”</span>` : ""}
+    </div>`).join("");
+  aiContent("sentiment").innerHTML = `
+    <div class="sentiment-mini">
+      <div class="seg-pos" style="width:${Number(s.positive) || 0}%"></div>
+      <div class="seg-neu" style="width:${Number(s.neutral) || 0}%"></div>
+      <div class="seg-neg" style="width:${Number(s.critical) || 0}%"></div>
+    </div>
+    <div class="sentiment-legend">${Number(s.positive) || 0}% positive · ${Number(s.neutral) || 0}% neutral · ${Number(s.critical) || 0}% critical</div>
+    <div class="theme-list">${themes || `<p class="placeholder-note">No clear themes found.</p>`}</div>`;
+}
+
+// ── AI settings UI ────────────────────────────────────────────────────────────
+async function initAiUi() {
+  const modal      = document.getElementById("settings-modal");
+  const keyInput   = document.getElementById("ai-key");
+  const modelInput = document.getElementById("ai-model");
+  const testResult = document.getElementById("ai-test-result");
+
+  // In-memory per-provider state so switching radio doesn't lose typed values
+  const perProvider = {
+    gemini: { apiKey: "", model: "" },
+    claude:  { apiKey: "", model: "" },
+  };
+  let activeProvider = "gemini";
+
+  function flushForm() {
+    perProvider[activeProvider] = { apiKey: keyInput.value, model: modelInput.value.trim() };
+  }
+
+  function restoreForm(provider) {
+    const s = perProvider[provider];
+    keyInput.value   = s.apiKey;
+    modelInput.value = s.model;
+    updateProviderUi(provider);
+  }
+
+  function updateProviderUi(provider) {
+    document.getElementById("provider-config-label").textContent =
+      provider === "gemini" ? "Google Gemini" : "Anthropic Claude";
+    modelInput.placeholder = WLA_AI.DEFAULTS[provider].model;
+    document.getElementById("ai-key-hint").innerHTML = provider === "gemini"
+      ? `Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com</a> — no credit card needed (~250 requests/day).`
+      : `Get a key at <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com</a> — pay as you go (Haiku ≈ $0.001–0.01 per video).`;
+  }
+
+  async function openModal() {
+    const all = await WLA_AI.getAllProviderSettings();
+    perProvider.gemini = { apiKey: all.gemini.apiKey, model: all.gemini.model };
+    perProvider.claude  = { apiKey: all.claude.apiKey,  model: all.claude.model  };
+    activeProvider = all.provider;
+    const radio = document.querySelector(`input[name="ai-provider"][value="${activeProvider}"]`);
+    if (radio) radio.checked = true;
+    restoreForm(activeProvider);
+    testResult.hidden = true;
+    modal.hidden = false;
+    keyInput.focus();
+  }
+
+  const closeModal = () => { modal.hidden = true; };
+
+  function allSettings() {
+    flushForm();
+    return { provider: activeProvider, gemini: { ...perProvider.gemini }, claude: { ...perProvider.claude } };
+  }
+
+  document.querySelectorAll('input[name="ai-provider"]').forEach(radio => {
+    radio.addEventListener("change", e => {
+      flushForm();                    // save current fields before switching
+      activeProvider = e.target.value;
+      restoreForm(activeProvider);    // load the other provider's saved fields
+    });
+  });
+
+  document.getElementById("settings-btn").addEventListener("click", openModal);
+  document.getElementById("settings-close").addEventListener("click", closeModal);
+  modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+
+  document.getElementById("ai-key-toggle").addEventListener("click", () => {
+    keyInput.type = keyInput.type === "password" ? "text" : "password";
+  });
+
+  document.getElementById("ai-save").addEventListener("click", async () => {
+    await WLA_AI.saveAllProviderSettings(allSettings());
+    dbg("INFO", `AI settings saved (provider: ${activeProvider})`);
+    closeModal();
+    if (currentVideoId) ensureAnalysis(currentVideoId);
+  });
+
+  document.getElementById("ai-test").addEventListener("click", async () => {
+    await WLA_AI.saveAllProviderSettings(allSettings());
+    testResult.hidden = false;
+    testResult.className = "form-test-result";
+    testResult.textContent = "Testing…";
+    try {
+      await WLA_AI.test();
+      testResult.classList.add("ok");
+      testResult.textContent = "✓ Connection works";
+    } catch (err) {
+      testResult.classList.add("err");
+      testResult.textContent = `✗ ${err.message}`;
+      dbg("ERROR", `AI settings test failed: ${err.message}`);
+    }
+  });
+}
+
 // ── DOM refs ─────────────────────────────────────────────────────────────────
 const loadingState  = document.getElementById("loading-state");
 const errorState    = document.getElementById("error-state");
@@ -223,6 +490,7 @@ const infoDuration  = document.getElementById("info-duration");
 // ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
   await loadSavedStrategy();
+  initAiUi();
   loadPlaylist();
 
   refreshBtn.addEventListener("click", () => loadPlaylist());
@@ -339,6 +607,9 @@ function loadVideo(videoId) {
   if (active) active.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
 
   updateActionButtons();
+
+  // Kick off AI analysis (cached per video; no-op if not configured)
+  ensureAnalysis(videoId);
 }
 
 function handleKeep() {
@@ -613,7 +884,9 @@ function formatRelativeTime(date) {
   const mins = Math.floor(secs / 60);
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
-  return `${hrs}h ago`;
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
 }
 
 setInterval(updateSyncStatus, 60_000);

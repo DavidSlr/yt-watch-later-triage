@@ -27,8 +27,68 @@
         </svg>
         Refresh
       </button>
+      <button id="settings-btn" class="btn-secondary settings-btn" title="AI settings">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.484.484 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.61 3.61 0 0 1 8.4 12c0-1.98 1.62-3.6 3.6-3.6s3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+        </svg>
+      </button>
     </div>
   </header>
+
+  <!-- AI settings modal -->
+  <div id="settings-modal" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2>AI Settings</h2>
+        <button id="settings-close" class="modal-close" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Provider radio cards -->
+        <div class="provider-radios">
+          <label class="provider-radio-card">
+            <input type="radio" name="ai-provider" value="gemini" checked />
+            <div class="provider-radio-info">
+              <span class="provider-radio-name">Google Gemini</span>
+              <span class="provider-radio-sub">Free tier · ~250 req/day</span>
+            </div>
+          </label>
+          <label class="provider-radio-card">
+            <input type="radio" name="ai-provider" value="claude" />
+            <div class="provider-radio-info">
+              <span class="provider-radio-name">Anthropic Claude</span>
+              <span class="provider-radio-sub">Paid · Haiku ≈ $0.001–0.01/video</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Provider-specific config -->
+        <fieldset class="provider-config">
+          <legend id="provider-config-label" class="provider-config-label">Google Gemini</legend>
+
+          <label class="form-label" for="ai-key">API key</label>
+          <div class="form-key-row">
+            <input id="ai-key" class="form-input" type="password" placeholder="Paste your API key" autocomplete="off" />
+            <button id="ai-key-toggle" class="btn-secondary" type="button" title="Show/hide key">👁</button>
+          </div>
+          <p id="ai-key-hint" class="form-hint">
+            Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com</a> — no credit card needed (~250 requests/day).
+          </p>
+
+          <label class="form-label" for="ai-model">Model</label>
+          <input id="ai-model" class="form-input" type="text" placeholder="gemini-2.5-flash" />
+        </fieldset>
+
+        <div id="ai-test-result" class="form-test-result" hidden></div>
+      </div>
+      <div class="modal-footer">
+        <button id="ai-test" class="btn-secondary">Test</button>
+        <button id="ai-save" class="btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Loading state -->
   <div id="loading-state" class="state-container" hidden>
@@ -106,11 +166,10 @@
             </svg>
           </button>
           <div class="acc-body open" id="acc-summary">
-            <p class="placeholder-note">Placeholder — AI-generated summary coming soon.</p>
-            <p class="summary-p">The creator walks through building a complete full-stack application over a single weekend, starting from an empty repository and ending with a deployed product. The stack centers on Next.js with tRPC for type-safe APIs and Prisma as the ORM layer.</p>
-            <p class="summary-p">A significant portion covers the decisions that didn't age well: choosing Prisma over Drizzle led to migration friction, authentication was bolted on too late, and the database schema churned heavily once real data arrived. Each misstep is paired with what the creator would do differently today.</p>
-            <p class="summary-p">The middle section dives into deployment trade-offs — serverless vs. a traditional VPS — with concrete latency and cost numbers from both setups running the same workload over two weeks.</p>
-            <p class="summary-p">The final ten minutes are a structured retrospective: when a full-stack framework is justified, when a simpler static site with a thin API wins, and a checklist the creator now uses before starting any new side project.</p>
+            <div class="ai-status" data-section="summary"></div>
+            <div class="ai-content" data-section="summary">
+              <button class="btn-setup-ai" onclick="document.getElementById('settings-btn').click()">Set up AI…</button>
+            </div>
           </div>
 
           <button class="acc-header open" data-acc="sentiment">
@@ -120,20 +179,9 @@
             </svg>
           </button>
           <div class="acc-body open" id="acc-sentiment">
-            <p class="placeholder-note">Comment analysis coming soon.</p>
-            <div class="sentiment-bars">
-              <div class="sentiment-row">
-                <span class="sentiment-label">Positive</span>
-                <div class="sentiment-track"><div class="sentiment-fill placeholder-fill" style="width:60%"></div></div>
-              </div>
-              <div class="sentiment-row">
-                <span class="sentiment-label">Neutral</span>
-                <div class="sentiment-track"><div class="sentiment-fill placeholder-fill" style="width:28%"></div></div>
-              </div>
-              <div class="sentiment-row">
-                <span class="sentiment-label">Critical</span>
-                <div class="sentiment-track"><div class="sentiment-fill placeholder-fill" style="width:12%"></div></div>
-              </div>
+            <div class="ai-status" data-section="sentiment"></div>
+            <div class="ai-content" data-section="sentiment">
+              <button class="btn-setup-ai" onclick="document.getElementById('settings-btn').click()">Set up AI…</button>
             </div>
           </div>
 
@@ -144,11 +192,9 @@
             </svg>
           </button>
           <div class="acc-body open" id="acc-tags">
-            <p class="placeholder-note">Auto-tagging coming soon.</p>
-            <div class="placeholder-chips">
-              <span class="placeholder-chip">⚡ Quick watch</span>
-              <span class="placeholder-chip">🎓 Deep dive</span>
-              <span class="placeholder-chip">🎧 Passive</span>
+            <div class="ai-status" data-section="tags"></div>
+            <div class="ai-content" data-section="tags">
+              <button class="btn-setup-ai" onclick="document.getElementById('settings-btn').click()">Set up AI…</button>
             </div>
           </div>
 
@@ -168,6 +214,8 @@
 
   </div><!-- /player-view -->
 
+  <script src="prompts.js"></script>
+  <script src="ai.js"></script>
   <script src="watchlater.js"></script>
 </body>
 </html>
