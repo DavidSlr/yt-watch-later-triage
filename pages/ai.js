@@ -163,6 +163,15 @@ const WLA_AI = {
     }
     return {
       summary: data.summary,
+      clickbait: data.clickbait ? String(data.clickbait) : null,
+      takeaways: Array.isArray(data.takeaways)
+        ? data.takeaways
+            .filter(t => t && t.point)
+            .map(t => ({
+              label: t.label === "worth watching" ? "worth watching" : "simple",
+              point: String(t.point),
+            }))
+        : null,
       tags: {
         context: Array.isArray(data.tags?.context) ? data.tags.context : [],
         type: Array.isArray(data.tags?.type) ? data.tags.type : [],

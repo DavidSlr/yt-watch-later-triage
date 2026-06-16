@@ -314,6 +314,7 @@ function setAiPanelsNoKey() {
   setAiStatus("");
   for (const [section, label] of [
     ["summary",   "Generate a summary"],
+    ["takeaways", "Extract key takeaways"],
     ["sentiment", "Analyze comment sentiment"],
     ["tags",      "Tag this video"],
   ]) {
@@ -329,18 +330,37 @@ function setAiPanelsNoKey() {
 }
 
 function setAiPanelsLoading() {
-  for (const s of ["summary", "sentiment", "tags"]) {
+  for (const s of ["summary", "takeaways", "sentiment", "tags"]) {
     aiContent(s).innerHTML = `<p class="placeholder-note">Analyzing…</p>`;
   }
 }
 
 function renderAnalysis(data) {
-  // Summary
-  aiContent("summary").innerHTML = data.summary
+  // Summary — paragraphs, optional no-transcript note, optional clickbait answer
+  const summaryParts = data.summary
     .split(/\n+/)
     .filter(Boolean)
     .map(p => `<p class="summary-p">${escHtml(p)}</p>`)
     .join("");
+  const noTranscriptNote = data.takeaways === null
+    ? `<p class="no-transcript-note">No transcript available — summary based on metadata only</p>`
+    : "";
+  const clickbaitBlock = data.clickbait
+    ? `<div class="clickbait-answer"><span class="clickbait-label">Click-bait answer</span>${escHtml(data.clickbait)}</div>`
+    : "";
+  aiContent("summary").innerHTML = summaryParts + noTranscriptNote + clickbaitBlock;
+
+  // Key takeaways
+  if (!data.takeaways) {
+    aiContent("takeaways").innerHTML = `<p class="placeholder-note">No transcript available for this video.</p>`;
+  } else {
+    const items = data.takeaways.map(t => `
+      <div class="takeaway-item">
+        <span class="takeaway-label ${t.label === "worth watching" ? "worth-watching" : "simple"}">${escHtml(t.label)}</span>
+        <span class="takeaway-point">${escHtml(t.point)}</span>
+      </div>`).join("");
+    aiContent("takeaways").innerHTML = `<div class="takeaways-list">${items || `<p class="placeholder-note">No key takeaways identified.</p>`}</div>`;
+  }
 
   // Tags
   const chip = t => `<span class="ai-chip">${escHtml(t)}</span>`;

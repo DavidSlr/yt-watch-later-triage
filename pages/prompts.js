@@ -1,9 +1,8 @@
 // ============================================================================
 // AI prompts — edit this file to tune what the AI generates for each section.
 //
-// Each section of the sidebar (Summary, Contextual Tags, Comment Sentiment)
-// has its own prompt below. They are assembled into a single API request by
-// buildPrompt(), so the video metadata is shared across sections.
+// Each section of the sidebar has its own prompt below. They are assembled into
+// a single API request by buildPrompt(), so the video metadata is shared.
 //
 // Placeholders available in section prompts (filled by buildPrompt):
 //   {{title}} {{channel}} {{duration}} {{uploadDate}} {{description}}
@@ -13,14 +12,16 @@ const WLA_PROMPTS = {
 
   // Role + output contract sent as the system instruction.
   system: `You are an assistant inside a YouTube "Watch Later" triage tool.
-You analyze video metadata and viewer comments to help the user quickly decide
-whether and how to watch a video.
+You analyze video metadata, transcript, and viewer comments to help the user quickly decide
+whether and how to watch a video or which information can be taken away without watching it.
 
 Respond with a single strict JSON object and nothing else — no markdown fences,
 no commentary. Use exactly this shape:
 
 {
   "summary": "string",
+  "clickbait": "string or null",
+  "takeaways": [{"label": "simple"|"worth watching", "point": "string"}] or null,
   "tags": { "context": ["string"], "type": ["string"] },
   "sentiment": {
     "positive": number, "neutral": number, "critical": number,
@@ -30,11 +31,32 @@ no commentary. Use exactly this shape:
 
   sections: {
 
-    summary: `## Summary
-Write a 3-5 sentence summary of what this video covers. If a transcript is
-provided, use it as the primary source — it is far more accurate than the
-description. Otherwise rely on the title, channel, and description. Focus on
-what the viewer will actually learn or see. Do not pad or speculate wildly.`,
+    // Used when a transcript is available
+    summary_transcript: `## Summary
+Write a 1-3 sentence summary of what this video covers. Use the transcript as the primary source —
+it is far more accurate than the description. Focus on what the viewer will actually learn or see.
+Do not pad or speculate wildly.`,
+
+    // Used when no transcript is available
+    summary_no_transcript: `## Summary
+Write a 1-3 sentence summary of what this video covers based on the title, channel, and description.
+If the title is vague or click-baity, note this briefly. Do not pad or speculate wildly.`,
+
+    // Always included — set to null when title is not click-baity
+    clickbait: `## Click-bait answer
+If the video title poses a question or makes a click-baity promise ("Is X the best?",
+"You won't believe…", "The truth about…", etc.), provide a direct tl;dr answer based on
+the transcript or description and put it in the "clickbait" field.
+Set "clickbait" to null if the title is straightforward or if the answer is not discernible.`,
+
+    // Requires transcript — set takeaways to null when no transcript
+    takeaways: `## Key takeaways
+Based on the transcript, list 1-5 key points a viewer could take away from this video.
+For each point classify it as:
+- "simple"         — the point can be understood as a one-liner; no need to watch for this
+- "worth watching" — enough nuance or context that watching adds real value
+Return as an array of { "label": "simple"|"worth watching", "point": "..." } objects.
+If no transcript is available, set "takeaways" to null.`,
 
     tags: `## Contextual tags
 Classify the video on two axes. Choose ONLY from these exact values:
@@ -60,6 +82,7 @@ If NO comments are provided, set the entire "sentiment" field to null.`,
 
   // --------------------------------------------------------------------------
   // Assembles the section prompts + video data into the final user prompt.
+  // Selects the appropriate summary prompt based on transcript availability.
   // --------------------------------------------------------------------------
   buildPrompt(video, comments, transcript = null) {
     const fill = (tpl) => tpl
@@ -69,6 +92,10 @@ If NO comments are provided, set the entire "sentiment" field to null.`,
       .replaceAll("{{uploadDate}}", video.uploadDate ?? "")
       .replaceAll("{{description}}", video.description ?? "");
 
+    const summaryPrompt = transcript
+      ? this.sections.summary_transcript
+      : this.sections.summary_no_transcript;
+
     const parts = [
       `# Video metadata`,
       `Title: ${video.title ?? "(unknown)"}`,
@@ -77,7 +104,11 @@ If NO comments are provided, set the entire "sentiment" field to null.`,
       `Uploaded: ${video.uploadDate ?? "(unknown)"}`,
       `Description snippet: ${video.description || "(none)"}`,
       ``,
-      fill(this.sections.summary),
+      fill(summaryPrompt),
+      ``,
+      fill(this.sections.clickbait),
+      ``,
+      fill(this.sections.takeaways),
       ``,
       fill(this.sections.tags),
       ``,
