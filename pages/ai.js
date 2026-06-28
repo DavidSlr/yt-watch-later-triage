@@ -129,7 +129,7 @@ const WLA_AI = {
       },
       body: JSON.stringify({
         model,
-        max_tokens: 1500,
+        max_tokens: 2500,
         system: WLA_PROMPTS.system,
         messages: [{ role: "user", content: prompt }],
       }),
@@ -170,6 +170,7 @@ const WLA_AI = {
             .map(t => ({
               label: t.label === "worth watching" ? "worth watching" : "simple",
               point: String(t.point),
+              ts: typeof t.ts === "number" ? Math.round(t.ts) : null,
             }))
         : null,
       tags: {

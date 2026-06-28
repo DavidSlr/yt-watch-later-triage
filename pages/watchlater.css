@@ -347,6 +347,23 @@ h1 {
   padding-top: 8px;
   border-top: 1px solid var(--border);
 }
+.no-transcript-note.transcript-offline {
+  color: #a05c00;
+}
+
+/* Harvester status chip in header */
+.harvester-status {
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--surface-raised, #f0f0f0);
+  color: #666;
+  white-space: nowrap;
+  align-self: center;
+}
+.harvester-status[data-state="online"] { color: #2d7a2d; background: #e6f4e6; }
+.harvester-status[data-state="offline"] { color: #a05c00; background: #fff3e0; }
+.harvester-status[data-state="error"] { color: #b00020; background: #fce4e4; }
 
 /* Click-bait answer block */
 .clickbait-answer {
@@ -402,6 +419,24 @@ h1 {
   color: #6aadff;
 }
 .takeaway-point { flex: 1; }
+.takeaway-ts {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 6px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(255, 80, 80, 0.12);
+  color: #ff6b6b;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.takeaway-ts:hover {
+  background: rgba(255, 80, 80, 0.25);
+  color: #ff8e8e;
+}
 
 .placeholder-note {
   font-size: 0.8125rem;
@@ -774,6 +809,73 @@ h1 {
   gap: 8px;
   padding: 12px 18px;
   border-top: 1px solid var(--border);
+}
+
+/* Inspect modal                                                        */
+/* ------------------------------------------------------------------ */
+.inspect-modal-content {
+  width: min(860px, 96vw);
+  display: flex;
+  flex-direction: column;
+  max-height: 82vh;
+}
+
+.inspect-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 0 18px;
+  gap: 4px;
+}
+
+.inspect-tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 8px 12px;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+.inspect-tab-btn.active {
+  color: var(--text);
+  border-bottom-color: #9fc1ff;
+}
+.inspect-tab-btn:hover:not(.active) { color: var(--text); }
+
+.inspect-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.inspect-panel {
+  flex: 1;
+  overflow: auto;
+  padding: 14px 18px;
+}
+
+.inspect-panel pre {
+  margin: 0;
+  font-family: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.inspect-panel pre.inspect-error {
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+/* Inspect AI button in the info actions row */
+.btn-inspect-ai {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 /* ------------------------------------------------------------------ */

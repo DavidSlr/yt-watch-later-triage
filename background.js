@@ -2,6 +2,14 @@
 // real youtube.com tab. Requests originating from that context are
 // indistinguishable from YouTube's own JS, avoiding bot-detection 403s.
 
+// Must match WLA_CS_VERSION in content.js. The background only proxies through
+// a tab whose content script reports this version, reloading any stale tab —
+// so it never silently uses a tab running outdated code.
+const WLA_EXPECTED_CS_VERSION = 12;
+
+// URL for the local Playwright transcript microservice. Configurable via AI
+// settings; callers read this from storage, but we expose the default here.
+
 // ---------------------------------------------------------------------------
 // Embed referrer fix
 // ---------------------------------------------------------------------------
@@ -94,11 +102,11 @@ browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (message.type === "fetch_transcript") {
-    proxyViaYouTubeTab({ type: "cs_fetch_transcript", videoId: message.videoId })
+    fetchTranscriptViaHarvester(message.videoId, message.harvesterUrl)
       .then(r => sendResponse(r))
       .catch(err => {
         console.error("[WLA background] fetch_transcript:", err);
-        sendResponse({ ok: true, transcript: null, error: err.message });
+        sendResponse({ ok: true, transcript: null, status: "offline", error: err.message });
       });
     return true;
   }
@@ -129,35 +137,83 @@ async function proxyViaYouTubeTab(message) {
   return sendToTab(tabId, message);
 }
 
+const DEFAULT_HARVESTER_URL = "http://localhost:47823";
+
+// ---------------------------------------------------------------------------
+// Transcript fetch via the local yt-caption-kit harvester service.
+// Returns { ok, transcript, status } where status is "ok" | "none" | "offline".
+// ---------------------------------------------------------------------------
+async function fetchTranscriptViaHarvester(videoId, harvesterUrl) {
+  const base = (harvesterUrl || DEFAULT_HARVESTER_URL).replace(/\/$/, "");
+  let resp;
+  try {
+    resp = await fetch(`${base}/transcript?v=${encodeURIComponent(videoId)}`, {
+      signal: AbortSignal.timeout(30000),
+    });
+  } catch (e) {
+    return { ok: true, transcript: null, status: "offline", error: e.message };
+  }
+  if (resp.ok) {
+    const json = await resp.json().catch(() => ({}));
+    return { ok: true, transcript: json.transcript || null, status: "ok" };
+  }
+  if (resp.status === 404) {
+    return { ok: true, transcript: null, status: "none" };
+  }
+  const body = await resp.text().catch(() => "");
+  return { ok: true, transcript: null, status: "offline", error: `HTTP ${resp.status}: ${body.slice(0, 200)}` };
+}
+
 async function getOrCreateYouTubeTab() {
-  // Verify cached tab is still alive and has the content script loaded
+  // Verify cached tab is still alive AND runs the current content-script version
   if (cachedYtTabId !== null) {
     try {
       const tab = await browser.tabs.get(cachedYtTabId);
-      if (tab && !tab.discarded) {
-        await sendToTab(cachedYtTabId, { type: "cs_ping" });
-        return cachedYtTabId;
-      }
+      if (tab && !tab.discarded && await tabHasCurrentCS(cachedYtTabId)) return cachedYtTabId;
     } catch (_) {}
     cachedYtTabId = null;
   }
 
-  // Try any existing YouTube tab
+  // Try any existing YouTube tab already running the current content script
   const tabs = await browser.tabs.query({ url: "*://*.youtube.com/*" });
   for (const tab of tabs) {
-    try {
-      await sendToTab(tab.id, { type: "cs_ping" });
+    if (tab.discarded) continue;
+    if (await tabHasCurrentCS(tab.id)) {
       cachedYtTabId = tab.id;
       return cachedYtTabId;
-    } catch (_) {}
+    }
   }
 
-  // No suitable tab found — open a background one
+  // None are current. Either the content scripts are orphaned (extension just
+  // reloaded) or all tabs run stale code (manifest/script changed). Reload one
+  // in place (prefer a non-active tab) to get the current content + mainworld
+  // scripts, rather than silently proxying through outdated code.
+  const reloadTarget = tabs.find(t => !t.active && !t.discarded) ?? tabs.find(t => !t.discarded);
+  if (reloadTarget) {
+    await browser.tabs.reload(reloadTarget.id);
+    cachedYtTabId = reloadTarget.id;
+    await waitForTabLoad(cachedYtTabId);
+    await delay(400); // let content script initialise
+    if (await tabHasCurrentCS(cachedYtTabId)) return cachedYtTabId;
+    cachedYtTabId = null;
+  }
+
+  // No usable tab at all — open a background one
   const tab = await browser.tabs.create({ url: "https://www.youtube.com", active: false });
   cachedYtTabId = tab.id;
   await waitForTabLoad(cachedYtTabId);
   await delay(400); // let content script initialise
   return cachedYtTabId;
+}
+
+// True only if the tab's content script answers AND reports the current version.
+async function tabHasCurrentCS(tabId) {
+  try {
+    const resp = await sendToTab(tabId, { type: "cs_ping" });
+    return !!resp && resp.version === WLA_EXPECTED_CS_VERSION;
+  } catch (_) {
+    return false;
+  }
 }
 
 function sendToTab(tabId, message) {

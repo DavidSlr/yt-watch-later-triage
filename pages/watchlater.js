@@ -133,6 +133,13 @@ function embedSrc(videoId) {
     `?rel=0&fs=1&enablejsapi=1&wla_ref=${encodeURIComponent(s.ref)}`;
 }
 
+function seekPlayerTo(seconds) {
+  const win = ytPlayerEl.contentWindow;
+  if (!win) return;
+  win.postMessage(JSON.stringify({ event: "command", func: "seekTo",    args: [seconds, true] }), "*");
+  win.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }),               "*");
+}
+
 function retryEmbed() {
   if (strategyIndex >= EMBED_STRATEGIES.length - 1) return false;
   strategyIndex++;
@@ -212,6 +219,7 @@ async function ensureAnalysis(videoId, force = false) {
     if (cached) {
       renderAnalysis(cached.data);
       setAiStatus(`Generated ${formatRelativeTime(new Date(cached.ts))}`, { refresh: videoId });
+      showInspectBtn(videoId);
       return;
     }
   }
@@ -228,17 +236,50 @@ async function ensureAnalysis(videoId, force = false) {
     // Transcript and comments are both best-effort; fetch in parallel
     let comments = [];
     let transcript = null;
+    let transcriptStatus = null; // "ok" | "none" | "offline"
+    let transcriptError = null;
+
+    const { aiSettings } = await browser.storage.local.get("aiSettings");
+    const harvesterUrl = aiSettings?.harvesterUrl || "http://localhost:47823";
+
     await Promise.allSettled([
       sendMessage({ type: "fetch_comments", videoId, limit: 30 }).then(r => {
         comments = r.comments ?? [];
         if (r.error) dbg("WARN", `Comments unavailable for ${videoId}: ${r.error}`);
       }).catch(e => dbg("WARN", `Comment fetch failed for ${videoId}: ${e.message}`)),
-      sendMessage({ type: "fetch_transcript", videoId }).then(r => {
-        transcript = r.transcript ?? null;
-        if (r.error) dbg("WARN", `Transcript unavailable for ${videoId}: ${r.error}`);
-      }).catch(e => dbg("WARN", `Transcript fetch failed for ${videoId}: ${e.message}`)),
+
+      (async () => {
+        // Check transcript cache first — "ok" and "none" are stable, never re-fetch.
+        const cached = await getCachedTranscript(videoId);
+        if (cached && (cached.status === "ok" || cached.status === "none")) {
+          transcript = cached.transcript;
+          transcriptStatus = cached.status;
+          dbg("INFO", `Transcript cache hit for ${videoId}: ${cached.status}`);
+          return;
+        }
+        try {
+          const r = await sendMessage({ type: "fetch_transcript", videoId, harvesterUrl });
+          transcript = r.transcript ?? null;
+          transcriptStatus = r.status ?? (transcript ? "ok" : "offline");
+          if (r.error) {
+            transcriptError = r.error;
+            dbg("WARN", `Transcript unavailable for ${videoId} (${transcriptStatus}): ${r.error}`);
+          }
+          await setCachedTranscript(videoId, { transcript, status: transcriptStatus });
+        } catch (e) {
+          transcriptStatus = "offline";
+          transcriptError = e.message;
+          dbg("WARN", `Transcript fetch failed for ${videoId}: ${e.message}`);
+        }
+      })(),
     ]);
-    dbg("INFO", `Analyzing ${videoId} — transcript: ${transcript ? `${transcript.length} chars` : "none"}, comments: ${comments.length}`);
+    dbg("INFO", `Analyzing ${videoId} — transcript: ${transcript ? `${transcript.length} chars (${transcriptStatus})` : `none (status=${transcriptStatus ?? "?"}, ${transcriptError ?? "no tracks"})`}, comments: ${comments.length}`);
+
+    // Build and persist the prompt + transcript BEFORE calling the AI so the
+    // inspect modal works even if the AI call fails.
+    const builtPrompt = WLA_PROMPTS.buildPrompt(video, comments, transcript);
+    await setCachedDebugInfo(videoId, { transcript, transcriptStatus, transcriptError, prompt: builtPrompt });
+    if (currentVideoId === videoId) showInspectBtn(videoId);
 
     const data = await WLA_AI.analyze(video, comments, transcript);
     await setCachedAnalysis(videoId, data);
@@ -246,7 +287,7 @@ async function ensureAnalysis(videoId, force = false) {
 
     // Don't clobber the panels if the user has moved on to another video
     if (currentVideoId === videoId) {
-      renderAnalysis(data);
+      renderAnalysis(data, transcriptStatus);
       setAiStatus("Generated just now", { refresh: videoId });
     }
   } catch (err) {
@@ -261,6 +302,34 @@ async function ensureAnalysis(videoId, force = false) {
   } finally {
     if (analysisInFlightFor === videoId) analysisInFlightFor = null;
   }
+}
+
+// ── Debug info cache (transcript + prompt, unbounded) ─────────────────────────
+async function getCachedDebugInfo(videoId) {
+  const key = `debug:${videoId}`;
+  const obj = await browser.storage.local.get(key);
+  return obj[key] ?? null;
+}
+
+async function setCachedDebugInfo(videoId, info) {
+  await browser.storage.local.set({ [`debug:${videoId}`]: info });
+}
+
+// ── Transcript cache (storage.local, persistent) ─────────────────────────────
+// Keyed by `transcript:${videoId}`. Stores { transcript, status, fetchedAt }.
+// "ok" and "none" are stable facts → always reuse. "offline" is transient →
+// never cache so the harvester is retried once it's back up.
+async function getCachedTranscript(videoId) {
+  const key = `transcript:${videoId}`;
+  const obj = await browser.storage.local.get(key);
+  return obj[key] ?? null;
+}
+
+async function setCachedTranscript(videoId, { transcript, status }) {
+  if (status === "offline") return; // don't persist transient failures
+  await browser.storage.local.set({
+    [`transcript:${videoId}`]: { transcript, status, fetchedAt: Date.now() },
+  });
 }
 
 // ── Analysis cache (storage.local, bounded) ───────────────────────────────────
@@ -329,22 +398,91 @@ function setAiPanelsNoKey() {
   }
 }
 
+// ── Inspect modal (transcript + AI prompt viewer) ─────────────────────────────
+const inspectModal    = document.getElementById("inspect-modal");
+const inspectClose    = document.getElementById("inspect-close");
+const inspectTabBtns  = inspectModal.querySelectorAll(".inspect-tab-btn");
+const inspectPanels   = inspectModal.querySelectorAll(".inspect-panel");
+
+inspectClose.addEventListener("click", () => { inspectModal.hidden = true; });
+inspectModal.addEventListener("click", e => { if (e.target === inspectModal) inspectModal.hidden = true; });
+
+document.getElementById("inspect-copy").addEventListener("click", () => {
+  const pre = inspectModal.querySelector(".inspect-panel:not([hidden]) pre");
+  navigator.clipboard.writeText(pre?.textContent ?? "").then(() => {
+    const btn = document.getElementById("inspect-copy");
+    const prev = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(() => { btn.textContent = prev; }, 1500);
+  });
+});
+
+inspectTabBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.tab;
+    inspectTabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === target));
+    inspectPanels.forEach(p => p.hidden = p.dataset.panel !== target);
+  });
+});
+
+function showInspectBtn(videoId) {
+  const btn = document.getElementById("btn-inspect-ai");
+  if (!btn) return;
+  btn.hidden = false;
+  btn.onclick = () => openInspectModal(videoId);
+}
+
+async function openInspectModal(videoId) {
+  const info = await getCachedDebugInfo(videoId);
+  const transcriptEl = document.getElementById("inspect-transcript");
+  if (info?.transcript) {
+    transcriptEl.textContent = info.transcript;
+    transcriptEl.className = "";
+  } else {
+    let reason;
+    if (info?.transcriptStatus === "none") {
+      reason = "No transcript available for this video.";
+    } else if (info?.transcriptStatus === "offline") {
+      reason = `Transcript service offline — start the harvester to enable transcripts.${info.transcriptError ? `\n\nError: ${info.transcriptError}` : ""}`;
+    } else if (info?.transcriptError) {
+      reason = `FETCH FAILED: ${info.transcriptError}`;
+    } else {
+      reason = "(video has no captions / transcript was not available)";
+    }
+    transcriptEl.textContent = reason;
+    transcriptEl.className = "inspect-error";
+  }
+  document.getElementById("inspect-prompt").textContent =
+    info?.prompt ?? "(prompt not cached — run analysis first)";
+
+  // Reset to transcript tab
+  inspectTabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === "transcript"));
+  inspectPanels.forEach(p => p.hidden = p.dataset.panel !== "transcript");
+
+  inspectModal.hidden = false;
+}
+
 function setAiPanelsLoading() {
   for (const s of ["summary", "takeaways", "sentiment", "tags"]) {
     aiContent(s).innerHTML = `<p class="placeholder-note">Analyzing…</p>`;
   }
 }
 
-function renderAnalysis(data) {
+function renderAnalysis(data, transcriptStatus) {
   // Summary — paragraphs, optional no-transcript note, optional clickbait answer
   const summaryParts = data.summary
     .split(/\n+/)
     .filter(Boolean)
     .map(p => `<p class="summary-p">${escHtml(p)}</p>`)
     .join("");
-  const noTranscriptNote = data.takeaways === null
-    ? `<p class="no-transcript-note">No transcript available — summary based on metadata only</p>`
-    : "";
+  let noTranscriptNote = "";
+  if (data.takeaways === null) {
+    if (transcriptStatus === "offline") {
+      noTranscriptNote = `<p class="no-transcript-note transcript-offline">Transcript service offline — summary based on metadata only</p>`;
+    } else {
+      noTranscriptNote = `<p class="no-transcript-note">No transcript available — summary based on metadata only</p>`;
+    }
+  }
   const clickbaitBlock = data.clickbait
     ? `<div class="clickbait-answer"><span class="clickbait-label">Click-bait answer</span>${escHtml(data.clickbait)}</div>`
     : "";
@@ -354,11 +492,22 @@ function renderAnalysis(data) {
   if (!data.takeaways) {
     aiContent("takeaways").innerHTML = `<p class="placeholder-note">No transcript available for this video.</p>`;
   } else {
-    const items = data.takeaways.map(t => `
+    const fmtTs = sec => {
+      const m = Math.floor(sec / 60);
+      const s = String(sec % 60).padStart(2, "0");
+      return `${m}:${s}`;
+    };
+    const items = data.takeaways.map(t => {
+      const tsChip = (t.ts != null)
+        ? `<button class="takeaway-ts" data-ts="${t.ts}">${fmtTs(t.ts)}</button>`
+        : "";
+      return `
       <div class="takeaway-item">
         <span class="takeaway-label ${t.label === "worth watching" ? "worth-watching" : "simple"}">${escHtml(t.label)}</span>
         <span class="takeaway-point">${escHtml(t.point)}</span>
-      </div>`).join("");
+        ${tsChip}
+      </div>`;
+    }).join("");
     aiContent("takeaways").innerHTML = `<div class="takeaways-list">${items || `<p class="placeholder-note">No key takeaways identified.</p>`}</div>`;
   }
 
@@ -395,10 +544,11 @@ function renderAnalysis(data) {
 
 // ── AI settings UI ────────────────────────────────────────────────────────────
 async function initAiUi() {
-  const modal      = document.getElementById("settings-modal");
-  const keyInput   = document.getElementById("ai-key");
-  const modelInput = document.getElementById("ai-model");
-  const testResult = document.getElementById("ai-test-result");
+  const modal          = document.getElementById("settings-modal");
+  const keyInput       = document.getElementById("ai-key");
+  const modelInput     = document.getElementById("ai-model");
+  const harvesterInput = document.getElementById("harvester-url");
+  const testResult     = document.getElementById("ai-test-result");
 
   // In-memory per-provider state so switching radio doesn't lose typed values
   const perProvider = {
@@ -435,6 +585,8 @@ async function initAiUi() {
     const radio = document.querySelector(`input[name="ai-provider"][value="${activeProvider}"]`);
     if (radio) radio.checked = true;
     restoreForm(activeProvider);
+    const { aiSettings } = await browser.storage.local.get("aiSettings");
+    harvesterInput.value = aiSettings?.harvesterUrl || "";
     testResult.hidden = true;
     modal.hidden = false;
     keyInput.focus();
@@ -444,7 +596,12 @@ async function initAiUi() {
 
   function allSettings() {
     flushForm();
-    return { provider: activeProvider, gemini: { ...perProvider.gemini }, claude: { ...perProvider.claude } };
+    return {
+      provider: activeProvider,
+      gemini: { ...perProvider.gemini },
+      claude: { ...perProvider.claude },
+      harvesterUrl: harvesterInput.value.trim() || "http://localhost:47823",
+    };
   }
 
   document.querySelectorAll('input[name="ai-provider"]').forEach(radio => {
@@ -507,15 +664,45 @@ const infoTitle     = document.getElementById("info-title");
 const infoChannel   = document.getElementById("info-channel");
 const infoDuration  = document.getElementById("info-duration");
 
+// ── Harvester health ping ─────────────────────────────────────────────────────
+async function pingHarvester() {
+  const { aiSettings } = await browser.storage.local.get("aiSettings");
+  const base = (aiSettings?.harvesterUrl || "http://localhost:47823").replace(/\/$/, "");
+  const el = document.getElementById("harvester-status");
+  if (!el) return;
+  try {
+    const resp = await fetch(`${base}/health`, { signal: AbortSignal.timeout(3000) });
+    if (resp.ok) {
+      el.textContent = "transcripts: online";
+      el.dataset.state = "online";
+    } else {
+      el.textContent = "transcripts: error";
+      el.dataset.state = "error";
+    }
+  } catch (_) {
+    el.textContent = "transcripts: offline";
+    el.dataset.state = "offline";
+  }
+  el.hidden = false;
+}
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
   await loadSavedStrategy();
   initAiUi();
   loadPlaylist();
+  pingHarvester();
 
   refreshBtn.addEventListener("click", () => loadPlaylist());
   btnRemoveNext.addEventListener("click", handleRemoveAndNext);
   btnKeep.addEventListener("click", handleKeep);
+
+  // Seek the embedded player when a timestamp chip is clicked
+  aiContent("takeaways").addEventListener("click", e => {
+    const btn = e.target.closest(".takeaway-ts");
+    if (!btn) return;
+    seekPlayerTo(Number(btn.dataset.ts));
+  });
 
   const debugBtn = document.getElementById("debug-btn");
   debugBtn.addEventListener("click", async () => {
@@ -602,6 +789,8 @@ function loadVideo(videoId) {
   if (!video) return;
 
   currentVideoId = videoId;
+  const inspectBtn = document.getElementById("btn-inspect-ai");
+  if (inspectBtn) { inspectBtn.hidden = true; inspectBtn.onclick = null; }
 
   // Load video — replacing src stops the previous video immediately.
   // enablejsapi lets us receive player events (incl. errors) via postMessage.

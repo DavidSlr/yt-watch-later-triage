@@ -1,0 +1,14 @@
+{
+  "name": "wla-transcript-harvester",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "YouTube transcript microservice for WatchLaterAssistant.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "yt-caption-kit": "^1.0.0"
+  }
+}

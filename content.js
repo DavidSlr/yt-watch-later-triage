@@ -1,81 +1,14 @@
 // Runs inside youtube.com tabs. All YouTube API calls are made from here so
 // they originate in a real browser page context, avoiding bot detection.
 
-// ---------------------------------------------------------------------------
-// DEBUG: inject a fetch interceptor into the page world to log YouTube's own
-// requests to /youtubei/v1/. Once enabled, clicking the native "Remove from
-// Watch later" X on any video will dump the real request payload to the
-// console so we can compare against what our extension is sending.
-// ---------------------------------------------------------------------------
-(function injectFetchLogger() {
-  if (document.getElementById("wla-fetch-logger")) return;
-  const s = document.createElement("script");
-  s.id = "wla-fetch-logger";
-  s.textContent = `
-    (function() {
-      if (window.__wlaPatched) return;
-      window.__wlaPatched = true;
-      const orig = window.fetch;
-      window.fetch = function(input, init) {
-        const isReq = (typeof Request !== "undefined") && (input instanceof Request);
-        const url = isReq ? input.url : (typeof input === "string" ? input : input?.url);
-        const method = (init?.method || (isReq ? input.method : "GET")).toUpperCase();
-
-        // Filter for the edit_playlist call (and a few related mutations)
-        const interesting = url && /\\/youtubei\\/v1\\/(browse\\/edit_playlist|playlist\\/(create|delete)|browse|feedback)/.test(url) && method === "POST";
-
-        if (interesting) {
-          // Clone the body source so we can read it without consuming the original
-          const clone = isReq ? input.clone() : null;
-          const initBody = init?.body;
-
-          // Read headers
-          const headers = {};
-          if (init?.headers) {
-            if (init.headers instanceof Headers) {
-              for (const [k, v] of init.headers.entries()) headers[k] = v;
-            } else if (Array.isArray(init.headers)) {
-              for (const [k, v] of init.headers) headers[k] = v;
-            } else {
-              Object.assign(headers, init.headers);
-            }
-          }
-          if (isReq) {
-            for (const [k, v] of input.headers.entries()) {
-              if (!(k in headers)) headers[k] = v;
-            }
-          }
-
-          // Read body (Promise so we can await async sources like Request.text())
-          const bodyPromise = (async () => {
-            if (typeof initBody === "string") return initBody;
-            if (initBody instanceof Blob) return await initBody.text();
-            if (initBody instanceof ArrayBuffer) return new TextDecoder().decode(initBody);
-            if (initBody instanceof FormData) return Object.fromEntries(initBody.entries());
-            if (clone) return await clone.text();
-            return initBody;
-          })();
-
-          bodyPromise.then((body) => {
-            console.log("%c[YT fetch intercept] " + url, "color:#4ade80;font-weight:bold");
-            console.log("  method:", method);
-            console.log("  headers:", headers);
-            try { console.log("  body:", typeof body === "string" ? JSON.parse(body) : body); }
-            catch (_) { console.log("  body (raw):", body); }
-          }).catch((e) => console.warn("[YT fetch intercept] body read error:", e));
-        }
-
-        return orig.apply(this, arguments);
-      };
-      console.log("%c[WLA] fetch interceptor installed", "color:#4ade80");
-    })();
-  `;
-  (document.head || document.documentElement).appendChild(s);
-})();
+// Build number reported to the background on cs_ping. Bump this whenever
+// content.js changes in a way that the proxy tab must pick up, so the
+// background reloads any tab running stale code instead of using it.
+const WLA_CS_VERSION = 12;
 
 browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "cs_ping") {
-    sendResponse({ ok: true });
+    sendResponse({ ok: true, version: WLA_CS_VERSION });
     return false;
   }
   if (message.type === "cs_fetch_wl") {
@@ -101,15 +34,7 @@ browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       });
     return true;
   }
-  if (message.type === "cs_fetch_transcript") {
-    handleFetchTranscript(message.videoId)
-      .then(transcript => sendResponse({ ok: true, transcript }))
-      .catch(err => {
-        console.warn("[WLA content] fetch_transcript failed:", err);
-        sendResponse({ ok: true, transcript: null, error: err.message });
-      });
-    return true;
-  }
+
 });
 
 // ---------------------------------------------------------------------------
@@ -335,54 +260,7 @@ function extractCommentTexts(data) {
     .filter(Boolean);
 }
 
-// ---------------------------------------------------------------------------
-// Fetch video transcript via InnerTube player API + timedtext endpoint
-// ---------------------------------------------------------------------------
-async function handleFetchTranscript(videoId) {
-  const cfg = getConfig();
-
-  // Step 1: get the player response — it includes caption track URLs
-  const resp = await fetch("https://www.youtube.com/youtubei/v1/player?prettyPrint=false", {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      "X-YouTube-Client-Name": "1",
-      "X-YouTube-Client-Version": cfg.clientVersion,
-      "X-Origin": "https://www.youtube.com",
-    },
-    body: JSON.stringify({ context: buildContext(cfg), videoId }),
-  });
-  if (!resp.ok) throw new Error(`InnerTube player returned HTTP ${resp.status}`);
-  const playerData = await resp.json();
-
-  // Step 2: pick an English caption track (prefer manual, accept auto-generated)
-  const tracks = playerData?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? [];
-  if (tracks.length === 0) return null;
-
-  const track =
-    tracks.find(t => t.languageCode === "en" && t.kind !== "asr") ??
-    tracks.find(t => t.languageCode === "en") ??
-    tracks.find(t => t.languageCode?.startsWith("en")) ??
-    tracks[0];
-
-  if (!track?.baseUrl) return null;
-
-  // Step 3: fetch the timedtext in JSON3 format
-  const ttResp = await fetch(`${track.baseUrl}&fmt=json3`, { credentials: "include" });
-  if (!ttResp.ok) throw new Error(`Timedtext returned HTTP ${ttResp.status}`);
-  const ttData = await ttResp.json();
-
-  // Step 4: join segments into a single string (cap at 8 000 chars for token budget)
-  const lines = [];
-  for (const event of ttData?.events ?? []) {
-    if (!event.segs) continue;
-    const text = event.segs.map(s => s.utf8 ?? "").join("").replace(/\n/g, " ").trim();
-    if (text) lines.push(text);
-  }
-  const full = lines.join(" ").replace(/\s+/g, " ").trim();
-  return full ? full.slice(0, 8000) : null;
-}
+const delay = (ms) => new Promise(r => setTimeout(r, ms));
 
 // ---------------------------------------------------------------------------
 // SAPISID hash — YouTube's frontend computes a hash for each of the three
@@ -390,7 +268,7 @@ async function handleFetchTranscript(videoId) {
 // Mutation endpoints (like edit_playlist) validate against the 1P/3P hashes,
 // so sending only one is what was causing the FAILED_PRECONDITION 400.
 // ---------------------------------------------------------------------------
-async function buildSapisidhash() {
+async function buildSapisidhash(suffix = "") {
   const cookieMap = parseCookies(document.cookie);
   const pairs = [
     ["SAPISID", "SAPISIDHASH"],
@@ -406,7 +284,8 @@ async function buildSapisidhash() {
     const message = `${timestamp} ${value} https://www.youtube.com`;
     const buf = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(message));
     const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
-    parts.push(`${hashLabel} ${timestamp}_${hex}`);
+    // YouTube's newer requests append a scheme suffix (e.g. "_u") to each hash.
+    parts.push(`${hashLabel} ${timestamp}_${hex}${suffix}`);
   }
 
   if (parts.length === 0) {

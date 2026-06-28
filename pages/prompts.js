@@ -21,7 +21,7 @@ no commentary. Use exactly this shape:
 {
   "summary": "string",
   "clickbait": "string or null",
-  "takeaways": [{"label": "simple"|"worth watching", "point": "string"}] or null,
+  "takeaways": [{"label": "simple"|"worth watching", "point": "string", "ts": number|null}] or null,
   "tags": { "context": ["string"], "type": ["string"] },
   "sentiment": {
     "positive": number, "neutral": number, "critical": number,
@@ -51,11 +51,20 @@ Set "clickbait" to null if the title is straightforward or if the answer is not 
 
     // Requires transcript — set takeaways to null when no transcript
     takeaways: `## Key takeaways
-Based on the transcript, list 1-5 key points a viewer could take away from this video.
-For each point classify it as:
-- "simple"         — the point can be understood as a one-liner; no need to watch for this
-- "worth watching" — enough nuance or context that watching adds real value
-Return as an array of { "label": "simple"|"worth watching", "point": "..." } objects.
+Based on the transcript, extract key points a viewer could take away from this video.
+
+LIST DETECTION: If the title promises a numbered list ("8 ways to…", "5 tips for…", "Top 10…",
+"N reasons/things/steps/mistakes/hacks/…"), expand ALL those items as short headline-style
+takeaways — one per listed item, even if some must be brief. Otherwise list 1–5 key points.
+
+For each point:
+- Classify as "simple" (one-liner, no need to watch) or "worth watching" (nuance/context adds value; add a brief hint)
+- Add "ts": the integer seconds offset where this point is discussed. Find the [M:SS] marker
+  immediately before the relevant passage in the transcript and convert it: ts = M*60 + S.
+  Every [M:SS] marker in the transcript is a reliable seek point — always provide ts when a
+  transcript is present; only set null if the passage genuinely cannot be located.
+
+Return as [{"label": "simple"|"worth watching", "point": "...", "ts": number|null}].
 If no transcript is available, set "takeaways" to null.`,
 
     tags: `## Contextual tags
@@ -69,11 +78,12 @@ Classify the video on two axes. Choose ONLY from these exact values:
   "entertainment", "news", "review"`,
 
     sentiment: `## Comment sentiment
-Analyze the viewer comments provided below.
+Analyze the viewer comments provided below. Positive and Critical in this context means if the
+comment generally agrees with the video's message or not, rather than the comment's tone.
 1. Estimate the rough share of positive / neutral / critical comments as
    percentages (integers summing to 100). This is a brief headline figure.
 2. The main output: identify 2-4 general THEMES across the comments, each
-   marked "positive" or "negative". A theme is a recurring observation, not a
+   marked "positive" or "critical". A theme is a recurring observation, not a
    single opinion. For each theme give a short description (under 12 words).
    Include a short representative "quote" (verbatim from a comment, max 15
    words) only when one genuinely illustrates the theme — otherwise null.

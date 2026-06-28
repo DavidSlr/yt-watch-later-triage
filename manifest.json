@@ -8,7 +8,8 @@
     "*://*.youtube.com/*",
     "*://*.youtube-nocookie.com/*",
     "https://generativelanguage.googleapis.com/*",
-    "https://api.anthropic.com/*"
+    "https://api.anthropic.com/*",
+    "http://localhost:47823/*"
   ],
   "background": {
     "scripts": ["background.js"]
