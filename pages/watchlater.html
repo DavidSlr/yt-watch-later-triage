@@ -27,7 +27,6 @@
         </svg>
         Refresh
       </button>
-      <span id="harvester-status" class="harvester-status" hidden></span>
       <button id="settings-btn" class="btn-secondary settings-btn" title="AI settings">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.484.484 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.61 3.61 0 0 1 8.4 12c0-1.98 1.62-3.6 3.6-3.6s3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
@@ -89,6 +88,9 @@
           <legend class="provider-config-label">Transcript harvester</legend>
           <label class="form-label" for="harvester-url">Service URL</label>
           <input id="harvester-url" class="form-input" type="text" placeholder="http://localhost:47823" autocomplete="off" />
+          <div class="harvester-status-row">
+            <span id="harvester-status" class="harvester-status" hidden></span>
+          </div>
           <p class="form-hint">Local service that fetches transcripts.
             <a href="http://localhost:47823/status" target="_blank" rel="noopener">View status</a> ·
             <a href="http://localhost:47823/jobs" target="_blank" rel="noopener">Recent jobs</a>
@@ -170,6 +172,17 @@
       <aside class="info-panel">
 
         <div class="info-sticky">
+          <button id="video-menu-btn" class="video-menu-btn" aria-label="Video options" hidden>
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+          </button>
+          <div id="video-menu-dropdown" class="video-menu-dropdown" hidden>
+            <button id="video-menu-inspect" class="video-menu-item">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
+                <path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/>
+              </svg>
+              Inspect data
+            </button>
+          </div>
           <h2 id="info-title" class="info-title"></h2>
           <div id="info-channel" class="info-channel"></div>
           <div id="info-duration" class="info-duration"></div>
@@ -190,12 +203,6 @@
               <a id="btn-open-yt" href="#" target="_blank" rel="noopener" class="btn-secondary">
                 Open on YouTube
               </a>
-              <button id="btn-inspect-ai" class="btn-secondary btn-inspect-ai" title="View fetched transcript and AI prompt" hidden>
-                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
-                  <path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/>
-                </svg>
-                Inspect AI
-              </button>
             </div>
           </div>
         </div>
@@ -260,10 +267,21 @@
     </div><!-- /player-section -->
 
     <!-- Queue -->
-    <div class="queue-section">
-      <div class="queue-header">
+    <div class="queue-section" id="queue-section">
+      <div class="queue-header" id="queue-collapse-toggle" role="button" aria-expanded="true">
         <span class="queue-label">Queue</span>
         <span id="queue-count" class="queue-count"></span>
+        <div class="queue-nav">
+          <button class="queue-nav-btn" id="queue-prev" aria-label="Scroll left">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          </button>
+          <button class="queue-nav-btn" id="queue-next" aria-label="Scroll right">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+          </button>
+        </div>
+        <button class="queue-collapse-btn" id="queue-collapse-btn" aria-label="Toggle queue">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M7.41 15.41 12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+        </button>
       </div>
       <div id="queue-scroll" class="queue-scroll"></div>
     </div>

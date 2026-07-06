@@ -15,7 +15,7 @@
   --accent-hover: #cc0000;
   --radius:       8px;
   --header-h:     56px;
-  --queue-h:      192px;
+  --queue-h:      260px;
 }
 
 html, body { height: 100%; overflow: hidden; }
@@ -230,7 +230,62 @@ h1 {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
+  position: relative;
 }
+
+.video-menu-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.12s, color 0.12s;
+}
+.video-menu-btn:hover { background: var(--surface-hover); color: var(--text); }
+
+.video-menu-dropdown {
+  position: absolute;
+  top: 38px;
+  right: 8px;
+  z-index: 20;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  min-width: 160px;
+  padding: 4px 0;
+}
+
+.video-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+.video-menu-item:hover { background: var(--surface-hover); }
+
+.harvester-status-row {
+  margin: 6px 0 2px;
+  min-height: 0;
+}
+.harvester-status-row .harvester-status { display: inline-block; }
 
 .info-title {
   font-size: 1.25rem;
@@ -548,6 +603,52 @@ h1 {
   color: #555;
 }
 
+.queue-nav {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.queue-nav-btn {
+  width: 26px;
+  height: 26px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: border-color 0.12s, color 0.12s;
+}
+.queue-nav-btn:hover:not(:disabled) { border-color: #444; color: var(--text); }
+.queue-nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+.queue-collapse-btn {
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-left: 4px;
+  transition: color 0.12s;
+  flex-shrink: 0;
+}
+.queue-collapse-btn:hover { color: var(--text); }
+.queue-collapse-btn svg { transition: transform 0.2s; }
+
+.queue-section.collapsed .queue-collapse-btn svg { transform: rotate(180deg); }
+.queue-section.collapsed { height: auto; }
+.queue-section.collapsed .queue-scroll { display: none; }
+
 .queue-scroll {
   flex: 1;
   display: flex;
@@ -577,6 +678,28 @@ h1 {
 }
 .queue-card:hover  { border-color: #444; background: var(--surface-hover); }
 .queue-card.active { border-color: var(--accent); }
+
+.queue-card-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  background: rgba(0,0,0,0.72);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.12s, background 0.12s;
+  z-index: 1;
+}
+.queue-card:hover .queue-card-remove { opacity: 1; }
+.queue-card-remove:hover { background: rgba(180,0,0,0.9); }
 
 .queue-thumb {
   position: relative;
@@ -622,10 +745,9 @@ h1 {
   font-weight: 600;
   color: var(--text);
   line-height: 1.35;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
   overflow: hidden;
+  flex: 1;
+  min-height: 0;
 }
 
 .queue-card-meta {
@@ -634,6 +756,7 @@ h1 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex-shrink: 0;
 }
 
 /* Load-more sentinel card in the queue */
@@ -871,12 +994,6 @@ h1 {
   font-weight: 600;
 }
 
-/* Inspect AI button in the info actions row */
-.btn-inspect-ai {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
 
 /* ------------------------------------------------------------------ */
 /* AI panel content                                                     */

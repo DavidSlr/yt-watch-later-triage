@@ -426,10 +426,14 @@ inspectTabBtns.forEach(btn => {
 });
 
 function showInspectBtn(videoId) {
-  const btn = document.getElementById("btn-inspect-ai");
-  if (!btn) return;
-  btn.hidden = false;
-  btn.onclick = () => openInspectModal(videoId);
+  const menuBtn = document.getElementById("video-menu-btn");
+  const inspectItem = document.getElementById("video-menu-inspect");
+  if (!menuBtn || !inspectItem) return;
+  menuBtn.hidden = false;
+  inspectItem.onclick = () => {
+    document.getElementById("video-menu-dropdown").hidden = true;
+    openInspectModal(videoId);
+  };
 }
 
 async function openInspectModal(videoId) {
@@ -657,6 +661,8 @@ const syncStatus    = document.getElementById("sync-status");
 const ytPlayerEl    = document.getElementById("yt-player");
 const queueScroll   = document.getElementById("queue-scroll");
 const queueCount    = document.getElementById("queue-count");
+const queuePrev     = document.getElementById("queue-prev");
+const queueNext     = document.getElementById("queue-next");
 const btnRemoveNext = document.getElementById("btn-remove-next");
 const btnKeep       = document.getElementById("btn-keep");
 const btnOpenYt     = document.getElementById("btn-open-yt");
@@ -696,6 +702,38 @@ document.addEventListener("DOMContentLoaded", async () => {
   refreshBtn.addEventListener("click", () => loadPlaylist());
   btnRemoveNext.addEventListener("click", handleRemoveAndNext);
   btnKeep.addEventListener("click", handleKeep);
+
+  const videoMenuBtn = document.getElementById("video-menu-btn");
+  const videoMenuDropdown = document.getElementById("video-menu-dropdown");
+  videoMenuBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    videoMenuDropdown.hidden = !videoMenuDropdown.hidden;
+  });
+  document.addEventListener("click", (e) => {
+    if (!videoMenuDropdown.hidden && !videoMenuDropdown.contains(e.target)) {
+      videoMenuDropdown.hidden = true;
+    }
+  });
+
+  const scrollQueue = (dir) => {
+    queueScroll.scrollBy({ left: dir * Math.max(queueScroll.clientWidth * 0.8, 200), behavior: "smooth" });
+  };
+  queuePrev.addEventListener("click", () => scrollQueue(-1));
+  queueNext.addEventListener("click", () => scrollQueue(1));
+
+  const queueSection = document.getElementById("queue-section");
+  const queueCollapseBtn = document.getElementById("queue-collapse-btn");
+  const queueCollapseToggle = document.getElementById("queue-collapse-toggle");
+  if (localStorage.getItem("queue-collapsed") === "true") {
+    queueSection.classList.add("collapsed");
+    queueCollapseToggle.setAttribute("aria-expanded", "false");
+  }
+  queueCollapseBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const collapsed = queueSection.classList.toggle("collapsed");
+    queueCollapseToggle.setAttribute("aria-expanded", String(!collapsed));
+    localStorage.setItem("queue-collapsed", String(collapsed));
+  });
 
   // Seek the embedded player when a timestamp chip is clicked
   aiContent("takeaways").addEventListener("click", e => {
@@ -789,8 +827,10 @@ function loadVideo(videoId) {
   if (!video) return;
 
   currentVideoId = videoId;
-  const inspectBtn = document.getElementById("btn-inspect-ai");
-  if (inspectBtn) { inspectBtn.hidden = true; inspectBtn.onclick = null; }
+  const menuBtn = document.getElementById("video-menu-btn");
+  if (menuBtn) { menuBtn.hidden = true; }
+  const dropdown = document.getElementById("video-menu-dropdown");
+  if (dropdown) { dropdown.hidden = true; }
 
   // Load video — replacing src stops the previous video immediately.
   // enablejsapi lets us receive player events (incl. errors) via postMessage.
@@ -887,6 +927,41 @@ function getNextVideo() {
   return idx === -1 ? null : (allVideos[idx + 1] ?? null);
 }
 
+async function removeVideoById(videoId) {
+  const video = allVideos.find(v => v.videoId === videoId);
+  if (!video) return;
+
+  const wasActive = videoId === currentVideoId;
+  const nextVideo = wasActive ? getNextVideo() : null;
+
+  try {
+    await sendMessage({
+      type: "remove_video",
+      videoId: video.videoId,
+      setVideoId: video.setVideoId,
+      removeEndpoint: video.removeEndpoint ?? null,
+    });
+
+    allVideos = allVideos.filter(v => v.videoId !== videoId);
+    const card = queueScroll.querySelector(`.queue-card[data-video-id="${CSS.escape(videoId)}"]`);
+    if (card) card.remove();
+
+    updateCount(allVideos.length);
+    updateQueueCount();
+
+    if (allVideos.length === 0) { showState("empty"); return; }
+
+    if (wasActive) {
+      const target = (nextVideo && allVideos.find(v => v.videoId === nextVideo.videoId))
+        ? nextVideo.videoId
+        : allVideos[allVideos.length - 1].videoId;
+      loadVideo(target);
+    }
+  } catch (err) {
+    showErrorBanner(`Could not remove video: ${err.message}`);
+  }
+}
+
 function updateActionButtons() {
   const hasNext = !!getNextVideo();
   btnKeep.disabled = !hasNext;
@@ -910,16 +985,18 @@ function buildQueueCard(video) {
   card.className = "queue-card";
   card.dataset.videoId = video.videoId;
 
+  const metaText = [video.channel, video.uploadDate].filter(Boolean).join(" · ");
   card.innerHTML = `
     <div class="queue-thumb">
       <img src="${escAttr(video.thumbnail)}" alt="" loading="lazy" />
       ${video.duration ? `<span class="duration-badge">${escHtml(video.duration)}</span>` : ""}
+      <button class="queue-card-remove" aria-label="Remove from Watch Later" title="Remove from Watch Later">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
     </div>
     <div class="queue-card-body">
-      <div class="queue-card-title">${escHtml(video.title)}</div>
-      <div class="queue-card-meta">${escHtml(
-        [video.channel, video.uploadDate].filter(Boolean).join(" · ")
-      )}</div>
+      <div class="queue-card-title" title="${escAttr(video.title)}">${escHtml(video.title)}</div>
+      <div class="queue-card-meta" title="${escAttr(metaText)}">${escHtml(metaText)}</div>
     </div>
   `;
 
@@ -927,6 +1004,12 @@ function buildQueueCard(video) {
   img.addEventListener("error", () => { img.style.display = "none"; });
 
   card.addEventListener("click", () => loadVideo(video.videoId));
+
+  card.querySelector(".queue-card-remove").addEventListener("click", async (e) => {
+    e.stopPropagation();
+    await removeVideoById(video.videoId);
+  });
+
   return card;
 }
 
