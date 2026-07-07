@@ -44,6 +44,10 @@ export class WlaTimestamp extends LitElement {
       background: rgba(255, 80, 80, 0.25);
       color: #ff8e8e;
     }
+    button:focus-visible {
+      outline: 2px solid var(--color-info, #9fc1ff);
+      outline-offset: 2px;
+    }
 
     /* icon is always in flow (preserves button width) but hidden at rest */
     .icon {

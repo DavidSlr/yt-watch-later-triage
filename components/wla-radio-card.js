@@ -46,9 +46,23 @@ export class WlaRadioCard extends LitElement {
                   background var(--transition-fast, 0.12s);
     }
     label:hover { border-color: #444; background: var(--color-surface-hover, #222); }
+    label:focus-within {
+      outline: 2px solid var(--color-info, #9fc1ff);
+      outline-offset: 2px;
+    }
     :host([checked]) label { border-color: var(--color-accent, #ff0000); background: rgba(255,0,0,0.05); }
 
-    input[type='radio'] { display: none; }
+    input[type='radio'] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
 
     .dot {
       width: 16px;

@@ -93,6 +93,12 @@ export class WlaButton extends LitElement {
     }
 
     /* ── Disabled ─────────────────────────────────────────────── */
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--color-info, #9fc1ff);
+      outline-offset: 2px;
+    }
+
     :host([disabled]) button,
     :host([disabled]) a {
       opacity: 0.45;

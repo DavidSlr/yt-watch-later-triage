@@ -49,6 +49,10 @@ export class WlaTabs extends LitElement {
       color: var(--color-text, #e8e8e8);
       border-bottom-color: var(--color-info, #9fc1ff);
     }
+    button:focus-visible {
+      outline: 2px solid var(--color-info, #9fc1ff);
+      outline-offset: -2px;
+    }
 
     .panels {
       flex: 1;
@@ -70,6 +74,22 @@ export class WlaTabs extends LitElement {
     this.dispatchEvent(new CustomEvent('wla-tab-change', { detail: { tab: id }, bubbles: true, composed: true }));
   }
 
+  _onKeyDown(e) {
+    const buttons = Array.from(this.shadowRoot.querySelectorAll('button[role="tab"]'));
+    const idx = buttons.indexOf(e.target);
+    if (idx === -1) return;
+    let next = -1;
+    if (e.key === 'ArrowRight') next = (idx + 1) % buttons.length;
+    else if (e.key === 'ArrowLeft') next = (idx - 1 + buttons.length) % buttons.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = buttons.length - 1;
+    if (next !== -1) {
+      e.preventDefault();
+      buttons[next].focus();
+      this._select(this.tabs[next].id);
+    }
+  }
+
   willUpdate(changed) {
     if ((changed.has('tabs') || changed.has('active')) && this.tabs.length && !this.active) {
       this.active = this.tabs[0].id;
@@ -86,7 +106,7 @@ export class WlaTabs extends LitElement {
 
   render() {
     return html`
-      <div class="tab-bar" part="tab-bar" role="tablist">
+      <div class="tab-bar" part="tab-bar" role="tablist" @keydown=${this._onKeyDown}>
         ${this.tabs.map(t => html`
           <button
             part="tab"

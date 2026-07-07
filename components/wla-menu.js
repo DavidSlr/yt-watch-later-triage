@@ -19,6 +19,7 @@ export class WlaMenu extends LitElement {
     this.open = false;
     this.label = 'More options';
     this._onDocClick = this._onDocClick.bind(this);
+    this._onKeyDown = this._onKeyDown.bind(this);
   }
 
   static styles = css`
@@ -40,6 +41,10 @@ export class WlaMenu extends LitElement {
                   color var(--transition-fast, 0.12s);
     }
     .trigger:hover { background: var(--color-surface-hover, #222); color: var(--color-text, #e8e8e8); }
+    .trigger:focus-visible {
+      outline: 2px solid var(--color-info, #9fc1ff);
+      outline-offset: 2px;
+    }
 
     .dropdown {
       display: none;
@@ -62,34 +67,36 @@ export class WlaMenu extends LitElement {
       align-items: center;
       gap: var(--space-2, 8px);
       width: 100%;
-      padding: 8px 14px;
+      padding: 8px 12px;
       background: transparent;
       border: none;
+      border-left: 2px solid transparent;
       color: var(--color-text, #e8e8e8);
       font-size: var(--font-size-base, 0.875rem);
       font-family: inherit;
       cursor: pointer;
       text-align: left;
       text-decoration: none;
-      transition: background var(--transition-fast, 0.12s);
+      transition: background var(--transition-fast, 0.12s),
+                  border-color var(--transition-fast, 0.12s);
     }
-    ::slotted(button):hover,
-    ::slotted(a):hover {
-      background: var(--color-surface-raised, #242424);
-      color: var(--color-text, #e8e8e8);
-      border-left: 2px solid var(--color-info, #9fc1ff);
-      padding-left: 12px;
+    ::slotted(button):focus-visible,
+    ::slotted(a):focus-visible {
+      outline: 2px solid var(--color-info, #9fc1ff);
+      outline-offset: -2px;
     }
   `;
 
   connectedCallback() {
     super.connectedCallback();
     document.addEventListener('click', this._onDocClick);
+    this.addEventListener('keydown', this._onKeyDown);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     document.removeEventListener('click', this._onDocClick);
+    this.removeEventListener('keydown', this._onKeyDown);
   }
 
   _onDocClick(e) {
@@ -97,6 +104,38 @@ export class WlaMenu extends LitElement {
       this.open = false;
       this.dispatchEvent(new CustomEvent('wla-menu-close', { bubbles: true, composed: true }));
     }
+  }
+
+  _onKeyDown(e) {
+    if (e.key === 'Escape' && this.open) {
+      e.stopPropagation();
+      this.open = false;
+      this.dispatchEvent(new CustomEvent('wla-menu-close', { bubbles: true, composed: true }));
+      this.shadowRoot.querySelector('.trigger')?.focus();
+    }
+  }
+
+  updated(changed) {
+    if (!changed.has('open')) return;
+    const dropdown = this.shadowRoot?.querySelector('.dropdown');
+    if (!dropdown) return;
+    if (!this.open) {
+      // Reset inline overrides so next open starts from CSS defaults
+      dropdown.style.top = dropdown.style.bottom = dropdown.style.left = dropdown.style.right = '';
+      return;
+    }
+    // After paint, check if the dropdown overflows the viewport and flip if needed
+    requestAnimationFrame(() => {
+      const rect = dropdown.getBoundingClientRect();
+      if (rect.bottom > window.innerHeight) {
+        dropdown.style.top = 'auto';
+        dropdown.style.bottom = 'calc(100% + 4px)';
+      }
+      if (rect.left < 0) {
+        dropdown.style.right = 'auto';
+        dropdown.style.left = '0';
+      }
+    });
   }
 
   _toggle(e) {
@@ -110,15 +149,36 @@ export class WlaMenu extends LitElement {
     this.dispatchEvent(new CustomEvent('wla-menu-close', { bubbles: true, composed: true }));
   }
 
+  _onSlotChange(e) {
+    e.target.assignedElements().forEach(el => {
+      if (!el.hasAttribute('role')) el.setAttribute('role', 'menuitem');
+      if (el._wlaCleanup) el._wlaCleanup();
+      const onEnter = () => {
+        el.style.background = 'var(--color-surface-hover, #222)';
+        el.style.borderLeftColor = 'var(--color-info, #9fc1ff)';
+      };
+      const onLeave = () => {
+        el.style.background = '';
+        el.style.borderLeftColor = '';
+      };
+      el.addEventListener('mouseenter', onEnter);
+      el.addEventListener('mouseleave', onLeave);
+      el._wlaCleanup = () => {
+        el.removeEventListener('mouseenter', onEnter);
+        el.removeEventListener('mouseleave', onLeave);
+      };
+    });
+  }
+
   render() {
     return html`
-      <button class="trigger" part="trigger" aria-label=${this.label} aria-haspopup="true" aria-expanded=${this.open} @click=${this._toggle}>
+      <button class="trigger" part="trigger" aria-label=${this.label} aria-haspopup="menu" aria-expanded=${this.open} @click=${this._toggle}>
         <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
           <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
         </svg>
       </button>
-      <div class="dropdown" part="dropdown" @click=${this._onSlotClick}>
-        <slot></slot>
+      <div class="dropdown" part="dropdown" role="menu" aria-orientation="vertical" @click=${this._onSlotClick}>
+        <slot @slotchange=${this._onSlotChange}></slot>
       </div>
     `;
   }

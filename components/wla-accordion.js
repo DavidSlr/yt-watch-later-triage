@@ -39,6 +39,7 @@ export class WlaAccordion extends LitElement {
       transition: background var(--transition-fast, 0.12s), color var(--transition-fast, 0.12s);
     }
     button:hover { background: var(--color-surface-hover, #222); color: var(--color-text, #e8e8e8); }
+    button:focus-visible { outline: 2px solid var(--color-info, #9fc1ff); outline-offset: -2px; }
     :host([open]) button { color: var(--color-text, #e8e8e8); }
 
     /* Inside wla-accordion-group the group renders its own sticky headers */

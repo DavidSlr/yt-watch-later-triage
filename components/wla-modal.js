@@ -18,6 +18,24 @@ export class WlaModal extends LitElement {
     super();
     this.open = false;
     this.heading = '';
+    this._onKeyDown = this._onKeyDown.bind(this);
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    document.addEventListener('keydown', this._onKeyDown);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener('keydown', this._onKeyDown);
+  }
+
+  _onKeyDown(e) {
+    if (e.key === 'Escape' && this.open) {
+      e.stopPropagation();
+      this._close();
+    }
   }
 
   static styles = css`
@@ -75,6 +93,10 @@ export class WlaModal extends LitElement {
       transition: color var(--transition-fast, 0.12s);
     }
     button.close:hover { color: var(--color-text, #e8e8e8); }
+    button.close:focus-visible {
+      outline: 2px solid var(--color-info, #9fc1ff);
+      outline-offset: 2px;
+    }
 
     .body {
       flex: 1;

@@ -94,6 +94,11 @@ export class WlaQueueCard extends LitElement {
     }
     article:hover button.remove { opacity: 1; }
     button.remove:hover { background: rgba(180,0,0,0.9); }
+    button.remove:focus-visible {
+      opacity: 1;
+      outline: 2px solid var(--color-info, #9fc1ff);
+      outline-offset: 2px;
+    }
 
     .body {
       padding: 5px 8px 6px;

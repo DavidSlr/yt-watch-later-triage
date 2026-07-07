@@ -65,6 +65,10 @@ export class WlaFormField extends LitElement {
       outline: none;
       border-color: var(--color-border-focus, #4a5a75);
     }
+    input:focus-visible {
+      outline: 2px solid var(--color-info, #9fc1ff);
+      outline-offset: 0;
+    }
     input::placeholder { color: var(--color-text-disabled, #555); }
 
     input.has-toggle { padding-right: 36px; }
@@ -101,6 +105,10 @@ export class WlaFormField extends LitElement {
       border-radius: var(--radius-sm, 4px);
     }
     .toggle:hover { color: var(--color-text-muted, #aaa); }
+    .toggle:focus-visible {
+      outline: 2px solid var(--color-info, #9fc1ff);
+      outline-offset: 2px;
+    }
 
     .hint {
       margin-top: var(--space-1, 4px);

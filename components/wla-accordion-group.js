@@ -60,6 +60,7 @@ export class WlaAccordionGroup extends LitElement {
       transition: background var(--transition-fast, 0.12s), color var(--transition-fast, 0.12s);
     }
     .header:hover { background: var(--color-surface-hover, #222); color: var(--color-text, #e8e8e8); }
+    .header:focus-visible { outline: 2px solid var(--color-info, #9fc1ff); outline-offset: -2px; }
     .header.open  { color: var(--color-text, #e8e8e8); }
 
     .header-title { flex: 1; }
