@@ -1,0 +1,92 @@
+/* ================================================================== */
+/* WLA Design Tokens                                                    */
+/* Single source of truth — imported by Storybook preview and          */
+/* pages/watchlater.css. Synced to Figma Variables via MCP.            */
+/* ================================================================== */
+:root {
+  /* ── Colors ───────────────────────────────────────────────────── */
+  --color-bg:             #0f0f0f;
+  --color-surface:        #1a1a1a;
+  --color-surface-hover:  #222222;
+  --color-surface-raised: #242424;
+  --color-border:         #2e2e2e;
+  --color-border-focus:   #4a5a75;
+  --color-text:           #e8e8e8;
+  --color-text-muted:     #aaaaaa;
+  --color-text-disabled:  #555555;
+  --color-accent:         #ff0000;
+  --color-accent-hover:   #cc0000;
+
+  /* Status */
+  --color-success:        #2d7a2d;
+  --color-success-bg:     #e6f4e6;
+  --color-warning:        #a05c00;
+  --color-warning-bg:     #fff3e0;
+  --color-error:          #b00020;
+  --color-error-bg:       #fce4e4;
+  --color-info:           #9fc1ff;
+
+  /* Sentiment */
+  --color-sentiment-positive: #4ade80;
+  --color-sentiment-negative: #f87171;
+  --color-sentiment-neutral:  var(--color-text-disabled);
+
+  /* ── Typography ───────────────────────────────────────────────── */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                 'Helvetica Neue', Arial, sans-serif;
+
+  --font-size-sm:   0.75rem;    /* 12px */
+  --font-size-base: 0.875rem;   /* 14px */
+  --font-size-lg:   1.0625rem;  /* 17px */
+  --font-size-xl:   1.25rem;    /* 20px */
+
+  /* Semantic text-size roles — use these when the role matters more than the step */
+  --text-caption-size: var(--font-size-sm);   /* timestamps, badges, meta */
+  --text-label-size:   var(--font-size-base); /* form labels, tabs, section headings */
+  --text-body-size:    var(--font-size-base); /* body copy, inputs, buttons */
+  --text-heading-size: var(--font-size-lg);   /* panel / modal headings */
+  --text-title-size:   var(--font-size-xl);   /* page / extension title */
+
+  --font-weight-normal:   400;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  --line-height-tight:   1.25;
+  --line-height-base:    1.45;
+  --line-height-relaxed: 1.6;
+
+  /* ── Spacing ──────────────────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* ── Radius ───────────────────────────────────────────────────── */
+  --radius-sm:   4px;
+  --radius:      8px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ──────────────────────────────────────────────────── */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+
+  /* ── Transitions ──────────────────────────────────────────────── */
+  --transition-fast: 0.12s ease;
+  --transition-base: 0.2s ease;
+
+  /* ── Layout ───────────────────────────────────────────────────── */
+  --header-h: 56px;
+  --queue-h:  260px;
+
+  /* ── Backward-compat aliases (used by watchlater.css) ─────────── */
+  --bg:            var(--color-bg);
+  --surface:       var(--color-surface);
+  --surface-hover: var(--color-surface-hover);
+  --border:        var(--color-border);
+  --text:          var(--color-text);
+  --text-muted:    var(--color-text-muted);
+  --accent:        var(--color-accent);
+  --accent-hover:  var(--color-accent-hover);
+}

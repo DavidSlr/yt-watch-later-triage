@@ -1,0 +1,18 @@
+{
+  "name": "wla-design-system",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web component design system for YT Watch Later Assistant",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build -o storybook-static"
+  },
+  "dependencies": {
+    "lit": "^3.2.0"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.4.0",
+    "@storybook/web-components-vite": "^8.4.0",
+    "storybook": "^8.4.0"
+  }
+}

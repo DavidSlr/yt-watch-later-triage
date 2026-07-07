@@ -2,3 +2,7 @@ prompts.md
 .claude/settings.local.json
 screenshots
 .vscode/
+
+node_modules/
+storybook-static/
+package-lock.json

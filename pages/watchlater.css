@@ -1,27 +1,15 @@
+@import '../tokens/tokens.css';
+
 /* ------------------------------------------------------------------ */
 /* Reset & base                                                         */
 /* ------------------------------------------------------------------ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 [hidden] { display: none !important; }
 
-:root {
-  --bg:           #0f0f0f;
-  --surface:      #1a1a1a;
-  --surface-hover:#222;
-  --border:       #2e2e2e;
-  --text:         #e8e8e8;
-  --text-muted:   #aaa;
-  --accent:       #ff0000;
-  --accent-hover: #cc0000;
-  --radius:       8px;
-  --header-h:     56px;
-  --queue-h:      260px;
-}
-
 html, body { height: 100%; overflow: hidden; }
 
 /* Base font size — all other sizes are rem-scaled from this */
-html { font-size: 16px; }
+html { font-size: 16px; font-family: var(--font-family); -webkit-font-smoothing: antialiased; }
 
 body {
   background: var(--bg);
@@ -1061,8 +1049,8 @@ h1 {
 .theme-list { display: flex; flex-direction: column; gap: 10px; }
 .theme-item { font-size: 0.875rem; line-height: 1.45; color: var(--text-muted); }
 .theme-tone { font-weight: 700; margin-right: 6px; }
-.theme-tone.positive { color: #4ade80; }
-.theme-tone.negative { color: #f87171; }
+.theme-tone.positive { color: var(--color-sentiment-positive); }
+.theme-tone.negative { color: var(--color-sentiment-negative); }
 .theme-quote {
   display: block;
   margin: 4px 0 0 14px;
