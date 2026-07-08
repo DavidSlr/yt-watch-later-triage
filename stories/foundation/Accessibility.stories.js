@@ -207,16 +207,6 @@ const FINDINGS = [
     fix: '—',
   },
 
-  // ── wla-settings-section ───────────────────────────────────────────────────
-  {
-    component: 'wla-settings-section',
-    story: null,
-    criterion: '1.3.1',
-    status: 'pass',
-    finding: 'Semantic <fieldset> + <legend>.',
-    fix: '—',
-  },
-
   // ── wla-spinner ────────────────────────────────────────────────────────────
   {
     component: 'wla-spinner',
