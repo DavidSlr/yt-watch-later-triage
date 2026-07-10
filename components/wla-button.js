@@ -58,7 +58,7 @@ export class WlaButton extends LitElement {
     :host([variant='primary']) button,
     :host([variant='primary']) a {
       background: var(--color-accent-solid, #1b7e74);
-      color: #fff;
+      color: var(--color-text-on-accent, #fff);
     }
     :host([variant='primary']) button:hover,
     :host([variant='primary']) a:hover {

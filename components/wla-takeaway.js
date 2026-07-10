@@ -1,4 +1,5 @@
 import { LitElement, html, css } from 'lit';
+import './wla-chip.js';
 
 /**
  * Single takeaway row: optional timestamp chip → body text → inline tag.
@@ -58,7 +59,7 @@ export class WlaTakeaway extends LitElement {
     /* Hover on the chip directly OR on the parent host */
     .ts-chip:hover,
     :host(:hover) .ts-chip {
-      background: rgba(40, 173, 160, 0.22);
+      background: var(--color-accent-subtle-hover, rgba(40, 173, 160, 0.22));
       color: var(--color-accent-hover, #3dccbe);
     }
     .ts-chip:focus-visible {
@@ -85,19 +86,8 @@ export class WlaTakeaway extends LitElement {
     /* Body text — inline so the tag flows naturally after the last word */
     .body { flex: 1; }
 
-    /* Worth watching tag — inline-block so it wraps with text */
-    .tag {
-      display: inline-block;
-      margin-left: 0;
-      vertical-align: middle;
-      font-size: var(--font-size-sm, 0.75rem);
-      font-weight: var(--font-weight-semibold, 600);
-      padding: 2px 7px;
-      border-radius: var(--radius-sm, 4px);
-      background: rgba(212, 150, 30, 0.15);
-      color: #d4963a;
-      white-space: nowrap;
-    }
+    /* Worth watching chip — sits inline after the body text */
+    wla-chip { vertical-align: middle; margin-left: 4px; }
   `;
 
   _fmt(sec) {
@@ -129,7 +119,7 @@ export class WlaTakeaway extends LitElement {
       </button>` : '';
 
     const tag = this.label === 'worth watching' ? html`
-      <span class="tag" part="tag">${this.label}</span>` : '';
+      <wla-chip state="warning" value="worth watching" part="tag"></wla-chip>` : '';
 
     return html`
       ${chip}

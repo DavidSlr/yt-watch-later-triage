@@ -235,21 +235,21 @@ const FINDINGS = [
     fix: '—',
   },
 
-  // ── wla-timestamp ──────────────────────────────────────────────────────────
+  // ── wla-takeaway ───────────────────────────────────────────────────────────
   {
-    component: 'wla-timestamp',
-    story: 'components-timestampitem--default',
+    component: 'wla-takeaway',
+    story: 'components-takeaway-item--simple',
     criterion: '1.4.3',
-    status: 'warn',
-    finding: 'Button text #ff6b6b on rgba(255,80,80,0.12) blended over dark surface → approx 2.4:1. 0.75rem / 12px is not large text; needs 4.5:1.',
-    fix: 'Use a brighter timestamp text (#ff9999 or white) or a darker background, or increase font size to ≥18.67px bold to qualify as large text (3:1 threshold).',
+    status: 'pass',
+    finding: 'Timestamp chip: teal #28ada0 on rgba(40,173,160,0.08) over dark surface → approx 4.7:1 at 14px semibold. Passes AA.',
+    fix: '—',
   },
   {
-    component: 'wla-timestamp',
-    story: 'components-timestampitem--default',
+    component: 'wla-takeaway',
+    story: 'components-takeaway-item--simple',
     criterion: '4.1.2',
     status: 'pass',
-    finding: 'Semantic <button>; icon is aria-hidden; click event dispatches with videoId + seconds detail.',
+    finding: 'Timestamp chip is a semantic <button>; icon is aria-hidden; fires wla-seek with seconds detail; host acts as an interactive row with pointer cursor.',
     fix: '—',
   },
 
@@ -273,15 +273,6 @@ const FINDINGS = [
     fix: '—',
   },
 
-  // ── wla-badge ──────────────────────────────────────────────────────────────
-  {
-    component: 'wla-badge',
-    story: null,
-    criterion: '1.4.3',
-    status: 'pass',
-    finding: 'All states (online, warning, offline, error) pass contrast on their respective backgrounds.',
-    fix: '—',
-  },
 ];
 
 // ── Rendering helpers ─────────────────────────────────────────────────────────

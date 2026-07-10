@@ -38,7 +38,7 @@ export class WlaQueueCard extends LitElement {
       width: 100%;
       height: 100%;
       border: 1px solid var(--color-border, #2e2e2e);
-      border-radius: var(--radius-sm, 6px);
+      border-radius: var(--radius-sm, 4px);
       background: var(--color-surface, #1a1a1a);
       overflow: hidden;
       cursor: pointer;
@@ -47,7 +47,7 @@ export class WlaQueueCard extends LitElement {
       transition: border-color var(--transition-fast, 0.12s),
                   background var(--transition-fast, 0.12s);
     }
-    article:hover  { border-color: #444; background: var(--color-surface-hover, #222); }
+    article:hover  { border-color: var(--color-border-hover, #444); background: var(--color-surface-hover, #222); }
     :host([active]) article {
       border-color: var(--color-accent, #28ada0);
       background: var(--color-accent-subtle, rgba(40,173,160,0.08));
@@ -75,7 +75,7 @@ export class WlaQueueCard extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      color: var(--color-text-on-accent, #fff);
       pointer-events: none;
     }
 
@@ -112,7 +112,7 @@ export class WlaQueueCard extends LitElement {
       z-index: 1;
     }
     article:hover button.remove { opacity: 1; }
-    button.remove:hover { background: rgba(229,72,77,0.9); }
+    button.remove:hover { background: var(--color-critical-ghost-hover, rgba(229,72,77,0.9)); }
     button.remove:focus-visible {
       opacity: 1;
       outline: 2px solid var(--color-info, #9fc1ff);

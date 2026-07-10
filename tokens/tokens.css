@@ -10,6 +10,7 @@
   --color-surface-hover:  #222222;
   --color-surface-raised: #242424;
   --color-border:         #2e2e2e;
+  --color-border-hover:   #444444;
   --color-border-focus:   #4a5a75;
   --color-text:           #e8e8e8;
   --color-text-muted:     #aaaaaa;
@@ -21,21 +22,19 @@
   --color-accent-solid-hover:  #176d65;
   --color-accent-solid-active: #10564f;
   --color-accent-subtle:       rgba(40, 173, 160, 0.08);
+  --color-accent-subtle-hover: rgba(40, 173, 160, 0.22);
+  --color-text-on-accent:      #ffffff;
 
   /* Status */
-  --color-success:        #2d7a2d;
-  --color-success-bg:     #e6f4e6;
-  --color-warning:        #a05c00;
-  --color-warning-bg:     #fff3e0;
-  --color-critical:       #e5484d;
-  --color-critical-hover: #c93f43;
-  --color-critical-bg:    #2e1314;
-  --color-info:           #9fc1ff;
-
-  /* Sentiment */
-  --color-sentiment-positive: #4ade80;
-  --color-sentiment-negative: #f87171;
-  --color-sentiment-neutral:  var(--color-text-disabled);
+  --color-success:              var(--color-accent);
+  --color-success-bg:           var(--color-accent-subtle);
+  --color-warning:              #d4963a;
+  --color-warning-bg:           rgba(212, 150, 30, 0.15);
+  --color-critical:             #e5484d;
+  --color-critical-hover:       #c93f43;
+  --color-critical-bg:          #2e1314;
+  --color-critical-ghost-hover: rgba(229, 72, 77, 0.9);
+  --color-info:                 #9fc1ff;
 
   /* ── Typography ───────────────────────────────────────────────── */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,

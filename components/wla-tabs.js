@@ -25,7 +25,7 @@ export class WlaTabs extends LitElement {
     .tab-bar {
       display: flex;
       border-bottom: 1px solid var(--color-border, #2e2e2e);
-      padding: 0 var(--space-4, 18px);
+      padding: 0 var(--space-4, 16px);
       gap: var(--space-1, 4px);
       flex-shrink: 0;
     }
@@ -36,7 +36,7 @@ export class WlaTabs extends LitElement {
       border-bottom: 2px solid transparent;
       color: var(--color-text-muted, #aaa);
       font-size: var(--font-size-base, 0.875rem);
-      font-weight: 500;
+      font-weight: var(--font-weight-semibold, 600);
       font-family: inherit;
       padding: 8px 12px;
       cursor: pointer;
@@ -64,7 +64,7 @@ export class WlaTabs extends LitElement {
       display: none;
       height: 100%;
       overflow: auto;
-      padding: var(--space-3, 14px) var(--space-4, 18px);
+      padding: var(--space-3, 12px) var(--space-4, 16px);
     }
     ::slotted(.active) { display: block; }
   `;

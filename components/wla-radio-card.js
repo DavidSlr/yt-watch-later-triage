@@ -45,7 +45,7 @@ export class WlaRadioCard extends LitElement {
       transition: border-color var(--transition-fast, 0.12s),
                   background var(--transition-fast, 0.12s);
     }
-    label:hover { border-color: #444; background: var(--color-surface-hover, #222); }
+    label:hover { border-color: var(--color-border-hover, #444); background: var(--color-surface-hover, #222); }
     label:focus-within {
       outline: 2px solid var(--color-info, #9fc1ff);
       outline-offset: 2px;

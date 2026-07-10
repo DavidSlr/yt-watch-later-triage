@@ -22,7 +22,7 @@ export class WlaSection extends LitElement {
     fieldset {
       border: 1px solid var(--color-border, #2e2e2e);
       border-radius: var(--radius, 8px);
-      padding: 0 var(--space-3, 14px) var(--space-3, 14px);
+      padding: 0 var(--space-3, 12px) var(--space-3, 12px);
       margin: 0;
       display: flex;
       flex-direction: column;

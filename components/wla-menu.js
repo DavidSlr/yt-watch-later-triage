@@ -54,7 +54,7 @@ export class WlaMenu extends LitElement {
       z-index: 20;
       background: var(--color-surface, #1a1a1a);
       border: 1px solid var(--color-border, #2e2e2e);
-      border-radius: var(--radius-sm, 6px);
+      border-radius: var(--radius-sm, 4px);
       box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,0.5));
       min-width: 160px;
       padding: var(--space-1, 4px) 0;
