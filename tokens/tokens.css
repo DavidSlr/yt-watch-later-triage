@@ -14,16 +14,22 @@
   --color-text:           #e8e8e8;
   --color-text-muted:     #aaaaaa;
   --color-text-disabled:  #555555;
-  --color-accent:         #ff0000;
-  --color-accent-hover:   #cc0000;
+  --color-accent:              #28ada0;
+  --color-accent-hover:        #3dccbe;
+  --color-accent-active:       #1c877d;
+  --color-accent-solid:        #1b7e74;
+  --color-accent-solid-hover:  #176d65;
+  --color-accent-solid-active: #10564f;
+  --color-accent-subtle:       rgba(40, 173, 160, 0.08);
 
   /* Status */
   --color-success:        #2d7a2d;
   --color-success-bg:     #e6f4e6;
   --color-warning:        #a05c00;
   --color-warning-bg:     #fff3e0;
-  --color-error:          #b00020;
-  --color-error-bg:       #fce4e4;
+  --color-critical:       #e5484d;
+  --color-critical-hover: #c93f43;
+  --color-critical-bg:    #2e1314;
   --color-info:           #9fc1ff;
 
   /* Sentiment */
@@ -87,6 +93,6 @@
   --border:        var(--color-border);
   --text:          var(--color-text);
   --text-muted:    var(--color-text-muted);
-  --accent:        var(--color-accent);
-  --accent-hover:  var(--color-accent-hover);
+  --accent:        var(--color-accent-solid);
+  --accent-hover:  var(--color-accent-solid-hover);
 }

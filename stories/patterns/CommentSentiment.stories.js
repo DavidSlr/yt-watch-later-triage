@@ -14,24 +14,24 @@ export default {
 
 const themeItem = ({ tone, theme, quote }) => html`
   <div style="
-    font-size: var(--font-size-base, 0.875rem);
-    line-height: var(--line-height-base, 1.45);
-    color: var(--color-text-muted, #aaa);
+    border-left: 3px solid ${tone === 'positive' ? 'var(--color-accent, #28ada0)' : 'var(--color-critical, #e5484d)'};
+    padding: 2px 0 2px var(--space-3, 12px);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   ">
     <span style="
-      font-weight: var(--font-weight-bold, 700);
-      margin-right: 6px;
-      color: ${tone === 'positive' ? '#4ade80' : '#f87171'};
-    ">${tone === 'positive' ? '+' : '−'}</span>${theme}
+      font-size: var(--font-size-base, 0.875rem);
+      font-weight: var(--font-weight-semibold, 600);
+      color: var(--color-text, #e8e8e8);
+      line-height: var(--line-height-base, 1.45);
+    "><span style="color:${tone === 'positive' ? 'var(--color-accent,#28ada0)' : 'var(--color-critical,#e5484d)'}; margin-right:4px; font-weight:var(--font-weight-bold,700)">${tone === 'positive' ? '+' : '−'}</span>${theme}</span>
     ${quote ? html`
       <span style="
-        display: block;
-        margin: 4px 0 0 14px;
-        font-style: italic;
-        color: #888;
         font-size: var(--font-size-sm, 0.75rem);
-        border-left: 2px solid var(--color-border, #2e2e2e);
-        padding-left: 8px;
+        font-style: italic;
+        color: var(--color-text-muted, #aaa);
+        line-height: var(--line-height-base, 1.45);
       ">"${quote}"</span>
     ` : ''}
   </div>
@@ -47,7 +47,7 @@ const block = ({ positive, neutral, negative, themes }) => html`
       negative=${negative}
       style="margin-bottom:16px"
     ></wla-sentiment-bar>
-    <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;flex-direction:column;gap:var(--space-3,12px)">
       ${themes.map(themeItem)}
     </div>
   </div>

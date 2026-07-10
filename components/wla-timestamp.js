@@ -28,8 +28,8 @@ export class WlaTimestamp extends LitElement {
       padding: 2px 8px;
       border: none;
       border-radius: var(--radius-sm, 4px);
-      background: rgba(255, 80, 80, 0.12);
-      color: #ff6b6b;
+      background: var(--color-accent-subtle, rgba(40,173,160,0.08));
+      color: var(--color-accent, #28ada0);
       font-size: var(--font-size-sm, 0.75rem);
       font-weight: var(--font-weight-semibold, 600);
       font-family: inherit;
@@ -41,8 +41,8 @@ export class WlaTimestamp extends LitElement {
     }
 
     button:hover {
-      background: rgba(255, 80, 80, 0.25);
-      color: #ff8e8e;
+      background: rgba(40, 173, 160, 0.22);
+      color: var(--color-accent-hover, #3dccbe);
     }
     button:focus-visible {
       outline: 2px solid var(--color-info, #9fc1ff);

@@ -34,7 +34,7 @@ export class WlaBadge extends LitElement {
 
     :host([state='online']) span  { color: var(--color-success, #2d7a2d); background: var(--color-success-bg, #e6f4e6); }
     :host([state='offline']) span { color: var(--color-warning, #a05c00); background: var(--color-warning-bg, #fff3e0); }
-    :host([state='error']) span   { color: var(--color-error, #b00020);   background: var(--color-error-bg, #fce4e4); }
+    :host([state='error']) span   { color: var(--color-critical, #e5484d); background: var(--color-critical-bg, #2e1314); }
   `;
 
   render() {

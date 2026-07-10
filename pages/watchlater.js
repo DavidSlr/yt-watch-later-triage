@@ -505,11 +505,13 @@ function renderAnalysis(data, transcriptStatus) {
       const tsChip = (t.ts != null)
         ? `<button class="takeaway-ts" data-ts="${t.ts}">${fmtTs(t.ts)}</button>`
         : "";
+      const labelChip = (t.label === "worth watching")
+        ? `<span class="takeaway-label worth-watching">${escHtml(t.label)}</span>`
+        : "";
       return `
       <div class="takeaway-item">
-        <span class="takeaway-label ${t.label === "worth watching" ? "worth-watching" : "simple"}">${escHtml(t.label)}</span>
-        <span class="takeaway-point">${escHtml(t.point)}</span>
         ${tsChip}
+        <span class="takeaway-point">${escHtml(t.point)}${labelChip ? ` ${labelChip}` : ""}</span>
       </div>`;
     }).join("");
     aiContent("takeaways").innerHTML = `<div class="takeaways-list">${items || `<p class="placeholder-note">No key takeaways identified.</p>`}</div>`;
@@ -531,11 +533,16 @@ function renderAnalysis(data, transcriptStatus) {
     aiContent("sentiment").innerHTML = `<p class="placeholder-note">No comments available for this video.</p>`;
     return;
   }
-  const themes = (s.themes ?? []).map(t => `
-    <div class="theme-item">
-      <span class="theme-tone ${t.tone}">${t.tone === "negative" ? "−" : "+"}</span>${escHtml(t.theme)}
-      ${t.quote ? `<span class="theme-quote">“${escHtml(t.quote)}”</span>` : ""}
-    </div>`).join("");
+  const themes = (s.themes ?? []).map(t => {
+    const sign = t.tone === 'positive'
+      ? `<span class=”theme-sign theme-sign-pos”>+</span>`
+      : `<span class=”theme-sign theme-sign-neg”>&#8722;</span>`;
+    return `
+    <div class=”theme-item ${t.tone}”>
+      <span class=”theme-title”>${sign}${escHtml(t.theme)}</span>
+      ${t.quote ? `<span class=”theme-quote”>”${escHtml(t.quote)}”</span>` : “”}
+    </div>`;
+  }).join(“”);
   aiContent("sentiment").innerHTML = `
     <div class="sentiment-mini">
       <div class="seg-pos" style="width:${Number(s.positive) || 0}%"></div>

@@ -47,7 +47,7 @@ export class WlaTabs extends LitElement {
     button:hover:not(.active) { color: var(--color-text, #e8e8e8); }
     button.active {
       color: var(--color-text, #e8e8e8);
-      border-bottom-color: var(--color-info, #9fc1ff);
+      border-bottom-color: var(--color-accent, #28ada0);
     }
     button:focus-visible {
       outline: 2px solid var(--color-info, #9fc1ff);

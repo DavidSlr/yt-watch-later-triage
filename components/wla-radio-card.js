@@ -50,7 +50,7 @@ export class WlaRadioCard extends LitElement {
       outline: 2px solid var(--color-info, #9fc1ff);
       outline-offset: 2px;
     }
-    :host([checked]) label { border-color: var(--color-accent, #ff0000); background: rgba(255,0,0,0.05); }
+    :host([checked]) label { border-color: var(--color-accent, #28ada0); background: var(--color-accent-subtle, rgba(40,173,160,0.08)); }
 
     input[type='radio'] {
       position: absolute;
@@ -76,13 +76,13 @@ export class WlaRadioCard extends LitElement {
       justify-content: center;
       transition: border-color var(--transition-fast, 0.12s);
     }
-    :host([checked]) .dot { border-color: var(--color-accent, #ff0000); }
+    :host([checked]) .dot { border-color: var(--color-accent, #28ada0); }
     :host([checked]) .dot::after {
       content: '';
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--color-accent, #ff0000);
+      background: var(--color-accent, #28ada0);
     }
 
     .text { flex: 1; min-width: 0; }

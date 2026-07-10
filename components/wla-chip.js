@@ -44,7 +44,7 @@ export class WlaChip extends LitElement {
 
     :host([state='success'])  .pill { background: var(--color-success-bg, #e6f4e6); color: var(--color-success, #2d7a2d);  border-color: transparent; }
     :host([state='warning'])  .pill { background: var(--color-warning-bg, #fff3e0); color: var(--color-warning, #a05c00);  border-color: transparent; }
-    :host([state='critical']) .pill { background: var(--color-error-bg,   #fce4e4); color: var(--color-error,   #b00020);  border-color: transparent; }
+    :host([state='critical']) .pill { background: var(--color-critical-bg, #2e1314); color: var(--color-critical, #e5484d); border-color: transparent; }
     :host([state='disabled']) .pill { background: var(--color-surface,    #1a1a1a); color: var(--color-text-disabled, #555); border-color: var(--color-border, #2e2e2e); opacity: 0.6; }
   `;
 

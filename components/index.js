@@ -11,3 +11,4 @@ export { WlaSection }       from './wla-section.js';
 export { WlaTabs }          from './wla-tabs.js';
 export { WlaMenu }          from './wla-menu.js';
 export { WlaTimestamp }     from './wla-timestamp.js';
+export { WlaTakeaway }     from './wla-takeaway.js';

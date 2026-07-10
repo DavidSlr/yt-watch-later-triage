@@ -36,9 +36,9 @@ export class WlaSentimentBar extends LitElement {
       min-width: 2px;
       transition: width var(--transition-base, 0.2s);
     }
-    .seg-pos { background: var(--color-sentiment-positive, #4ade80); }
+    .seg-pos { background: var(--color-accent, #28ada0); }
     .seg-neu { background: var(--color-sentiment-neutral, #555); }
-    .seg-neg { background: var(--color-sentiment-negative, #f87171); }
+    .seg-neg { background: var(--color-critical, #e5484d); }
 
     .legend {
       display: flex;
@@ -53,9 +53,9 @@ export class WlaSentimentBar extends LitElement {
       border-radius: 50%;
       flex-shrink: 0;
     }
-    .dot-pos { background: var(--color-sentiment-positive, #4ade80); }
+    .dot-pos { background: var(--color-accent, #28ada0); }
     .dot-neu { background: var(--color-sentiment-neutral, #555); }
-    .dot-neg { background: var(--color-sentiment-negative, #f87171); }
+    .dot-neg { background: var(--color-critical, #e5484d); }
   `;
 
   render() {

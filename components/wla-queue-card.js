@@ -48,7 +48,11 @@ export class WlaQueueCard extends LitElement {
                   background var(--transition-fast, 0.12s);
     }
     article:hover  { border-color: #444; background: var(--color-surface-hover, #222); }
-    :host([active]) article { border-color: var(--color-accent, #ff0000); }
+    :host([active]) article {
+      border-color: var(--color-accent, #28ada0);
+      background: var(--color-accent-subtle, rgba(40,173,160,0.08));
+    }
+    :host([active]) .title { color: var(--color-accent, #28ada0); }
 
     .thumb {
       position: relative;
@@ -59,6 +63,21 @@ export class WlaQueueCard extends LitElement {
       flex-shrink: 0;
     }
     img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .play-indicator {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 26px;
+      height: 22px;
+      background: var(--color-accent, #28ada0);
+      border-radius: 0 0 5px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      pointer-events: none;
+    }
 
     .duration {
       position: absolute;
@@ -93,7 +112,7 @@ export class WlaQueueCard extends LitElement {
       z-index: 1;
     }
     article:hover button.remove { opacity: 1; }
-    button.remove:hover { background: rgba(180,0,0,0.9); }
+    button.remove:hover { background: rgba(229,72,77,0.9); }
     button.remove:focus-visible {
       opacity: 1;
       outline: 2px solid var(--color-info, #9fc1ff);
@@ -145,6 +164,7 @@ export class WlaQueueCard extends LitElement {
       <article part="card" @click=${this._select}>
         <div class="thumb" part="thumb">
           <img src=${this.thumbnail} alt="" loading="lazy" @error=${(e) => { e.target.style.display = 'none'; }} />
+          ${this.active ? html`<span class="play-indicator" aria-label="Now playing"><svg viewBox="0 0 24 24" fill="currentColor" width="9" height="9"><path d="M8 5v14l11-7z"/></svg></span>` : ''}
           ${this.duration ? html`<span class="duration">${this.duration}</span>` : ''}
           <button class="remove" aria-label="Remove from Watch Later" title="Remove from Watch Later" @click=${this._remove}>
             <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
