@@ -1,0 +1,11 @@
+import '../components/wla-button.js';
+import '../components/wla-spinner.js';
+import '../components/wla-chip.js';
+import '../components/wla-modal.js';
+import '../components/wla-accordion-group.js';
+import '../components/wla-form-field.js';
+import '../components/wla-radio-card.js';
+import '../components/wla-tabs.js';
+import '../components/wla-queue-card.js';
+import '../components/wla-menu.js';
+import '../components/wla-takeaway.js';

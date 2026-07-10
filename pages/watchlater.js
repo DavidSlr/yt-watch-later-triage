@@ -195,7 +195,7 @@ window.addEventListener("message", (e) => {
 
     if (code === 101 || code === 150) {
       // Video-level restriction — no strategy can fix this
-      showErrorBanner(`This video has embedding disabled by its owner. Use "Open on YouTube" to watch it.`);
+      showErrorBanner(`This video has embedding disabled by its owner. Use "Open" to watch it on YouTube.`);
     } else if ((code === 152 || code === 153) && retryEmbed()) {
       // Context-level rejection — silently try the next strategy
     } else {
@@ -399,16 +399,14 @@ function setAiPanelsNoKey() {
 }
 
 // ── Inspect modal (transcript + AI prompt viewer) ─────────────────────────────
-const inspectModal    = document.getElementById("inspect-modal");
-const inspectClose    = document.getElementById("inspect-close");
-const inspectTabBtns  = inspectModal.querySelectorAll(".inspect-tab-btn");
-const inspectPanels   = inspectModal.querySelectorAll(".inspect-panel");
+const inspectModal = document.getElementById("inspect-modal");
 
-inspectClose.addEventListener("click", () => { inspectModal.hidden = true; });
-inspectModal.addEventListener("click", e => { if (e.target === inspectModal) inspectModal.hidden = true; });
+inspectModal.addEventListener("wla-close", () => { inspectModal.open = false; });
 
 document.getElementById("inspect-copy").addEventListener("click", () => {
-  const pre = inspectModal.querySelector(".inspect-panel:not([hidden]) pre");
+  const inspectTabs = document.getElementById("inspect-tabs");
+  const activeSlot  = inspectTabs?.active ?? "transcript";
+  const pre = inspectModal.querySelector(`[slot="${activeSlot}"] pre`);
   navigator.clipboard.writeText(pre?.textContent ?? "").then(() => {
     const btn = document.getElementById("inspect-copy");
     const prev = btn.textContent;
@@ -417,23 +415,12 @@ document.getElementById("inspect-copy").addEventListener("click", () => {
   });
 });
 
-inspectTabBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
-    const target = btn.dataset.tab;
-    inspectTabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === target));
-    inspectPanels.forEach(p => p.hidden = p.dataset.panel !== target);
-  });
-});
-
 function showInspectBtn(videoId) {
   const menuBtn = document.getElementById("video-menu-btn");
   const inspectItem = document.getElementById("video-menu-inspect");
   if (!menuBtn || !inspectItem) return;
   menuBtn.hidden = false;
-  inspectItem.onclick = () => {
-    document.getElementById("video-menu-dropdown").hidden = true;
-    openInspectModal(videoId);
-  };
+  inspectItem.onclick = () => openInspectModal(videoId);
 }
 
 async function openInspectModal(videoId) {
@@ -459,11 +446,10 @@ async function openInspectModal(videoId) {
   document.getElementById("inspect-prompt").textContent =
     info?.prompt ?? "(prompt not cached — run analysis first)";
 
-  // Reset to transcript tab
-  inspectTabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === "transcript"));
-  inspectPanels.forEach(p => p.hidden = p.dataset.panel !== "transcript");
+  const inspectTabs = document.getElementById("inspect-tabs");
+  if (inspectTabs) inspectTabs.active = "transcript";
 
-  inspectModal.hidden = false;
+  inspectModal.open = true;
 }
 
 function setAiPanelsLoading() {
@@ -496,23 +482,10 @@ function renderAnalysis(data, transcriptStatus) {
   if (!data.takeaways) {
     aiContent("takeaways").innerHTML = `<p class="placeholder-note">No transcript available for this video.</p>`;
   } else {
-    const fmtTs = sec => {
-      const m = Math.floor(sec / 60);
-      const s = String(sec % 60).padStart(2, "0");
-      return `${m}:${s}`;
-    };
     const items = data.takeaways.map(t => {
-      const tsChip = (t.ts != null)
-        ? `<button class="takeaway-ts" data-ts="${t.ts}">${fmtTs(t.ts)}</button>`
-        : "";
-      const labelChip = (t.label === "worth watching")
-        ? `<span class="takeaway-label worth-watching">${escHtml(t.label)}</span>`
-        : "";
-      return `
-      <div class="takeaway-item">
-        ${tsChip}
-        <span class="takeaway-point">${escHtml(t.point)}${labelChip ? ` ${labelChip}` : ""}</span>
-      </div>`;
+      const tsAttr    = (t.ts != null) ? ` ts="${t.ts}"` : "";
+      const labelAttr = t.label ? ` label="${escAttr(t.label)}"` : "";
+      return `<wla-takeaway${tsAttr} point="${escAttr(t.point)}"${labelAttr}></wla-takeaway>`;
     }).join("");
     aiContent("takeaways").innerHTML = `<div class="takeaways-list">${items || `<p class="placeholder-note">No key takeaways identified.</p>`}</div>`;
   }
@@ -535,14 +508,14 @@ function renderAnalysis(data, transcriptStatus) {
   }
   const themes = (s.themes ?? []).map(t => {
     const sign = t.tone === 'positive'
-      ? `<span class=”theme-sign theme-sign-pos”>+</span>`
-      : `<span class=”theme-sign theme-sign-neg”>&#8722;</span>`;
+      ? `<span class="theme-sign theme-sign-pos">+</span>`
+      : `<span class="theme-sign theme-sign-neg">&#8722;</span>`;
     return `
-    <div class=”theme-item ${t.tone}”>
-      <span class=”theme-title”>${sign}${escHtml(t.theme)}</span>
-      ${t.quote ? `<span class=”theme-quote”>”${escHtml(t.quote)}”</span>` : “”}
+    <div class="theme-item ${t.tone}">
+      <span class="theme-title">${sign}${escHtml(t.theme)}</span>
+      ${t.quote ? `<span class="theme-quote">"${escHtml(t.quote)}"</span>` : ""}
     </div>`;
-  }).join(“”);
+  }).join("");
   aiContent("sentiment").innerHTML = `
     <div class="sentiment-mini">
       <div class="seg-pos" style="width:${Number(s.positive) || 0}%"></div>
@@ -593,17 +566,17 @@ async function initAiUi() {
     perProvider.gemini = { apiKey: all.gemini.apiKey, model: all.gemini.model };
     perProvider.claude  = { apiKey: all.claude.apiKey,  model: all.claude.model  };
     activeProvider = all.provider;
-    const radio = document.querySelector(`input[name="ai-provider"][value="${activeProvider}"]`);
-    if (radio) radio.checked = true;
+    document.querySelectorAll('wla-radio-card[name="ai-provider"]').forEach(card => {
+      card.checked = card.value === activeProvider;
+    });
     restoreForm(activeProvider);
     const { aiSettings } = await browser.storage.local.get("aiSettings");
     harvesterInput.value = aiSettings?.harvesterUrl || "";
     testResult.hidden = true;
-    modal.hidden = false;
-    keyInput.focus();
+    modal.open = true;
   }
 
-  const closeModal = () => { modal.hidden = true; };
+  const closeModal = () => { modal.open = false; };
 
   function allSettings() {
     flushForm();
@@ -615,21 +588,16 @@ async function initAiUi() {
     };
   }
 
-  document.querySelectorAll('input[name="ai-provider"]').forEach(radio => {
-    radio.addEventListener("change", e => {
-      flushForm();                    // save current fields before switching
-      activeProvider = e.target.value;
-      restoreForm(activeProvider);    // load the other provider's saved fields
+  document.querySelectorAll('wla-radio-card[name="ai-provider"]').forEach(card => {
+    card.addEventListener("wla-change", e => {
+      flushForm();
+      activeProvider = e.detail.value;
+      restoreForm(activeProvider);
     });
   });
 
   document.getElementById("settings-btn").addEventListener("click", openModal);
-  document.getElementById("settings-close").addEventListener("click", closeModal);
-  modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
-
-  document.getElementById("ai-key-toggle").addEventListener("click", () => {
-    keyInput.type = keyInput.type === "password" ? "text" : "password";
-  });
+  modal.addEventListener("wla-close", closeModal);
 
   document.getElementById("ai-save").addEventListener("click", async () => {
     await WLA_AI.saveAllProviderSettings(allSettings());
@@ -675,7 +643,8 @@ const btnKeep       = document.getElementById("btn-keep");
 const btnOpenYt     = document.getElementById("btn-open-yt");
 const infoTitle     = document.getElementById("info-title");
 const infoChannel   = document.getElementById("info-channel");
-const infoDuration  = document.getElementById("info-duration");
+const infoVideoDuration = document.getElementById("info-video-duration");
+const infoUploaded  = document.getElementById("info-uploaded");
 
 // ── Harvester health ping ─────────────────────────────────────────────────────
 async function pingHarvester() {
@@ -710,18 +679,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   btnRemoveNext.addEventListener("click", handleRemoveAndNext);
   btnKeep.addEventListener("click", handleKeep);
 
-  const videoMenuBtn = document.getElementById("video-menu-btn");
-  const videoMenuDropdown = document.getElementById("video-menu-dropdown");
-  videoMenuBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    videoMenuDropdown.hidden = !videoMenuDropdown.hidden;
-  });
-  document.addEventListener("click", (e) => {
-    if (!videoMenuDropdown.hidden && !videoMenuDropdown.contains(e.target)) {
-      videoMenuDropdown.hidden = true;
-    }
-  });
-
   const scrollQueue = (dir) => {
     queueScroll.scrollBy({ left: dir * Math.max(queueScroll.clientWidth * 0.8, 200), behavior: "smooth" });
   };
@@ -729,24 +686,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   queueNext.addEventListener("click", () => scrollQueue(1));
 
   const queueSection = document.getElementById("queue-section");
-  const queueCollapseBtn = document.getElementById("queue-collapse-btn");
   const queueCollapseToggle = document.getElementById("queue-collapse-toggle");
   if (localStorage.getItem("queue-collapsed") === "true") {
     queueSection.classList.add("collapsed");
     queueCollapseToggle.setAttribute("aria-expanded", "false");
   }
-  queueCollapseBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
+  const toggleQueueCollapse = () => {
     const collapsed = queueSection.classList.toggle("collapsed");
     queueCollapseToggle.setAttribute("aria-expanded", String(!collapsed));
     localStorage.setItem("queue-collapsed", String(collapsed));
+  };
+  // Clicking anywhere in the bar toggles collapse, except on its own
+  // interactive children (Refresh, prev/next) which handle their own clicks.
+  queueCollapseToggle.addEventListener("click", (e) => {
+    if (e.target.closest("wla-button, button, a")) return;
+    toggleQueueCollapse();
+  });
+  queueCollapseToggle.addEventListener("keydown", (e) => {
+    if ((e.key === "Enter" || e.key === " ") && !e.target.closest("wla-button, button, a")) {
+      e.preventDefault();
+      toggleQueueCollapse();
+    }
   });
 
-  // Seek the embedded player when a timestamp chip is clicked
-  aiContent("takeaways").addEventListener("click", e => {
-    const btn = e.target.closest(".takeaway-ts");
-    if (!btn) return;
-    seekPlayerTo(Number(btn.dataset.ts));
+  // Seek the player when a wla-takeaway timestamp is clicked
+  aiContent("takeaways").addEventListener("wla-seek", e => {
+    seekPlayerTo(e.detail.seconds);
   });
 
   const debugBtn = document.getElementById("debug-btn");
@@ -761,15 +726,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(() => { debugBtn.textContent = "⚠ Copy debug info"; }, 2000);
   });
 
-  // Accordion toggle
-  document.querySelectorAll(".acc-header").forEach(header => {
-    header.addEventListener("click", () => {
-      const body = document.getElementById("acc-" + header.dataset.acc);
-      const isOpen = header.classList.contains("open");
-      header.classList.toggle("open", !isOpen);
-      body.classList.toggle("open", !isOpen);
-    });
-  });
+  // Set up inspect tabs (wla-tabs requires tabs property set as JS object)
+  const inspectTabs = document.getElementById("inspect-tabs");
+  if (inspectTabs) {
+    inspectTabs.tabs = [
+      { id: "transcript", label: "Transcript" },
+      { id: "prompt",     label: "AI Prompt"  },
+    ];
+  }
 });
 
 // ── Load / reload playlist ────────────────────────────────────────────────────
@@ -835,9 +799,7 @@ function loadVideo(videoId) {
 
   currentVideoId = videoId;
   const menuBtn = document.getElementById("video-menu-btn");
-  if (menuBtn) { menuBtn.hidden = true; }
-  const dropdown = document.getElementById("video-menu-dropdown");
-  if (dropdown) { dropdown.hidden = true; }
+  if (menuBtn) { menuBtn.hidden = true; menuBtn.open = false; }
 
   // Load video — replacing src stops the previous video immediately.
   // enablejsapi lets us receive player events (incl. errors) via postMessage.
@@ -848,18 +810,19 @@ function loadVideo(videoId) {
   // Info panel
   infoTitle.textContent = video.title ?? "";
   infoChannel.textContent = video.channel ?? "";
-  infoDuration.textContent = [video.duration, video.uploadDate].filter(Boolean).join(" · ");
+  infoVideoDuration.textContent = video.duration ?? "";
+  infoUploaded.textContent = video.uploadDate ?? "";
 
   // Open-on-YT link
   btnOpenYt.href = `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
 
   // Queue active highlight
-  document.querySelectorAll(".queue-card").forEach(card => {
-    card.classList.toggle("active", card.dataset.videoId === videoId);
+  queueScroll.querySelectorAll("wla-queue-card").forEach(card => {
+    card.active = card.dataset.videoId === videoId;
   });
 
   // Scroll active card into view
-  const active = queueScroll.querySelector(".queue-card.active");
+  const active = queueScroll.querySelector("wla-queue-card[active]");
   if (active) active.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
 
   updateActionButtons();
@@ -883,11 +846,7 @@ async function handleRemoveAndNext() {
 
   btnRemoveNext.disabled = true;
   btnKeep.disabled = true;
-  btnRemoveNext.innerHTML = `
-    <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15" style="animation:spin .6s linear infinite">
-      <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-    </svg>
-    Removing…`;
+  btnRemoveNext.textContent = "Removing…";
 
   try {
     await sendMessage({
@@ -899,7 +858,7 @@ async function handleRemoveAndNext() {
 
     // Remove from state & queue DOM
     allVideos = allVideos.filter(v => v.videoId !== currentVideoId);
-    const card = queueScroll.querySelector(`.queue-card[data-video-id="${CSS.escape(currentVideoId)}"]`);
+    const card = queueScroll.querySelector(`wla-queue-card[data-video-id="${CSS.escape(currentVideoId)}"]`);
     if (card) card.remove();
 
     updateCount(allVideos.length);
@@ -920,11 +879,7 @@ async function handleRemoveAndNext() {
     showErrorBanner(`Could not remove video: ${err.message}`);
   } finally {
     btnRemoveNext.disabled = false;
-    btnRemoveNext.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-      </svg>
-      Remove &amp; Next`;
+    btnRemoveNext.textContent = "Remove & Next";
     updateActionButtons();
   }
 }
@@ -950,7 +905,7 @@ async function removeVideoById(videoId) {
     });
 
     allVideos = allVideos.filter(v => v.videoId !== videoId);
-    const card = queueScroll.querySelector(`.queue-card[data-video-id="${CSS.escape(videoId)}"]`);
+    const card = queueScroll.querySelector(`wla-queue-card[data-video-id="${CSS.escape(videoId)}"]`);
     if (card) card.remove();
 
     updateCount(allVideos.length);
@@ -988,34 +943,16 @@ function renderQueue(videos, append) {
 }
 
 function buildQueueCard(video) {
-  const card = document.createElement("div");
-  card.className = "queue-card";
+  const card = document.createElement("wla-queue-card");
   card.dataset.videoId = video.videoId;
+  card.thumbnail = video.thumbnail ?? "";
+  card.title     = video.title ?? "";
+  card.channel   = video.channel ?? "";
+  card.duration  = video.duration ?? "";
+  card.date      = video.uploadDate ?? "";
 
-  const metaText = [video.channel, video.uploadDate].filter(Boolean).join(" · ");
-  card.innerHTML = `
-    <div class="queue-thumb">
-      <img src="${escAttr(video.thumbnail)}" alt="" loading="lazy" />
-      ${video.duration ? `<span class="duration-badge">${escHtml(video.duration)}</span>` : ""}
-      <button class="queue-card-remove" aria-label="Remove from Watch Later" title="Remove from Watch Later">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-      </button>
-    </div>
-    <div class="queue-card-body">
-      <div class="queue-card-title" title="${escAttr(video.title)}">${escHtml(video.title)}</div>
-      <div class="queue-card-meta" title="${escAttr(metaText)}">${escHtml(metaText)}</div>
-    </div>
-  `;
-
-  const img = card.querySelector("img");
-  img.addEventListener("error", () => { img.style.display = "none"; });
-
-  card.addEventListener("click", () => loadVideo(video.videoId));
-
-  card.querySelector(".queue-card-remove").addEventListener("click", async (e) => {
-    e.stopPropagation();
-    await removeVideoById(video.videoId);
-  });
+  card.addEventListener("wla-select", () => loadVideo(video.videoId));
+  card.addEventListener("wla-remove", () => removeVideoById(video.videoId));
 
   return card;
 }
@@ -1082,7 +1019,7 @@ function showError(message) {
 }
 
 function updateCount(n) {
-  videoCount.textContent = `${n} video${n !== 1 ? "s" : ""}`;
+  videoCount.value  = `${n} video${n !== 1 ? "s" : ""}`;
   videoCount.hidden = false;
 }
 
@@ -1093,19 +1030,7 @@ function updateSyncStatus() {
 
 function setRefreshing(loading) {
   refreshBtn.disabled = loading;
-  if (loading) {
-    refreshBtn.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="animation:spin .8s linear infinite">
-        <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-      </svg>
-      Refreshing…`;
-  } else {
-    refreshBtn.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-      </svg>
-      Refresh`;
-  }
+  refreshBtn.textContent = loading ? "Refreshing…" : "Refresh";
 }
 
 // ── Persistent error banner ────────────────────────────────────────────────────

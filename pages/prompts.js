@@ -83,9 +83,10 @@ comment generally agrees with the video's message or not, rather than the commen
 1. Estimate the rough share of positive / neutral / critical comments as
    percentages (integers summing to 100). This is a brief headline figure.
 2. The main output: identify 2-4 general THEMES across the comments, each
-   marked "positive" or "critical". A theme is a recurring observation, not a
+   marked "positive" or "negative" (this is the per-theme "tone" field — use
+   these exact two values, not "critical"). A theme is a recurring observation, not a
    single opinion. For each theme give a short description (under 12 words).
-   Include a short representative "quote" (verbatim from a comment, max 15
+   Include a short representative "quote" (verbatim from a comment, max 30
    words) only when one genuinely illustrates the theme — otherwise null.
 If NO comments are provided, set the entire "sentiment" field to null.`,
   },

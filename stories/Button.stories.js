@@ -8,15 +8,16 @@ export default {
   parameters: { layout: 'padded' },
   argTypes: {
     variant:  { control: 'select', options: ['primary', 'secondary', 'link'] },
+    size:     { control: 'select', options: ['md', 'sm'] },
     disabled: { control: 'boolean' },
     icon:     { control: 'select', options: ['', 'refresh', 'settings', 'close', 'play', 'arrow-left', 'arrow-right'] },
-    label:    { control: 'text' },
+    text:     { control: 'text', description: 'Slotted button text (not a component prop)' },
   },
-  args: { label: 'Click me', disabled: false, icon: '' },
+  args: { text: 'Click me', variant: 'primary', size: 'md', disabled: false, icon: '' },
 };
 
-const btn = ({ variant, disabled, label, icon }) => html`
-  <wla-button variant=${variant} ?disabled=${disabled} icon=${icon ?? ''}>${label}</wla-button>
+const btn = ({ variant, size, disabled, text, icon }) => html`
+  <wla-button variant=${variant} size=${size} ?disabled=${disabled} icon=${icon ?? ''}>${text}</wla-button>
 `;
 
 export const Primary = {
@@ -30,25 +31,38 @@ export const Secondary = {
 };
 
 export const Link = {
-  args: { variant: 'link', label: 'Learn more' },
+  args: { variant: 'link', text: 'Learn more' },
   render: btn,
 };
 
 export const WithIcon = {
   name: 'With icon (left)',
-  args: { variant: 'primary', icon: 'refresh', label: 'Refresh' },
+  args: { variant: 'primary', icon: 'refresh', text: 'Refresh' },
   render: btn,
 };
 
 export const IconOnly = {
   name: 'Icon only',
-  args: { variant: 'secondary', icon: 'settings', label: '' },
-  render: btn,
+  render: () => html`
+    <wla-button variant="secondary" icon="settings" icon-only label="AI settings"></wla-button>
+  `,
 };
 
 export const Disabled = {
-  args: { variant: 'primary', disabled: true, icon: 'refresh', label: 'Refresh' },
+  args: { variant: 'primary', disabled: true, icon: 'refresh', text: 'Refresh' },
   render: btn,
+};
+
+export const Sizes = {
+  name: 'Sizes (md vs sm)',
+  render: () => html`
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+      <wla-button variant="secondary" icon="refresh">Refresh (md)</wla-button>
+      <wla-button variant="secondary" size="sm" icon="refresh">Refresh (sm)</wla-button>
+      <wla-button variant="secondary" icon="arrow-left" icon-only label="Previous"></wla-button>
+      <wla-button variant="secondary" size="sm" icon="arrow-left" icon-only label="Previous"></wla-button>
+    </div>
+  `,
 };
 
 export const AllVariants = {
@@ -56,7 +70,7 @@ export const AllVariants = {
   render: () => html`
     <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
       <wla-button variant="primary"   icon="refresh">Refresh</wla-button>
-      <wla-button variant="secondary" icon="settings"></wla-button>
+      <wla-button variant="secondary" icon="settings" icon-only label="Settings"></wla-button>
       <wla-button variant="secondary" icon="arrow-right">Next</wla-button>
       <wla-button variant="link">Learn more</wla-button>
       <wla-button variant="primary"   disabled icon="refresh">Refresh</wla-button>

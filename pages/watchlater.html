@@ -22,124 +22,67 @@
         </defs>
       </svg>
       <h1>Watch Later</h1>
-      <span id="video-count" class="count-badge" hidden></span>
+      <wla-chip id="video-count" hidden></wla-chip>
     </div>
     <div class="header-right">
-      <button id="debug-btn" class="btn-secondary debug-btn" hidden title="Copy debug data and recent errors to the clipboard">
+      <button id="debug-btn" class="debug-btn" hidden title="Copy debug data and recent errors to the clipboard">
         ⚠ Copy debug info
       </button>
-      <span id="sync-status"></span>
-      <button id="refresh-btn" class="btn-primary" title="Reload your Watch Later list">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-        </svg>
-        Refresh
-      </button>
-      <button id="settings-btn" class="btn-secondary settings-btn" title="AI settings">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.484.484 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.61 3.61 0 0 1 8.4 12c0-1.98 1.62-3.6 3.6-3.6s3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
-        </svg>
-      </button>
+      <wla-button id="settings-btn" variant="secondary" icon="settings" icon-only label="AI settings" title="AI settings"></wla-button>
     </div>
   </header>
 
   <!-- AI settings modal -->
-  <div id="settings-modal" class="modal-overlay" hidden>
-    <div class="modal">
-      <div class="modal-header">
-        <h2>AI Settings</h2>
-        <button id="settings-close" class="modal-close" aria-label="Close">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </div>
-      <div class="modal-body">
+  <wla-modal id="settings-modal" heading="AI Settings">
 
-        <!-- Provider radio cards -->
-        <div class="provider-radios">
-          <label class="provider-radio-card">
-            <input type="radio" name="ai-provider" value="gemini" checked />
-            <div class="provider-radio-info">
-              <span class="provider-radio-name">Google Gemini</span>
-              <span class="provider-radio-sub">Free tier · ~250 req/day</span>
-            </div>
-          </label>
-          <label class="provider-radio-card">
-            <input type="radio" name="ai-provider" value="claude" />
-            <div class="provider-radio-info">
-              <span class="provider-radio-name">Anthropic Claude</span>
-              <span class="provider-radio-sub">Paid · Haiku ≈ $0.001–0.01/video</span>
-            </div>
-          </label>
-        </div>
-
-        <!-- Provider-specific config -->
-        <fieldset class="provider-config">
-          <legend id="provider-config-label" class="provider-config-label">Google Gemini</legend>
-
-          <label class="form-label" for="ai-key">API key</label>
-          <div class="form-key-row">
-            <input id="ai-key" class="form-input" type="password" placeholder="Paste your API key" autocomplete="off" />
-            <button id="ai-key-toggle" class="btn-secondary" type="button" title="Show/hide key">👁</button>
-          </div>
-          <p id="ai-key-hint" class="form-hint">
-            Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com</a> — no credit card needed (~250 requests/day).
-          </p>
-
-          <label class="form-label" for="ai-model">Model</label>
-          <input id="ai-model" class="form-input" type="text" placeholder="gemini-2.5-flash" />
-        </fieldset>
-
-        <div id="ai-test-result" class="form-test-result" hidden></div>
-
-        <!-- Transcript harvester -->
-        <fieldset class="provider-config" style="margin-top:1rem">
-          <legend class="provider-config-label">Transcript harvester</legend>
-          <label class="form-label" for="harvester-url">Service URL</label>
-          <input id="harvester-url" class="form-input" type="text" placeholder="http://localhost:47823" autocomplete="off" />
-          <div class="harvester-status-row">
-            <span id="harvester-status" class="harvester-status" hidden></span>
-          </div>
-          <p class="form-hint">Local service that fetches transcripts.
-            <a href="http://localhost:47823/status" target="_blank" rel="noopener">View status</a> ·
-            <a href="http://localhost:47823/jobs" target="_blank" rel="noopener">Recent jobs</a>
-          </p>
-        </fieldset>
-      </div>
-      <div class="modal-footer">
-        <button id="ai-test" class="btn-secondary">Test</button>
-        <button id="ai-save" class="btn-primary">Save</button>
-      </div>
+    <!-- Provider radio cards -->
+    <div class="provider-radios">
+      <wla-radio-card name="ai-provider" value="gemini" label="Google Gemini" sublabel="Free tier · ~250 req/day" checked></wla-radio-card>
+      <wla-radio-card name="ai-provider" value="claude" label="Anthropic Claude" sublabel="Paid · Haiku ≈ $0.001–0.01/video"></wla-radio-card>
     </div>
-  </div>
+
+    <!-- Provider-specific config -->
+    <fieldset class="provider-config">
+      <legend id="provider-config-label" class="provider-config-label">Google Gemini</legend>
+      <wla-form-field id="ai-key" label="API key" type="password" placeholder="Paste your API key"></wla-form-field>
+      <p id="ai-key-hint" class="form-hint">
+        Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com</a> — no credit card needed (~250 requests/day).
+      </p>
+      <wla-form-field id="ai-model" label="Model" type="text" placeholder="gemini-2.5-flash"></wla-form-field>
+    </fieldset>
+
+    <div id="ai-test-result" class="form-test-result" hidden></div>
+
+    <!-- Transcript harvester -->
+    <fieldset class="provider-config harvester-config">
+      <legend class="provider-config-label">Transcript harvester</legend>
+      <wla-form-field id="harvester-url" label="Service URL" type="url" placeholder="http://localhost:47823"></wla-form-field>
+      <div class="harvester-status-row">
+        <span id="harvester-status" class="harvester-status" hidden></span>
+      </div>
+      <p class="form-hint">Local service that fetches transcripts.
+        <a href="http://localhost:47823/status" target="_blank" rel="noopener">View status</a> ·
+        <a href="http://localhost:47823/jobs" target="_blank" rel="noopener">Recent jobs</a>
+      </p>
+    </fieldset>
+
+    <!-- Footer buttons -->
+    <wla-button slot="footer" id="ai-test" variant="secondary">Test</wla-button>
+    <wla-button slot="footer" id="ai-save">Save</wla-button>
+  </wla-modal>
 
   <!-- Inspect modal (transcript + AI prompt viewer) -->
-  <div id="inspect-modal" class="modal-overlay" hidden>
-    <div class="modal inspect-modal-content">
-      <div class="modal-header">
-        <h2>AI Inspect</h2>
-        <button id="inspect-copy" class="btn-secondary" style="margin-right:auto;font-size:0.8rem;padding:3px 10px">Copy</button>
-        <button id="inspect-close" class="modal-close" aria-label="Close">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </div>
-      <div class="inspect-tabs">
-        <button class="inspect-tab-btn active" data-tab="transcript">Transcript</button>
-        <button class="inspect-tab-btn" data-tab="prompt">AI Prompt</button>
-      </div>
-      <div class="inspect-body">
-        <div class="inspect-panel" data-panel="transcript">
-          <pre id="inspect-transcript"></pre>
-        </div>
-        <div class="inspect-panel" data-panel="prompt" hidden>
-          <pre id="inspect-prompt"></pre>
-        </div>
-      </div>
-    </div>
-  </div>
+  <wla-modal id="inspect-modal" heading="AI Inspect">
+    <wla-tabs id="inspect-tabs">
+      <div slot="transcript"><pre id="inspect-transcript"></pre></div>
+      <div slot="prompt"><pre id="inspect-prompt"></pre></div>
+    </wla-tabs>
+    <wla-button slot="footer" id="inspect-copy" variant="secondary">Copy</wla-button>
+  </wla-modal>
 
   <!-- Loading state -->
   <div id="loading-state" class="state-container" hidden>
-    <div class="spinner"></div>
+    <wla-spinner size="lg"></wla-spinner>
     <p>Loading your Watch Later list…</p>
   </div>
 
@@ -148,7 +91,7 @@
     <div class="state-icon">⚠️</div>
     <h2 id="error-title">Something went wrong</h2>
     <p id="error-message"></p>
-    <a id="error-link" href="https://www.youtube.com" target="_blank" class="btn-primary" hidden>
+    <a id="error-link" href="https://www.youtube.com" target="_blank" class="state-link" hidden>
       Open YouTube
     </a>
     <pre id="error-detail" hidden></pre>
@@ -159,7 +102,7 @@
     <div class="state-icon">🎬</div>
     <h2>Your Watch Later list is empty</h2>
     <p>Save videos on YouTube and they'll appear here.</p>
-    <a href="https://www.youtube.com" target="_blank" class="btn-primary">Open YouTube</a>
+    <a href="https://www.youtube.com" target="_blank" class="state-link">Open YouTube</a>
   </div>
 
   <!-- ── Player view ── -->
@@ -180,122 +123,90 @@
       <aside class="info-panel">
 
         <div class="info-sticky">
-          <button id="video-menu-btn" class="video-menu-btn" aria-label="Video options" hidden>
-            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-          </button>
-          <div id="video-menu-dropdown" class="video-menu-dropdown" hidden>
-            <button id="video-menu-inspect" class="video-menu-item">
+          <wla-menu id="video-menu-btn" label="Video options" hidden>
+            <button id="video-menu-inspect">
               <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
                 <path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/>
               </svg>
               Inspect data
             </button>
-          </div>
+          </wla-menu>
           <h2 id="info-title" class="info-title"></h2>
-          <div id="info-channel" class="info-channel"></div>
-          <div id="info-duration" class="info-duration"></div>
+          <div class="info-channel-row">
+            <span id="info-channel" class="info-channel"></span>
+            <span id="info-video-duration" class="info-video-duration"></span>
+          </div>
+          <div id="info-uploaded" class="info-duration"></div>
           <div class="info-actions">
-            <button id="btn-remove-next" class="btn-primary">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-              </svg>
-              Remove &amp; Next
-            </button>
-            <div class="info-actions-row">
-              <button id="btn-keep" class="btn-secondary">
-                Keep
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-                </svg>
-              </button>
-              <a id="btn-open-yt" href="#" target="_blank" rel="noopener" class="btn-secondary">
-                Open on YouTube
-              </a>
-            </div>
+            <wla-button id="btn-remove-next" icon="close" class="info-btn-remove">Remove &amp; Next</wla-button>
+            <wla-button id="btn-keep" variant="secondary" icon="arrow-right" class="info-btn-flex">Keep</wla-button>
+            <a id="btn-open-yt" href="#" target="_blank" rel="noopener">
+              <wla-button variant="secondary" class="info-btn-flex" title="Open on YouTube">Open</wla-button>
+            </a>
           </div>
         </div>
 
-        <div class="acc-scroll">
-
-          <button class="acc-header open" data-acc="summary">
-            <span class="acc-title">Summary</span>
-            <svg class="acc-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </button>
-          <div class="acc-body open" id="acc-summary">
+        <wla-accordion-group class="acc-group">
+          <wla-accordion title="Summary" open>
             <div class="ai-status" data-section="summary"></div>
             <div class="ai-content" data-section="summary">
-              <button class="btn-setup-ai" onclick="document.getElementById('settings-btn').click()">Set up AI…</button>
+              <button class="btn-setup-ai">Set up AI…</button>
             </div>
-          </div>
-
-          <button class="acc-header open" data-acc="takeaways">
-            <span class="acc-title">Key Takeaways</span>
-            <svg class="acc-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </button>
-          <div class="acc-body open" id="acc-takeaways">
+          </wla-accordion>
+          <wla-accordion title="Key Takeaways" open>
             <div class="ai-status" data-section="takeaways"></div>
             <div class="ai-content" data-section="takeaways">
-              <button class="btn-setup-ai" onclick="document.getElementById('settings-btn').click()">Set up AI…</button>
+              <button class="btn-setup-ai">Set up AI…</button>
             </div>
-          </div>
-
-          <button class="acc-header open" data-acc="sentiment">
-            <span class="acc-title">Comment Sentiment</span>
-            <svg class="acc-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </button>
-          <div class="acc-body open" id="acc-sentiment">
+          </wla-accordion>
+          <wla-accordion title="Comment Sentiment" open>
             <div class="ai-status" data-section="sentiment"></div>
             <div class="ai-content" data-section="sentiment">
-              <button class="btn-setup-ai" onclick="document.getElementById('settings-btn').click()">Set up AI…</button>
+              <button class="btn-setup-ai">Set up AI…</button>
             </div>
-          </div>
-
-          <button class="acc-header open" data-acc="tags">
-            <span class="acc-title">Contextual Tags</span>
-            <svg class="acc-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </button>
-          <div class="acc-body open" id="acc-tags">
+          </wla-accordion>
+          <wla-accordion title="Contextual Tags" open>
             <div class="ai-status" data-section="tags"></div>
             <div class="ai-content" data-section="tags">
-              <button class="btn-setup-ai" onclick="document.getElementById('settings-btn').click()">Set up AI…</button>
+              <button class="btn-setup-ai">Set up AI…</button>
             </div>
-          </div>
-
-        </div><!-- /acc-scroll -->
+          </wla-accordion>
+        </wla-accordion-group>
 
       </aside>
     </div><!-- /player-section -->
 
     <!-- Queue -->
     <div class="queue-section" id="queue-section">
-      <div class="queue-header" id="queue-collapse-toggle" role="button" aria-expanded="true">
-        <span class="queue-label">Queue</span>
-        <span id="queue-count" class="queue-count"></span>
-        <div class="queue-nav">
-          <button class="queue-nav-btn" id="queue-prev" aria-label="Scroll left">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-          </button>
-          <button class="queue-nav-btn" id="queue-next" aria-label="Scroll right">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-          </button>
+      <div class="queue-header" id="queue-collapse-toggle" role="button" tabindex="0" aria-expanded="true" aria-label="Toggle queue visibility">
+        <div class="queue-title-left">
+          <span class="queue-label">Queue</span>
+          <span id="queue-count" class="queue-count"></span>
+          <div class="queue-title-sep" aria-hidden="true"></div>
+          <div class="queue-sync">
+            <wla-button id="refresh-btn" variant="secondary" size="sm" icon="refresh" title="Reload your Watch Later list">Refresh</wla-button>
+            <span id="sync-status"></span>
+          </div>
         </div>
-        <button class="queue-collapse-btn" id="queue-collapse-btn" aria-label="Toggle queue">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M7.41 15.41 12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
-        </button>
+
+        <span class="queue-collapse-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <path d="M12 15.5 6 9.5l1.41-1.41L12 12.67l4.59-4.58L18 9.5z"/>
+            <path d="M12 21 6 15l1.41-1.41L12 18.17l4.59-4.58L18 15z"/>
+          </svg>
+        </span>
+
+        <div class="queue-nav">
+          <wla-button id="queue-prev" variant="secondary" size="sm" icon-only icon="arrow-left" label="Scroll left"></wla-button>
+          <wla-button id="queue-next" variant="secondary" size="sm" icon-only icon="arrow-right" label="Scroll right"></wla-button>
+        </div>
       </div>
       <div id="queue-scroll" class="queue-scroll"></div>
     </div>
 
   </div><!-- /player-view -->
 
+  <script type="module" src="components.bundle.js"></script>
   <script src="prompts.js"></script>
   <script src="ai.js"></script>
   <script src="watchlater.js"></script>

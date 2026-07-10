@@ -23,48 +23,58 @@ export class WlaTakeaway extends LitElement {
   }
 
   static styles = css`
-    :host {
+    /* All box model + interaction state lives on this shadow-DOM wrapper,
+       not on :host: a light-DOM reset like "* { padding: 0; margin: 0 }"
+       beats :host rules at equal specificity (same reason ::slotted() loses
+       to page rules), which silently zeroed padding/margin here before.
+       Margin pulls the hover box back toward the container edge by less
+       than the container's own inset, leaving a space-2 gap to the
+       sidebar; padding then pushes the content back out by the same
+       amount, so the visible text still lands at its original position,
+       aligned with sibling text like the accordion header. */
+    :host { display: block; }
+
+    .row {
       display: flex;
       align-items: baseline;
       gap: var(--space-2, 8px);
-      padding: 6px var(--space-2, 8px);
+      margin: 0 calc(-1 * var(--space-2, 8px));
+      padding: var(--space-2, 8px);
       border-radius: var(--radius, 8px);
       font-size: var(--font-size-base, 0.875rem);
       line-height: var(--line-height-base, 1.45);
       color: var(--color-text, #e8e8e8);
       transition: background var(--transition-fast, 0.12s);
-      cursor: pointer;
     }
-    :host(:hover) { background: var(--color-surface-hover, #222); }
+    .row.seekable { cursor: pointer; }
+    .row.seekable:hover,
+    .row.seekable:focus-visible { background: var(--color-surface-hover, #222); }
+    .row.seekable:focus-visible {
+      outline: 2px solid var(--color-info, #9fc1ff);
+      outline-offset: -2px;
+    }
 
-    /* Timestamp chip */
+    /* Timestamp chip — visual only; the whole .row is the click/keyboard target */
     .ts-chip {
       flex-shrink: 0;
       display: inline-flex;
       align-items: center;
       gap: 4px;
       padding: 2px 6px;
-      border: none;
       border-radius: var(--radius-sm, 4px);
       background: var(--color-accent-subtle, rgba(40,173,160,0.08));
       color: var(--color-accent, #28ada0);
       font-size: var(--font-size-base, 0.875rem);
       font-weight: var(--font-weight-semibold, 600);
-      font-family: inherit;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
       transition: background var(--transition-fast, 0.12s),
                   color     var(--transition-fast, 0.12s);
     }
-    /* Hover on the chip directly OR on the parent host */
-    .ts-chip:hover,
-    :host(:hover) .ts-chip {
+    .row.seekable:hover .ts-chip,
+    .row.seekable:focus-visible .ts-chip {
       background: var(--color-accent-subtle-hover, rgba(40, 173, 160, 0.22));
       color: var(--color-accent-hover, #3dccbe);
-    }
-    .ts-chip:focus-visible {
-      outline: 2px solid var(--color-info, #9fc1ff);
-      outline-offset: 2px;
     }
 
     /* Play icon inside chip */
@@ -78,10 +88,10 @@ export class WlaTakeaway extends LitElement {
       transform: translateX(-7px);
       transition: transform var(--transition-fast, 0.12s);
     }
-    .ts-chip:hover .ts-icon,
-    :host(:hover) .ts-chip .ts-icon { visibility: visible; }
-    .ts-chip:hover .ts-time,
-    :host(:hover) .ts-chip .ts-time { transform: translateX(0); }
+    .row.seekable:hover .ts-icon,
+    .row.seekable:focus-visible .ts-icon { visibility: visible; }
+    .row.seekable:hover .ts-time,
+    .row.seekable:focus-visible .ts-time { transform: translateX(0); }
 
     /* Body text — inline so the tag flows naturally after the last word */
     .body { flex: 1; }
@@ -100,6 +110,7 @@ export class WlaTakeaway extends LitElement {
   }
 
   _onSeek() {
+    if (this.ts == null || isNaN(this.ts)) return;
     this.dispatchEvent(new CustomEvent('wla-seek', {
       detail: { seconds: this.ts },
       bubbles: true,
@@ -107,23 +118,41 @@ export class WlaTakeaway extends LitElement {
     }));
   }
 
+  _onKeyDown(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this._onSeek();
+    }
+  }
+
   render() {
-    const chip = (this.ts != null && !isNaN(this.ts)) ? html`
-      <button class="ts-chip" part="ts-chip" @click=${this._onSeek}>
+    const seekable = this.ts != null && !isNaN(this.ts);
+
+    const chip = seekable ? html`
+      <span class="ts-chip" part="ts-chip">
         <span class="ts-icon" aria-hidden="true">
           <svg viewBox="0 0 16 16" fill="currentColor" width="9" height="9">
             <path d="M3 2.5l10 5.5-10 5.5V2.5z"/>
           </svg>
         </span>
         <span class="ts-time">${this._fmt(this.ts)}</span>
-      </button>` : '';
+      </span>` : '';
 
     const tag = this.label === 'worth watching' ? html`
       <wla-chip state="warning" value="worth watching" part="tag"></wla-chip>` : '';
 
     return html`
-      ${chip}
-      <span class="body" part="body">${this.point}${tag}</span>
+      <div
+        class="row ${seekable ? 'seekable' : ''}"
+        part="row"
+        role=${seekable ? 'button' : 'group'}
+        tabindex=${seekable ? '0' : '-1'}
+        @click=${seekable ? this._onSeek : null}
+        @keydown=${seekable ? this._onKeyDown : null}
+      >
+        ${chip}
+        <span class="body" part="body">${this.point}${tag}</span>
+      </div>
     `;
   }
 }

@@ -1,4 +1,4 @@
-import { LitElement, html, css, svg } from 'lit';
+import { LitElement, html, css, svg, nothing } from 'lit';
 
 const ICONS = {
   refresh:       svg`<path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>`,
@@ -12,23 +12,32 @@ const ICONS = {
 /**
  * General-purpose button / link.
  * @attr {'primary'|'secondary'|'link'} variant
+ * @attr {'md'|'sm'} size       - md is the standard size; sm fits compact bars like the queue header
  * @attr {boolean} disabled
- * @attr {string}  href  - renders an <a> instead of <button>
- * @attr {string}  icon  - optional built-in icon: refresh | settings | close | play | arrow-left | arrow-right
+ * @attr {boolean} icon-only    - square padding, no text gap; pair with `label` for accessibility
+ * @attr {string}  href         - renders an <a> instead of <button>
+ * @attr {string}  icon         - optional built-in icon: refresh | settings | close | play | arrow-left | arrow-right
+ * @attr {string}  label        - accessible name; required when icon-only (no visible text to fall back on)
  */
 export class WlaButton extends LitElement {
   static properties = {
     variant:  { type: String, reflect: true },
+    size:     { type: String, reflect: true },
     disabled: { type: Boolean, reflect: true },
+    iconOnly: { type: Boolean, reflect: true, attribute: 'icon-only' },
     href:     { type: String },
     icon:     { type: String },
+    label:    { type: String },
   };
 
   constructor() {
     super();
     this.variant = 'primary';
+    this.size = 'md';
     this.disabled = false;
+    this.iconOnly = false;
     this.icon = '';
+    this.label = '';
   }
 
   static styles = css`
@@ -38,8 +47,8 @@ export class WlaButton extends LitElement {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 7px 14px;
+      gap: var(--space-2, 8px);
+      padding: var(--space-2, 8px) var(--space-4, 16px);
       border-radius: var(--radius, 8px);
       font-size: var(--font-size-base, 0.875rem);
       font-weight: var(--font-weight-semibold, 600);
@@ -52,6 +61,26 @@ export class WlaButton extends LitElement {
                   border-color var(--transition-fast, 0.12s),
                   color var(--transition-fast, 0.12s),
                   opacity var(--transition-fast, 0.12s);
+    }
+
+    /* ── Size: sm (compact bars, e.g. the queue header) ──────────── */
+    :host([size='sm']) button,
+    :host([size='sm']) a {
+      gap: var(--space-1, 4px);
+      padding: var(--space-1, 4px) var(--space-3, 12px);
+      border-radius: var(--radius-sm, 4px);
+      font-size: var(--font-size-sm, 0.75rem);
+    }
+
+    /* ── Icon-only: square padding, no text gap ──────────────────── */
+    :host([icon-only]) button,
+    :host([icon-only]) a {
+      padding: var(--space-2, 8px);
+      gap: 0;
+    }
+    :host([icon-only][size='sm']) button,
+    :host([icon-only][size='sm']) a {
+      padding: var(--space-1, 4px);
     }
 
     /* ── Primary ──────────────────────────────────────────────── */
@@ -111,25 +140,28 @@ export class WlaButton extends LitElement {
       display: flex;
       flex-shrink: 0;
     }
-    ::slotted(svg) { width: 15px; height: 15px; flex-shrink: 0; }
+    ::slotted(svg) { width: 16px; height: 16px; flex-shrink: 0; }
+    :host([size='sm']) ::slotted(svg) { width: 14px; height: 14px; }
   `;
 
   _icon() {
     const path = ICONS[this.icon];
     if (!path) return '';
+    const s = this.size === 'sm' ? 14 : 16;
     return html`
-      <span class="icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15">${path}</svg>
+      <span class="icon" part="icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor" width=${s} height=${s}>${path}</svg>
       </span>
     `;
   }
 
   render() {
     const inner = html`${this._icon()}<slot></slot>`;
+    const ariaLabel = this.label ? this.label : nothing;
     if (this.href) {
-      return html`<a href=${this.href} part="button">${inner}</a>`;
+      return html`<a href=${this.href} part="button" aria-label=${ariaLabel}>${inner}</a>`;
     }
-    return html`<button ?disabled=${this.disabled} part="button">${inner}</button>`;
+    return html`<button ?disabled=${this.disabled} part="button" aria-label=${ariaLabel}>${inner}</button>`;
   }
 }
 

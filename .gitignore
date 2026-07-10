@@ -5,3 +5,6 @@ screenshots
 
 node_modules/
 storybook-static/
+
+# Built extension bundle (run `npm run build` to regenerate)
+pages/components.bundle.js

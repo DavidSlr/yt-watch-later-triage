@@ -54,18 +54,19 @@ export class WlaTabs extends LitElement {
       outline-offset: -2px;
     }
 
+    /* Padding + scroll live on this shadow-DOM container, not on the
+       slotted elements: a light-DOM reset like "* { padding: 0 }" wins
+       over ::slotted() on equal specificity and would strip panel padding.
+       min-height: 0 lets this flex child shrink so overflow can scroll. */
     .panels {
       flex: 1;
-      overflow: hidden;
-      position: relative;
-    }
-
-    ::slotted(*) {
-      display: none;
-      height: 100%;
+      min-height: 0;
       overflow: auto;
+      position: relative;
       padding: var(--space-3, 12px) var(--space-4, 16px);
     }
+
+    ::slotted(*) { display: none; }
     ::slotted(.active) { display: block; }
   `;
 

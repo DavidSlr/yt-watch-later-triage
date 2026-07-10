@@ -186,7 +186,7 @@ const WLA_AI = {
               ? data.sentiment.themes
                   .filter(t => t && t.theme)
                   .map(t => ({
-                    tone: t.tone === "negative" ? "negative" : "positive",
+                    tone: String(t.tone ?? "").toLowerCase() === "positive" ? "positive" : "negative",
                     theme: String(t.theme),
                     quote: t.quote ? String(t.quote) : null,
                   }))
