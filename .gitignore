@@ -8,3 +8,6 @@ storybook-static/
 
 # Built extension bundle (run `npm run build` to regenerate)
 pages/components.bundle.js
+
+# web-ext build/sign output
+web-ext-artifacts/

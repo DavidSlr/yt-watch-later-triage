@@ -7,7 +7,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o storybook-static",
     "build": "esbuild pages/components.js --bundle --format=esm --outfile=pages/components.bundle.js",
-    "build:watch": "npm run build -- --watch"
+    "build:watch": "npm run build -- --watch",
+    "sign": "web-ext sign --channel=unlisted --artifacts-dir=web-ext-artifacts"
   },
   "dependencies": {
     "lit": "^3.2.0"
@@ -16,6 +17,7 @@
     "@storybook/addon-essentials": "^8.4.0",
     "@storybook/web-components-vite": "^8.4.0",
     "esbuild": "^0.25.12",
-    "storybook": "^8.4.0"
+    "storybook": "^8.4.0",
+    "web-ext": "^10.5.0"
   }
 }

@@ -1,0 +1,60 @@
+name: Sign and release extension
+
+# Push a version tag (e.g. `v0.2.0`, matching manifest.json's "version") to
+# build, sign via Mozilla (AMO), and publish a GitHub Release with the
+# signed .xpi attached.
+#
+# Requires two repo secrets (Settings → Secrets and variables → Actions):
+#   AMO_JWT_ISSUER   — API key from https://addons.mozilla.org/developers/addon/api/key/
+#   AMO_JWT_SECRET   — API secret from the same page
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  sign-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build component bundle
+        run: npm run build
+
+      - name: Verify manifest version matches tag
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          MANIFEST_VERSION=$(node -p "require('./manifest.json').version")
+          if [ "$TAG_VERSION" != "$MANIFEST_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME (version $TAG_VERSION) does not match manifest.json version $MANIFEST_VERSION"
+            exit 1
+          fi
+
+      - name: Lint extension
+        run: npx web-ext lint
+
+      - name: Sign with Mozilla (AMO)
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.AMO_JWT_ISSUER }}
+          WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: npx web-ext sign --channel=unlisted --artifacts-dir=web-ext-artifacts
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" web-ext-artifacts/*.xpi \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes
