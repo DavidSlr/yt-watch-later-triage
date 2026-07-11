@@ -1,0 +1,55 @@
+name: Publish harvester Docker image
+
+# Triggers only when a push to master actually touches harvester/ files —
+# independent of the extension's release tags, since the two version at
+# different cadences. Bump harvester/package.json's "version" alongside any
+# code change; no git tag needed here, just a normal push to master.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'harvester/**'
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: wla-transcript-harvester
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Read version + lowercase owner
+        id: meta
+        run: |
+          echo "version=$(node -p "require('./harvester/package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Refuse to overwrite an existing version tag
+        run: |
+          IMAGE="ghcr.io/${{ steps.meta.outputs.owner }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}"
+          if docker manifest inspect "$IMAGE" > /dev/null 2>&1; then
+            echo "::error::$IMAGE already exists. Bump \"version\" in harvester/package.json before pushing harvester changes."
+            exit 1
+          fi
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: harvester
+          push: true
+          tags: |
+            ghcr.io/${{ steps.meta.outputs.owner }}/${{ env.IMAGE_NAME }}:latest
+            ghcr.io/${{ steps.meta.outputs.owner }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}

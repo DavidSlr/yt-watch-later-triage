@@ -1,7 +1,6 @@
 services:
   harvester:
-    build: .
-    image: wla-transcript-harvester:latest
+    image: ghcr.io/davidslr/wla-transcript-harvester:latest
     container_name: wla-transcript-harvester
     restart: unless-stopped
     ports:
