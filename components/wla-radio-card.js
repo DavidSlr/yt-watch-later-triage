@@ -68,7 +68,7 @@ export class WlaRadioCard extends LitElement {
       width: 16px;
       height: 16px;
       border-radius: 50%;
-      border: 2px solid var(--color-border, #2e2e2e);
+      border: 2px solid var(--color-border-strong, #707070);
       background: transparent;
       flex-shrink: 0;
       display: flex;

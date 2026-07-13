@@ -18,6 +18,7 @@ export class WlaModal extends LitElement {
     super();
     this.open = false;
     this.heading = '';
+    this._returnFocusTo = null;
     this._onKeyDown = this._onKeyDown.bind(this);
   }
 
@@ -31,11 +32,64 @@ export class WlaModal extends LitElement {
     document.removeEventListener('keydown', this._onKeyDown);
   }
 
+  updated(changed) {
+    if (!changed.has('open')) return;
+    if (this.open) {
+      this._returnFocusTo = document.activeElement;
+      // Wait for the open content to render before focusing into it.
+      this.updateComplete.then(() => {
+        const focusable = this._getFocusable();
+        (focusable[0] ?? this.shadowRoot.querySelector('button.close'))?.focus();
+      });
+    } else if (this._returnFocusTo?.isConnected) {
+      this._returnFocusTo.focus();
+      this._returnFocusTo = null;
+    }
+  }
+
   _onKeyDown(e) {
-    if (e.key === 'Escape' && this.open) {
+    if (!this.open) return;
+    if (e.key === 'Escape') {
       e.stopPropagation();
       this._close();
     }
+  }
+
+  // Finds tabbable elements inside the modal, piercing into any open shadow
+  // roots of slotted custom elements (e.g. a wla-form-field's own <input>
+  // lives inside ITS shadow root, not this one) — plain querySelectorAll
+  // can't see across that boundary, so this walks both trees by hand.
+  _getFocusable() {
+    const isFocusable = (el) => {
+      if (el.hasAttribute('disabled') || el.getAttribute('aria-hidden') === 'true') return false;
+      if (el.classList?.contains('sentinel')) return false;
+      const tag = el.tagName?.toLowerCase();
+      if (tag === 'a') return el.hasAttribute('href');
+      if (['button', 'input', 'select', 'textarea'].includes(tag)) return true;
+      return el.hasAttribute('tabindex') && Number(el.getAttribute('tabindex')) >= 0;
+    };
+    const collect = (root, out = []) => {
+      for (const el of Array.from(root.children ?? [])) {
+        if (isFocusable(el)) out.push(el);
+        if (el.shadowRoot) collect(el.shadowRoot, out);
+        collect(el, out);
+      }
+      return out;
+    };
+    const modal = this.shadowRoot.querySelector('.modal');
+    return [...collect(modal), ...collect(this)];
+  }
+
+  _onSentinelStart() {
+    // Reached by shift+tabbing past the first real element — wrap to the last.
+    const focusable = this._getFocusable();
+    (focusable[focusable.length - 1] ?? this.shadowRoot.querySelector('button.close'))?.focus();
+  }
+
+  _onSentinelEnd() {
+    // Reached by tabbing past the last real element — wrap to the first.
+    const focusable = this._getFocusable();
+    (focusable[0] ?? this.shadowRoot.querySelector('button.close'))?.focus();
   }
 
   static styles = css`
@@ -115,6 +169,19 @@ export class WlaModal extends LitElement {
       flex-shrink: 0;
     }
     footer:empty { display: none; }
+
+    /* Visually hidden but reachable by Tab — see _onSentinelStart/End. */
+    .sentinel {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
   `;
 
   _close() {
@@ -126,6 +193,7 @@ export class WlaModal extends LitElement {
     return html`
       <div class="overlay" part="overlay" @click=${(e) => e.target === e.currentTarget && this._close()}>
         <div class="modal" part="modal" role="dialog" aria-modal="true" aria-label=${this.heading}>
+          <span class="sentinel" tabindex="0" @focus=${this._onSentinelStart}></span>
           <header part="header">
             <h2>${this.heading}</h2>
             <button class="close" aria-label="Close" @click=${this._close}>
@@ -136,6 +204,7 @@ export class WlaModal extends LitElement {
           </header>
           <div class="body" part="body"><slot></slot></div>
           <footer part="footer"><slot name="footer"></slot></footer>
+          <span class="sentinel" tabindex="0" @focus=${this._onSentinelEnd}></span>
         </div>
       </div>
     `;

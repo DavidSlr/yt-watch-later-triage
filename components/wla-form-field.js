@@ -69,7 +69,7 @@ export class WlaFormField extends LitElement {
       outline: 2px solid var(--color-info, #9fc1ff);
       outline-offset: 0;
     }
-    input::placeholder { color: var(--color-text-disabled, #555); }
+    input::placeholder { color: var(--color-text-tertiary, #888); }
 
     input.has-toggle { padding-right: 36px; }
 
@@ -100,7 +100,7 @@ export class WlaFormField extends LitElement {
       background: transparent;
       border: none;
       cursor: pointer;
-      color: var(--color-text-disabled, #555);
+      color: var(--color-text-tertiary, #888);
       transition: color var(--transition-fast, 0.12s);
       border-radius: var(--radius-sm, 4px);
     }
@@ -113,7 +113,7 @@ export class WlaFormField extends LitElement {
     .hint {
       margin-top: var(--space-1, 4px);
       font-size: var(--font-size-sm, 0.75rem);
-      color: var(--color-text-disabled, #555);
+      color: var(--color-text-tertiary, #888);
       line-height: var(--line-height-base, 1.45);
     }
     .hint ::slotted(a) { color: var(--color-info, #9fc1ff); }

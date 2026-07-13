@@ -42,9 +42,9 @@ const FINDINGS = [
     component: 'wla-button',
     story: 'components-button--primary',
     criterion: '1.4.3',
-    status: 'warn',
-    finding: 'Primary variant: white on --color-accent #ff0000 → 3.99:1. Needs 4.5:1 for 14px/600 weight (not large text).',
-    fix: 'Darken button background to #d40000 (white gives 5.1:1) while keeping --color-accent as the brand token.',
+    status: 'pass',
+    finding: 'Primary variant: white on --color-accent-solid #1b7e74 → 4.90:1. Meets 4.5:1 for 14px/600 weight (not large text). (Superseded by a later token rework — the original #ff0000 accent this finding was written against no longer exists.)',
+    fix: '—',
   },
   {
     component: 'wla-button',
@@ -68,17 +68,17 @@ const FINDINGS = [
     component: 'wla-chip',
     story: 'components-chip--disabled',
     criterion: '1.4.3',
-    status: 'fail',
-    finding: 'Disabled state: #555 text on #1a1a1a surface → 2.33:1 (needs 4.5:1).',
-    fix: 'Raise disabled text to #888 (3.9:1) or #999 (5.0:1). Update --color-text-disabled or add a chip-specific disabled override.',
+    status: 'pass',
+    finding: 'Was #555 text at 0.6 opacity on #1a1a1a → effectively ~1.57:1 once the opacity fade onto the page background is accounted for (needs 4.5:1). This is genuinely-readable status text, not an inert/disabled control, so it isn’t exempt from 1.4.3.',
+    fix: 'New --color-text-tertiary (#888) token for muted-but-readable text, distinct from --color-text-disabled (#555, kept for truly inactive controls, which WCAG does exempt). Dropped the opacity fade entirely — #888 on #1a1a1a is already 4.9:1, no fade needed. Border raised alongside it (see 1.4.11 below).',
   },
   {
     component: 'wla-chip',
     story: 'components-chip--neutral',
     criterion: '1.4.11',
-    status: 'fail',
-    finding: 'Neutral chip border #2e2e2e on surface #1a1a1a → 1.28:1 (needs 3:1 for UI boundaries).',
-    fix: 'Raise neutral border to #555 (2.33:1) or #666 (2.7:1). Consider adding a 1px inner background contrast instead.',
+    status: 'pass',
+    finding: 'Neutral chip border #2e2e2e on surface-raised #242424 → 1.14:1 (needs 3:1 for UI boundaries).',
+    fix: 'New --color-border-strong (#707070) token, reserved for UI-component boundaries that need 3:1 (this and the radio-card dot below) — not applied to --color-border globally, since most of its uses are plain decorative dividers that don’t carry this requirement. Gives 3.13:1 against the darkest surface it appears on.',
   },
 
   // ── wla-form-field ─────────────────────────────────────────────────────────
@@ -86,9 +86,9 @@ const FINDINGS = [
     component: 'wla-form-field',
     story: 'components-formfield--text',
     criterion: '1.4.3',
-    status: 'fail',
-    finding: 'Placeholder: --color-text-disabled (#555) on input bg #0f0f0f → 2.33:1 (needs 4.5:1). Placeholder text is not exempt from contrast under WCAG 1.4.3.',
-    fix: 'Raise placeholder to #777 (3.7:1) or #888 (4.7:1 ✓). Keep --color-text-disabled as-is for truly disabled elements; introduce --color-text-placeholder: #888.',
+    status: 'pass',
+    finding: 'Placeholder: was --color-text-disabled (#555) on input bg #0f0f0f → 2.57:1 (needs 4.5:1). Placeholder text is not exempt from contrast under WCAG 1.4.3. Same token was also used for the hint text below the field, and for the password-toggle icon — both genuinely-readable, not exempt either.',
+    fix: 'All three switched to --color-text-tertiary (#888) → 5.41:1 on #0f0f0f. This token turned out to be misused the same way in several other places outside this component too — see the app-wide note at the end of this table.',
   },
   {
     component: 'wla-form-field',
@@ -122,9 +122,9 @@ const FINDINGS = [
     component: 'wla-modal',
     story: 'components-modal--default',
     criterion: '2.1.2',
-    status: 'fail',
-    finding: 'No focus trap — Tab can leave the modal to background content while the overlay is open.',
-    fix: 'On open: collect all focusable elements inside, move focus to first, intercept Tab/Shift+Tab at boundaries. On close: restore focus to the element that triggered open.',
+    status: 'pass',
+    finding: 'No focus trap — Tab could leave the modal to background content while the overlay was open.',
+    fix: 'Two visually-hidden sentinel elements at the start/end of the modal redirect focus back in when reached (Tab past the last real element → wraps to the first; Shift+Tab before the first → wraps to the last). Finding the "first"/"last" real element required walking into slotted custom elements’ own shadow roots by hand (e.g. a wla-form-field’s actual &lt;input&gt; lives inside its own shadow root, not the modal’s — plain querySelectorAll can’t see across that boundary). On open, focus moves to the first focusable element; on close, it’s restored to whatever triggered the open. Verified by stepping through Tab/Shift+Tab one key at a time in a live browser, not just by reading the code.',
   },
   {
     component: 'wla-modal',
@@ -141,8 +141,8 @@ const FINDINGS = [
     story: 'components-queuecard--default',
     criterion: '1.4.11',
     status: 'warn',
-    finding: 'Remove button background rgba(0,0,0,0.72) on dark surface has insufficient boundary contrast when not hovered (~1.5:1 vs surface).',
-    fix: 'Use a semi-transparent lighter background (#333 at 80% opacity) or rely on a visible border instead.',
+    finding: 'Remove button sits on an arbitrary video thumbnail, not a fixed surface color — no single fill color can guarantee 3:1 boundary contrast against every possible thumbnail (a dark fill vanishes on dark thumbnails; a light one vanishes on light thumbnails). Previous dark-only fill (rgba(0,0,0,0.72)) failed against dark thumbnails specifically.',
+    fix: 'Dark fill (now 0.8 opacity) + a light 1px border (rgba(255,255,255,0.55)): the fill separates it from light thumbnails, the border from dark ones, so one of the two is always visible. Kept as "warn" rather than "pass" — this mitigates the realistic worst cases but can’t mathematically guarantee 3:1 against literally any image, so it’s not a clean pass in the way a fixed-background component can be.',
   },
   {
     component: 'wla-queue-card',
@@ -156,15 +156,15 @@ const FINDINGS = [
   // ── wla-radio-card ─────────────────────────────────────────────────────────
   {
     component: 'wla-radio-card',
-    story: 'components-radiocard--unchecked',
+    story: 'components-radiocard--default',
     criterion: '1.4.11',
-    status: 'fail',
+    status: 'pass',
     finding: 'Unchecked radio dot border: #2e2e2e on surface #1a1a1a → 1.28:1 (needs 3:1 for UI component boundaries).',
-    fix: 'Raise unchecked dot border to #555 (2.33:1) or #666. The checked state with --color-accent already passes.',
+    fix: 'Same --color-border-strong (#707070) token as the chip fix above → 3.51:1 against this surface. The checked state (--color-accent) already passed.',
   },
   {
     component: 'wla-radio-card',
-    story: 'components-radiocard--unchecked',
+    story: 'components-radiocard--default',
     criterion: '2.4.7',
     status: 'pass',
     finding: 'Native radio input was display:none (removed from tab order) and label had no :focus-within indicator.',
@@ -194,9 +194,9 @@ const FINDINGS = [
     component: 'wla-sentiment-bar',
     story: 'components-sentimentbar--positive',
     criterion: '1.4.11',
-    status: 'fail',
-    finding: 'Neutral legend dot: --color-sentiment-neutral (#555) on surface #1a1a1a → 2.33:1 (needs 3:1). Positive and negative dots pass.',
-    fix: 'Raise --color-sentiment-neutral to #777 (3.7:1). This also fixes the same token used in the legend and watchlater.css.',
+    status: 'pass',
+    finding: 'Neutral segment/legend dot used --color-text-disabled (#555) on surface #1a1a1a → 2.33:1 (needs 3:1). Positive and negative dots already passed. (There was never a --color-sentiment-neutral token — this finding’s original name for it didn’t match the actual code.)',
+    fix: 'Switched to --color-text-tertiary (#888) → 4.91:1. Same token also fixes the identical .seg-neu rule duplicated in pages/watchlater.css.',
   },
   {
     component: 'wla-sentiment-bar',
@@ -241,7 +241,7 @@ const FINDINGS = [
     story: 'components-takeaway-item--simple',
     criterion: '1.4.3',
     status: 'pass',
-    finding: 'Timestamp chip: teal #28ada0 on rgba(40,173,160,0.08) over dark surface → approx 4.7:1 at 14px semibold. Passes AA.',
+    finding: 'Timestamp chip: teal #28ada0 on rgba(40,173,160,0.08) over dark surface → 6.28:1 at 14px semibold. Passes AA.',
     fix: '—',
   },
   {
@@ -249,7 +249,7 @@ const FINDINGS = [
     story: 'components-takeaway-item--simple',
     criterion: '4.1.2',
     status: 'pass',
-    finding: 'Timestamp chip is a semantic <button>; icon is aria-hidden; fires wla-seek with seconds detail; host acts as an interactive row with pointer cursor.',
+    finding: 'Restructured since this was last audited: the timestamp chip is now a decorative &lt;span&gt; (not a &lt;button&gt;), and the whole row carries role="button" with a keydown handler for Enter/Space — the chip alone used to be the only clickable target, which meant only a small part of the visible row was actually interactive.',
     fix: '—',
   },
 
@@ -266,7 +266,7 @@ const FINDINGS = [
   // ── wla-accordion-group ────────────────────────────────────────────────────
   {
     component: 'wla-accordion-group',
-    story: 'components-accordion--default-group',
+    story: 'components-accordion--default',
     criterion: '4.1.2',
     status: 'pass',
     finding: 'aria-expanded on each group-rendered header button; group manages open state.',
@@ -274,6 +274,17 @@ const FINDINGS = [
   },
 
 ];
+
+// Beyond the component-level findings above: --color-text-disabled (#555) was
+// found reused throughout pages/watchlater.css for genuinely-readable status
+// text that has nothing to do with a disabled control — status captions,
+// hints, the queue count, the sync-time label, empty-state messages. All of
+// it failed 4.5:1 the same way the form-field placeholder did. Moved to the
+// new --color-text-tertiary (#888) token everywhere it wasn't describing an
+// actually-inactive element. --color-text-disabled itself is untouched and
+// still intentionally low-contrast, reserved for controls WCAG 1.4.3/1.4.11
+// genuinely exempt (native [disabled] elements) — not for "text I want to
+// look quiet."
 
 // ── Rendering helpers ─────────────────────────────────────────────────────────
 
@@ -334,7 +345,7 @@ export const AuditReport = {
   parameters: {
     docs: {
       description: {
-        story: 'WCAG 2.1 AA audit across all components. Contrast ratios computed from token values. Keyboard behavior verified against ARIA Authoring Practices Guide. Last run: 2026-07-07.',
+        story: 'WCAG 2.1 AA audit across all components. Contrast ratios computed from token values. Keyboard behavior verified against ARIA Authoring Practices Guide. Last run: 2026-07-13.',
       },
     },
   },

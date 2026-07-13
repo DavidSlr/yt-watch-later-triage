@@ -39,13 +39,13 @@ export class WlaChip extends LitElement {
       white-space: nowrap;
       background: var(--color-surface-raised, #242424);
       color: var(--color-text-muted, #aaa);
-      border: 1px solid var(--color-border, #2e2e2e);
+      border: 1px solid var(--color-border-strong, #707070);
     }
 
     :host([state='success'])  .pill { background: var(--color-success-bg, rgba(40,173,160,0.08)); color: var(--color-success, #28ada0); border-color: transparent; }
     :host([state='warning'])  .pill { background: var(--color-warning-bg, rgba(212,150,30,0.15)); color: var(--color-warning, #d4963a); border-color: transparent; }
     :host([state='critical']) .pill { background: var(--color-critical-bg, #2e1314); color: var(--color-critical, #e5484d); border-color: transparent; }
-    :host([state='disabled']) .pill { background: var(--color-surface,    #1a1a1a); color: var(--color-text-disabled, #555); border-color: var(--color-border, #2e2e2e); opacity: 0.6; }
+    :host([state='disabled']) .pill { background: var(--color-surface, #1a1a1a); color: var(--color-text-tertiary, #888); border-color: var(--color-border-strong, #707070); }
   `;
 
   render() {

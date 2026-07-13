@@ -92,14 +92,20 @@ export class WlaQueueCard extends LitElement {
       pointer-events: none;
     }
 
+    /* Sits on arbitrary thumbnail content, so no single fill color can
+       guarantee boundary contrast against it — a dark fill disappears on
+       dark thumbnails, a light one on light thumbnails. The dark fill +
+       light border combination means one of the two always shows: the
+       fill separates it from light thumbnails, the border from dark ones. */
     button.remove {
       position: absolute;
       top: 4px;
       right: 4px;
       width: 20px;
       height: 20px;
-      background: rgba(0,0,0,0.72);
-      border: none;
+      box-sizing: border-box;
+      background: rgba(0,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.55);
       border-radius: 50%;
       color: #fff;
       cursor: pointer;

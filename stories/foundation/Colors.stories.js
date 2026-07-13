@@ -1,4 +1,9 @@
 import { html } from 'lit';
+// Raw source text, not the parsed stylesheet — lets this story read the
+// actual token declarations (names, values, comment-based grouping)
+// directly, instead of a hand-maintained copy that drifts out of sync
+// every time a token is added, renamed, or removed.
+import tokensRaw from '../../tokens/tokens.css?raw';
 
 export default {
   title: 'Foundation/Colors',
@@ -6,63 +11,35 @@ export default {
   parameters: { layout: 'padded' },
 };
 
-const GROUPS = [
-  {
-    label: 'Backgrounds',
-    tokens: [
-      { name: '--color-bg',             value: '#0f0f0f',  label: 'bg' },
-      { name: '--color-surface',        value: '#1a1a1a',  label: 'surface' },
-      { name: '--color-surface-hover',  value: '#222222',  label: 'surface-hover' },
-      { name: '--color-surface-raised', value: '#242424',  label: 'surface-raised' },
-    ],
-  },
-  {
-    label: 'Borders',
-    tokens: [
-      { name: '--color-border',       value: '#2e2e2e', label: 'border' },
-      { name: '--color-border-hover', value: '#444444', label: 'border-hover' },
-      { name: '--color-border-focus', value: '#4a5a75', label: 'border-focus' },
-    ],
-  },
-  {
-    label: 'Text',
-    tokens: [
-      { name: '--color-text',           value: '#e8e8e8', label: 'text' },
-      { name: '--color-text-muted',     value: '#aaaaaa', label: 'text-muted' },
-      { name: '--color-text-disabled',  value: '#555555', label: 'text-disabled' },
-      { name: '--color-text-on-accent', value: '#ffffff', label: 'text-on-accent' },
-    ],
-  },
-  {
-    label: 'Accent',
-    tokens: [
-      { name: '--color-accent',              value: '#28ada0',              label: 'accent' },
-      { name: '--color-accent-hover',        value: '#3dccbe',              label: 'accent-hover' },
-      { name: '--color-accent-active',       value: '#1c877d',              label: 'accent-active' },
-      { name: '--color-accent-solid',        value: '#1b7e74',              label: 'accent-solid' },
-      { name: '--color-accent-solid-hover',  value: '#176d65',              label: 'accent-solid-hover' },
-      { name: '--color-accent-solid-active', value: '#10564f',              label: 'accent-solid-active' },
-      { name: '--color-accent-subtle',       value: 'rgba(40,173,160,0.08)', label: 'accent-subtle' },
-      { name: '--color-accent-subtle-hover', value: 'rgba(40,173,160,0.22)', label: 'accent-subtle-hover' },
-    ],
-  },
-  {
-    label: 'Status',
-    tokens: [
-      { name: '--color-success',             value: '#28ada0',              label: 'success (→ accent)' },
-      { name: '--color-success-bg',          value: 'rgba(40,173,160,0.08)', label: 'success-bg (→ accent-subtle)' },
-      { name: '--color-warning',             value: '#d4963a',              label: 'warning' },
-      { name: '--color-warning-bg',          value: 'rgba(212,150,30,0.15)', label: 'warning-bg' },
-      { name: '--color-critical',            value: '#e5484d',              label: 'critical' },
-      { name: '--color-critical-hover',      value: '#c93f43',              label: 'critical-hover' },
-      { name: '--color-critical-bg',         value: '#2e1314',              label: 'critical-bg' },
-      { name: '--color-critical-ghost-hover',value: 'rgba(229,72,77,0.9)', label: 'critical-ghost-hover' },
-      { name: '--color-info',                value: '#9fc1ff',              label: 'info' },
-    ],
-  },
-];
+// Walks the :root block and buckets every --color-* declaration under the
+// nearest preceding comment (e.g. "/* Borders */", "/* ── Colors ── */").
+// Any new --color-* token shows up automatically under whatever heading
+// precedes it in tokens.css — no second list to remember to update.
+function parseColorGroups(css) {
+  const body = css.slice(css.indexOf(':root'));
+  const groups = [];
+  let current = null;
 
-const swatch = ({ name, value, label }) => html`
+  for (const raw of body.split('\n')) {
+    const line = raw.trim();
+
+    if (line.startsWith('/*') && line.endsWith('*/')) {
+      const label = line.slice(2, -2).replace(/─/g, '').trim();
+      if (label) current = { label, tokens: [] };
+      if (label) groups.push(current);
+      continue;
+    }
+
+    const match = line.match(/^(--color-[a-zA-Z0-9-]+)\s*:\s*([^;]+);/);
+    if (match && current) {
+      current.tokens.push({ name: match[1], value: match[2].trim() });
+    }
+  }
+
+  return groups.filter(g => g.tokens.length > 0);
+}
+
+const swatch = ({ name, value }) => html`
   <div style="display:flex;flex-direction:column;gap:6px;min-width:100px">
     <div style="
       height: 56px;
@@ -72,7 +49,7 @@ const swatch = ({ name, value, label }) => html`
       box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);
     "></div>
     <div>
-      <div style="font-size:12px;font-weight:600;color:var(--color-text,#e8e8e8)">${label}</div>
+      <div style="font-size:12px;font-weight:600;color:var(--color-text,#e8e8e8)">${name.replace('--color-', '')}</div>
       <div style="font-size:11px;color:var(--color-text-muted,#aaa);font-family:monospace">${value}</div>
       <div style="font-size:10px;color:var(--color-text-disabled,#555);font-family:monospace;margin-top:2px">${name}</div>
     </div>
@@ -91,8 +68,17 @@ const group = ({ label, tokens }) => html`
   </div>
 `;
 
+const GROUPS = parseColorGroups(tokensRaw);
+
 export const AllColors = {
   name: 'All Colors',
+  parameters: {
+    docs: {
+      description: {
+        story: `Generated directly from tokens/tokens.css — grouped by that file's own comments, values taken from the actual declarations. Add, rename, or remove a token there and this updates on its own; there is no second list to keep in sync.`,
+      },
+    },
+  },
   render: () => html`
     <div style="max-width:900px">
       ${GROUPS.map(group)}
