@@ -33,6 +33,16 @@ jobs:
       - name: Build Storybook
         run: npm run build-storybook
 
+      - name: Build extension bundle
+        run: npm run build
+
+      - name: Assemble demo into Storybook output
+        run: |
+          mkdir -p storybook-static/demo storybook-static/pages storybook-static/tokens
+          cp demo/*.html demo/*.css demo/*.js demo/*.json storybook-static/demo/
+          cp pages/watchlater.css pages/components.bundle.js storybook-static/pages/
+          cp tokens/tokens.css storybook-static/tokens/
+
       - uses: actions/configure-pages@v6
 
       - uses: actions/upload-pages-artifact@v5

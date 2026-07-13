@@ -1,0 +1,932 @@
+[
+  {
+    "videoId": "uzkD5SeuwzM",
+    "title": "TRUE Limits Of Humanity – The Final Border We Will Never Cross",
+    "channel": "Kurzgesagt – In a Nutshell",
+    "duration": "11:41",
+    "uploadDate": "",
+    "thumbnail": "https://i.ytimg.com/vi/uzkD5SeuwzM/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD7XC5-KXJ3mzWk-GREb97lzdVC_A",
+    "analysis": {
+      "summary": "The video explains that while the universe is vast, we are trapped within our local group of galaxies due to cosmic expansion and dark energy. 94% of observable galaxies have already passed beyond our cosmological horizon and are forever unreachable, and eventually even light from distant galaxies will fade from view, leaving future civilizations in isolation.",
+      "clickbait": "The 'final border' refers to the cosmological horizon created by accelerating universal expansion—we cannot physically reach 94% of observable galaxies, and all other galaxy groups will eventually become unreachable and invisible.",
+      "takeaways": [
+        {
+          "label": "simple",
+          "point": "95% of all stars that will ever exist have already been born; we live at the tail end of star formation.",
+          "ts": 56
+        },
+        {
+          "label": "simple",
+          "point": "94% of currently observable galaxies are already beyond our cosmological horizon due to expansion of space exceeding light speed.",
+          "ts": 120
+        },
+        {
+          "label": "worth watching",
+          "point": "Cosmic inflation in the Big Bang's first fraction of a second stretched tiny density variations into galactic distances, explaining why the universe has structure and separated pockets.",
+          "ts": 151
+        },
+        {
+          "label": "simple",
+          "point": "Dark energy is accelerating universal expansion, making the distance between galaxy groups grow faster over time.",
+          "ts": 236
+        },
+        {
+          "label": "worth watching",
+          "point": "We can see distant galaxies whose light was emitted when they were closer, but those galaxies are now unreachable—a cosmic illusion showing us things forever out of reach.",
+          "ts": 291
+        },
+        {
+          "label": "simple",
+          "point": "60,000 stars pass beyond our cosmic horizon every second of your life.",
+          "ts": 367
+        },
+        {
+          "label": "worth watching",
+          "point": "Future civilizations in the merged Milkdromeda galaxy may believe the universe is static and eternal, unable to detect the cosmic microwave background or learn about the Big Bang.",
+          "ts": 480
+        }
+      ],
+      "tags": {
+        "context": [
+          "deep dive"
+        ],
+        "type": [
+          "documentary",
+          "talk"
+        ]
+      },
+      "sentiment": {
+        "positive": 65,
+        "neutral": 20,
+        "critical": 15,
+        "themes": [
+          {
+            "tone": "negative",
+            "theme": "Existential dread from cosmic insignificance and isolation",
+            "quote": "This is the most upsetting thing that will literally never affect me"
+          },
+          {
+            "tone": "positive",
+            "theme": "Appreciation for Kurzgesagt's educational production quality and presentation style",
+            "quote": "They spend hundreds of hours making amazing content and end it with 'sorry it took so long'"
+          },
+          {
+            "tone": "positive",
+            "theme": "Perspective-shifting comfort from understanding universal scale reduces everyday anxiety",
+            "quote": "knowing the universe is so incomprehensibly large is kinda comforting. nothing I'm stressed about today really matters"
+          },
+          {
+            "tone": "negative",
+            "theme": "Melancholy about future darkness and loss of cosmic knowledge across deep time",
+            "quote": "To think someday the night sky will be empty is depressing."
+          }
+        ]
+      }
+    }
+  },
+  {
+    "videoId": "N2NwII5mAU4",
+    "title": "The future of design systems and AI | Schema by Figma 2025",
+    "channel": "Figma",
+    "duration": "11:55",
+    "uploadDate": "",
+    "thumbnail": "https://i.ytimg.com/vi/N2NwII5mAU4/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD72IiraxK9UqV2fbfuko1xeO_hew",
+    "analysis": {
+      "summary": "Matt, a design manager at Figma, presents how AI is reshaping design systems and introduces new Figma features (Figma Make, Make Kits, slots, Check Designs, and MCP) designed to bridge the gap between design and code, reduce fragmentation, and enable AI to assist teams more effectively.",
+      "clickbait": null,
+      "takeaways": [
+        {
+          "label": "simple",
+          "point": "The 'chasm of despair' is where design and code drift apart, eroding trust in design systems and causing teams to abandon them.",
+          "ts": 84
+        },
+        {
+          "label": "worth watching",
+          "point": "Figma Make allows production-grade components from npm packages to be used in design; Make Kits auto-generate component sets from Figma libraries to enable code-backed prototypes for entire teams.",
+          "ts": 205
+        },
+        {
+          "label": "simple",
+          "point": "Slots feature gives designers flexibility matching engineers' development capabilities, reducing need to detach components and improving system scalability.",
+          "ts": 270
+        },
+        {
+          "label": "worth watching",
+          "point": "Figma MCP bridges Figma and code by syncing tokens, props, patterns, and metadata as a live service; Check Designs provides real-time validation and auto-correction of design decisions against system rules.",
+          "ts": 314
+        },
+        {
+          "label": "worth watching",
+          "point": "Future vision: design systems will become self-evolving organisms that automatically learn and suggest updates based on team patterns, making documentation and governance less manual and more scalable.",
+          "ts": 428
+        }
+      ],
+      "tags": {
+        "context": [
+          "quick watch"
+        ],
+        "type": [
+          "talk",
+          "demo"
+        ]
+      },
+      "sentiment": {
+        "positive": 41,
+        "neutral": 35,
+        "critical": 24,
+        "themes": [
+          {
+            "tone": "positive",
+            "theme": "Innovation and practical value of new tools like Make Kits and AI-assisted design",
+            "quote": "This is genuinely innovative work, and I do think tools like Figma Make are exciting"
+          },
+          {
+            "tone": "negative",
+            "theme": "Concern that AI framing oversells automation and undervalues human craft and judgment",
+            "quote": "I strongly believe that the craftsmanship behind design will always be the foundation — even more so with AI."
+          },
+          {
+            "tone": "negative",
+            "theme": "Skepticism about pace of delivery and actual implementation timeline",
+            "quote": "This all sounds great! But… when? Can we move faster?"
+          },
+          {
+            "tone": "negative",
+            "theme": "Frustration with presentation style and perceived lack of concrete immediate impact",
+            "quote": "It is sad and weak. A design manager shares a vision of an ai assisted-design, and his best idea is a design-linter lol."
+          }
+        ]
+      }
+    }
+  },
+  {
+    "videoId": "EXqf9cQWsUw",
+    "title": "Air Fryers Are More Useful Than You Think",
+    "channel": "Andy Cooks",
+    "duration": "15:20",
+    "uploadDate": "",
+    "thumbnail": "https://i.ytimg.com/vi/EXqf9cQWsUw/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCcV2hxM5dPGtMtUbJk9e2fA9C-Gg",
+    "analysis": {
+      "summary": "Andy Cooks demonstrates five air fryer recipes, starting with Cantonese-style roast pork belly and chicken wings, explaining the science behind why air fryers excel at crisping food through high-velocity dry heat and even heat distribution.",
+      "clickbait": null,
+      "takeaways": [
+        {
+          "label": "worth watching",
+          "point": "Cantonese roast pork belly: Air fryer cuts cooking time roughly in half vs. oven; key techniques include blanching skin, dry-brining overnight, scoring the bottom, punching holes in skin to release steam, and boating with foil to render fat while keeping top crispy",
+          "ts": 34
+        },
+        {
+          "label": "worth watching",
+          "point": "Crispy chicken wings without deep frying: Use baking powder in dry spice rub to alter skin pH for extra crispness; arrange skin-side down, light oil spray, 200°C for 20–25 minutes with a flip at 12 minutes; serve with hot sauce or ranch",
+          "ts": 331
+        },
+        {
+          "label": "simple",
+          "point": "Air fryer efficiency: Preheats faster, cooks 30–50% quicker, uses a fraction of the energy of a full oven, and doesn't require babysitting like traditional ovens",
+          "ts": 268
+        },
+        {
+          "label": "simple",
+          "point": "Why air fryers work: High-velocity airflow distributes heat evenly and creates dry conditions ideal for crisping; similar principle to commercial combi ovens with humidity control",
+          "ts": 44
+        }
+      ],
+      "tags": {
+        "context": [
+          "quick watch"
+        ],
+        "type": [
+          "demo",
+          "tutorial"
+        ]
+      },
+      "sentiment": {
+        "positive": 90,
+        "neutral": 8,
+        "critical": 2,
+        "themes": [
+          {
+            "tone": "positive",
+            "theme": "Converts skeptics and air fryer snobs into enthusiastic users",
+            "quote": "I was an air fryer skeptic until I got one for free. Now I'd consider a good one essential."
+          },
+          {
+            "tone": "positive",
+            "theme": "Practical benefits: speed, energy efficiency, space-saving for busy households",
+            "quote": "No one wants to turn on an oven in summer. Love my air fryer."
+          },
+          {
+            "tone": "positive",
+            "theme": "Appreciation for Andy's credibility and non-condescending approach to cooking",
+            "quote": "It's great to see someone with actual credentials who doesn't look down on air fryers."
+          },
+          {
+            "tone": "positive",
+            "theme": "Real-world success with specific recipes; viewers excited to try demonstrated techniques",
+            "quote": "The pork belly recipe is exactly what I was looking for! I will be doing this tomorrow, absolutely."
+          }
+        ]
+      }
+    }
+  },
+  {
+    "videoId": "0HdzJz_evNw",
+    "title": "The Truly Absurd Secrets of An Incredible Americano",
+    "channel": "James Hoffmann",
+    "duration": "24:51",
+    "uploadDate": "",
+    "thumbnail": "https://i.ytimg.com/vi/0HdzJz_evNw/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD2XxheRVI_wzsA9kxUFD-28cIfqQ",
+    "analysis": {
+      "summary": "James Hoffmann explores often-overlooked techniques to dramatically improve Americanos, which he argues have been neglected compared to other espresso drinks. The video covers the technical challenges of Americanos (extraction limitations, perceived bitterness from dilution) and presents several 'absurd' optimizations—primarily steaming fresh water instead of using machine-dispensed water—that noticeably enhance flavor and texture without changing how the espresso is brewed.",
+      "clickbait": "The 'truly absurd secrets' refer to unconventional but effective techniques (mainly steaming water) that significantly improve Americanos despite sounding ridiculous at first.",
+      "takeaways": [
+        {
+          "label": "simple",
+          "point": "Americano's origin story may be misattributed; modern espresso wasn't invented until 1948, after WWII, so the 'American soldiers wanting weaker coffee' narrative is historically questionable.",
+          "ts": 75
+        },
+        {
+          "label": "worth watching",
+          "point": "Espresso extraction with lighter roasts is difficult due to limited water; darker roasts are used for espresso, but this contributes to bitterness when diluted for Americanos—context on why Americanos taste different from filter coffee.",
+          "ts": 120
+        },
+        {
+          "label": "worth watching",
+          "point": "Diluting espresso lowers oil concentration and increases perceived bitterness; steaming fresh water (to ~67°C) instead of using machine-dispensed hot water dramatically improves flavor, texture, and sweetness—the core optimization demonstrated.",
+          "ts": 262
+        },
+        {
+          "label": "simple",
+          "point": "Water from dedicated steam boilers on espresso machines can become increasingly concentrated over time as it evaporates, potentially affecting scale and taste.",
+          "ts": 314
+        },
+        {
+          "label": "worth watching",
+          "point": "Steamed water outperforms kettle-heated water in blind tastings; the likely mechanism involves dissolved gases (oxygen/CO₂), though exact reason is not definitively explained—an intriguing empirical finding.",
+          "ts": 440
+        }
+      ],
+      "tags": {
+        "context": [
+          "deep dive"
+        ],
+        "type": [
+          "demo",
+          "tutorial"
+        ]
+      },
+      "sentiment": {
+        "positive": 85,
+        "neutral": 10,
+        "critical": 5,
+        "themes": [
+          {
+            "tone": "positive",
+            "theme": "Practical impact and real-world results inspire viewers to try techniques immediately",
+            "quote": "I made her an Americano using steamed water without telling her this morning. I'm currently watching her try to figure out why it's so good."
+          },
+          {
+            "tone": "positive",
+            "theme": "Appreciation for James's explanatory approach and passion for coffee science",
+            "quote": "I am not sure I watch James for the coffee or his sheer passion. All I know is I walk away feeling happy"
+          },
+          {
+            "tone": "negative",
+            "theme": "Skepticism and humor about the absurdity of steaming water for an Americano",
+            "quote": "When James said 'steam water' I looked at my calender to check we weren't back at April 1st!😂"
+          },
+          {
+            "tone": "positive",
+            "theme": "Growing adoption of techniques in professional coffee shops with documented customer approval",
+            "quote": "I have been serving aerocanos for over a year and every single time people are surprised by these... velvety smooth, and refreshing drinks."
+          }
+        ]
+      }
+    }
+  },
+  {
+    "videoId": "BacJ6sEhqMo",
+    "title": "The Four Types of Memory Every AI Agent Needs",
+    "channel": "IBM Technology",
+    "duration": "10:41",
+    "uploadDate": "",
+    "thumbnail": "https://i.ytimg.com/vi/BacJ6sEhqMo/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA5jgGi8q0iK6rnBJd8YoYQQFqeZg",
+    "analysis": {
+      "summary": "This video explains the four types of memory AI agents need—working memory (context window), semantic memory (knowledge base), procedural memory (skills), and episodic memory (past experiences)—drawing parallels to human memory and showing how different agent types leverage these to function effectively.",
+      "clickbait": null,
+      "takeaways": [
+        {
+          "label": "simple",
+          "point": "Working memory is the agent's context window—fast but volatile, limited in size, similar to computer RAM.",
+          "ts": 201
+        },
+        {
+          "label": "simple",
+          "point": "Semantic memory stores facts, rules, and conventions; often implemented as simple Markdown files rather than complex vector databases.",
+          "ts": 325
+        },
+        {
+          "label": "worth watching",
+          "point": "Procedural memory uses 'progressive disclosure'—agents see only a lightweight skill index and load full instructions on-demand to avoid bloating the context window.",
+          "ts": 495
+        },
+        {
+          "label": "worth watching",
+          "point": "Episodic memory requires distilled experience (compressed notes) rather than full transcripts; 'forgetting' is an engineering challenge agents must solve to avoid token bloat and obsolescence.",
+          "ts": 648
+        },
+        {
+          "label": "simple",
+          "point": "Not all agents need all four memory types; simpler agents (e.g., thermostat) may only need working memory, while complex ones (e.g., coding agents) need all four.",
+          "ts": 822
+        }
+      ],
+      "tags": {
+        "context": [
+          "quick watch"
+        ],
+        "type": [
+          "talk",
+          "tutorial"
+        ]
+      },
+      "sentiment": {
+        "positive": 85,
+        "neutral": 10,
+        "critical": 5,
+        "themes": [
+          {
+            "tone": "positive",
+            "theme": "Excellent teaching clarity and practical breakdown of complex concepts.",
+            "quote": "Imagine all teachers could explain concepts the way you do. Thanks a lot."
+          },
+          {
+            "tone": "positive",
+            "theme": "Content is immediately actionable and useful for real agent implementation.",
+            "quote": "I use exactly the same and it works amazing, specially with Orchestrator and subagents."
+          },
+          {
+            "tone": "positive",
+            "theme": "IBM's technical depth and distillation of information is consistently impressive.",
+            "quote": "I really appreciate these videos that IBM puts out. Always blown away by the technical depth and distillation of information you all provide!"
+          },
+          {
+            "tone": "negative",
+            "theme": "Fundamental limitations: AI lacks human experiential learning and faces structural bias in self-evaluation.",
+            "quote": "The best human memory is the one learned by pain. AI doesn't feel pain or have experience and therefore it will always be missing a key element."
+          }
+        ]
+      }
+    }
+  },
+  {
+    "videoId": "GAWt6xCnFkI",
+    "title": "The 6-Step System to a Home You're Actually Proud Of",
+    "channel": "Reynard Lowell",
+    "duration": "14:49",
+    "uploadDate": "",
+    "thumbnail": "https://i.ytimg.com/vi/GAWt6xCnFkI/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA4wCh-q-8Es2df44L-Ph30u91fww",
+    "analysis": {
+      "summary": "A systematic approach to home design that prioritizes function and lifestyle over aesthetics. The video covers six core principles: designing around actual daily routines rather than aspirational ones, identifying and eliminating friction points in your space, planning layouts around natural movement paths and zoning, and building a cohesive design concept from curated inspiration rather than random purchases.",
+      "clickbait": null,
+      "takeaways": [
+        {
+          "label": "simple",
+          "point": "Design for how you actually live, not fantasy lifestyle—if your sofa layout doesn't match your real habits, no nice furniture will fix it.",
+          "ts": 52
+        },
+        {
+          "label": "simple",
+          "point": "Friction = bad design: identify annoying friction points (moving three things to reach one, tripping over shoes) as signals something needs redesign.",
+          "ts": 84
+        },
+        {
+          "label": "simple",
+          "point": "Point-of-view storage: place high-use items as close as possible to where they're needed (blanket basket by sofa, mail tray where it lands).",
+          "ts": 125
+        },
+        {
+          "label": "simple",
+          "point": "Map natural circulation paths first: maintain 75–90 cm walkways where people move; anything less than 45 cm feels cramped.",
+          "ts": 316
+        },
+        {
+          "label": "simple",
+          "point": "Use zoning to define room purpose: rugs anchor seating, sofa backs divide zones, consoles create separation without closing off space.",
+          "ts": 390
+        },
+        {
+          "label": "simple",
+          "point": "Test layout with painter's tape before buying: mark furniture footprints to validate traffic flow and room feel.",
+          "ts": 413
+        },
+        {
+          "label": "worth watching",
+          "point": "Build inspiration boards by identifying patterns (colors, materials, mood) rather than collecting random images—this becomes your design filter for all future decisions.",
+          "ts": 438
+        }
+      ],
+      "tags": {
+        "context": [
+          "quick watch"
+        ],
+        "type": [
+          "tutorial",
+          "commentary"
+        ]
+      },
+      "sentiment": {
+        "positive": 85,
+        "neutral": 12,
+        "critical": 3,
+        "themes": [
+          {
+            "tone": "positive",
+            "theme": "Practical, actionable advice that prioritizes function over aesthetics",
+            "quote": "They make practical sense, challenge the owner to think, feel and experiment with what make their living space suited to their lifestyle."
+          },
+          {
+            "tone": "positive",
+            "theme": "Validates viewers' own design instincts and real-world needs",
+            "quote": "My husband and kids are constantly moving my coffee table out of the way to make room for fun stuff. Maybe I should take the hint."
+          },
+          {
+            "tone": "positive",
+            "theme": "Clear, straightforward presentation and expert credibility",
+            "quote": "The clearest and most straightforward design channel on YouTube"
+          },
+          {
+            "tone": "negative",
+            "theme": "Requests for more specific guidance (accessibility, tiny homes, before-and-afters of same room)",
+            "quote": "It would be helpful if you could take before and after photos of the same room."
+          }
+        ]
+      }
+    }
+  },
+  {
+    "videoId": "gYwkKaK5yeQ",
+    "title": "The Cooking Skill That Can't Be Taught",
+    "channel": "Internet Shaquille",
+    "duration": "6:39",
+    "uploadDate": "",
+    "thumbnail": "https://i.ytimg.com/vi/gYwkKaK5yeQ/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAD1gMKVumAZm_Ec_DBwDkkptbKKg",
+    "analysis": {
+      "summary": "Internet Shaquille explains that cooking intuition—like judging salt amounts by feel, meat doneness by color, and ingredient behavior—cannot be learned from videos alone but must be developed through deliberate practice, repetition, and experimentation with your ingredients.",
+      "clickbait": "Intuition—the ability to make correct cooking judgments without measuring or overthinking. It's taught through hands-on practice, not instruction.",
+      "takeaways": [
+        {
+          "label": "simple",
+          "point": "Practice pinching and sprinkling measured salt between three fingers to develop feel for proper seasoning amounts.",
+          "ts": 0
+        },
+        {
+          "label": "worth watching",
+          "point": "Learn to judge meat doneness by adjusting heat level based on thickness while targeting a specific exterior color—practice with cheap ground beef to fail safely.",
+          "ts": 65
+        },
+        {
+          "label": "simple",
+          "point": "Study ingredient properties (acid, salt, sweetness, fat, glutamates) to predict how they affect dishes and make informed substitutions.",
+          "ts": 159
+        },
+        {
+          "label": "worth watching",
+          "point": "Learn dishes from other cultures to build a mental library of flavor combinations and cooking techniques you can draw from creatively.",
+          "ts": 237
+        },
+        {
+          "label": "simple",
+          "point": "Develop intuition through repetition, deliberate mistakes, and practice—skills like timing components so everything finishes together or fixing oversalted dishes on the fly.",
+          "ts": 286
+        }
+      ],
+      "tags": {
+        "context": [
+          "quick watch"
+        ],
+        "type": [
+          "tutorial",
+          "commentary"
+        ]
+      },
+      "sentiment": {
+        "positive": 90,
+        "neutral": 8,
+        "critical": 2,
+        "themes": [
+          {
+            "tone": "positive",
+            "theme": "Video communicates cooking intuition in an accessible, relatable way",
+            "quote": "You have managed to communicate the subjective element of cooking to the autistic YouTube community"
+          },
+          {
+            "tone": "positive",
+            "theme": "Viewers relate to the 'just know' experience of intuitive cooking development",
+            "quote": "The only way I knew it was done is because it just felt done. reaching those intuitive milestones is really exciting."
+          },
+          {
+            "tone": "positive",
+            "theme": "Appreciation for concise delivery without padding",
+            "quote": "this could've easily been a 20 minute video, but it wasn't. brevity & clarity off the charts."
+          },
+          {
+            "tone": "positive",
+            "theme": "Humorous visual details (peanut butter jar joke) enhance engagement",
+            "quote": "The cylindrical hole in the peanut butter at 3:16 is Andy Kaufman level genius"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "videoId": "DR-AvSBdmE8",
+    "title": "Why Weight Lifting is a Waste of Time | Dr. John Jaquish | TEDxMayfieldHS",
+    "channel": "TEDx Talks",
+    "duration": "18:19",
+    "uploadDate": "",
+    "thumbnail": "https://i.ytimg.com/vi/DR-AvSBdmE8/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCaa-d8LRT9WMfTwBL0u2Iuqa9KfA",
+    "analysis": {
+      "summary": "Dr. Jaquish argues that traditional weight lifting is ineffective because it uses constant resistance, while the body's strength varies dramatically across range of motion. He proposes variable resistance training (using chains, bands, or specialized devices) as a superior alternative that accommodates the body's natural strength curve, drawing from his research into bone density and genetic advantages in athleticism.",
+      "clickbait": "Weight lifting is not entirely a waste of time, but traditional constant-weight resistance is inefficient compared to variable resistance training that matches the body's strength capabilities at each point in the movement.",
+      "takeaways": [
+        {
+          "label": "simple",
+          "point": "The body is 7× stronger at certain joint positions than at others, making constant-weight training suboptimal",
+          "ts": 238
+        },
+        {
+          "label": "worth watching",
+          "point": "Variable resistance (chains, bands, or elastic devices) adjusts load to match strength curve; research shows it outperforms standard weights—explores the mechanism and practical applications",
+          "ts": 604
+        },
+        {
+          "label": "simple",
+          "point": "Genetic athletic outliers have tendons inserted at different points on bones, giving them natural elastic 'recycled energy' advantage",
+          "ts": 491
+        },
+        {
+          "label": "simple",
+          "point": "Most people quit fitness because traditional workouts don't deliver visible results, not because they're lazy",
+          "ts": 321
+        },
+        {
+          "label": "worth watching",
+          "point": "Bone density can be stimulated mechanically through high-impact forces (5–7× body weight) rather than medication—originated from solving his mother's osteoporosis problem",
+          "ts": 68
+        }
+      ],
+      "tags": {
+        "context": [
+          "deep dive"
+        ],
+        "type": [
+          "talk",
+          "commentary"
+        ]
+      },
+      "sentiment": {
+        "positive": 50,
+        "neutral": 25,
+        "critical": 25,
+        "themes": [
+          {
+            "tone": "positive",
+            "theme": "Variable resistance and mechanical solutions are genuinely innovative and eye-opening",
+            "quote": "The explanation about tendon insertion and recycled energy was so fascinating. I had no idea that the body could work like that"
+          },
+          {
+            "tone": "negative",
+            "theme": "Oversimplification and dismissal of proven weight training; presentation style is verbose for the core message",
+            "quote": "It took him 18 minutes to just say 'use variable resistance'"
+          },
+          {
+            "tone": "positive",
+            "theme": "Personal motivation and alternative approaches resonate; practical applications for joint health and injury recovery",
+            "quote": "I used resistance bands to help strengthen my leg after getting into a bad accident - they definitely work"
+          },
+          {
+            "tone": "negative",
+            "theme": "Factual errors (e.g., 'eat big to get big' claim) and incomplete reasoning undermine credibility",
+            "quote": "You do have to 'eat big' to get big. It is literally impossible to gain weight if you don't eat at a calorie surplus."
+          }
+        ]
+      }
+    }
+  },
+  {
+    "videoId": "4e2xKYbi0Ec",
+    "title": "Ich baue zum ersten Mal ein Mountainbike komplett selbst auf",
+    "channel": "Freeride Flo",
+    "duration": "23:44",
+    "uploadDate": "",
+    "thumbnail": "https://i.ytimg.com/vi/4e2xKYbi0Ec/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLC58The6TOBiEFugUsfClolOcGEnQ",
+    "analysis": {
+      "summary": "Freeride Flo builds his first mountain bike from scratch, starting with a bare frame and progressively adding components like the fork, headset, seat post, stem, handlebar, drivetrain, and brakes while learning techniques and troubleshooting missing tools along the way.",
+      "clickbait": null,
+      "takeaways": [
+        {
+          "label": "worth watching",
+          "point": "Setting up a work stand and initial frame prep — essential first steps before component installation",
+          "ts": 21
+        },
+        {
+          "label": "worth watching",
+          "point": "Seat post installation with torque specifications (6 Nm provisional) and proper logo orientation",
+          "ts": 31
+        },
+        {
+          "label": "worth watching",
+          "point": "Fork and headset assembly including bearing placement, greasing technique, and cup pressing with proper tools",
+          "ts": 104
+        },
+        {
+          "label": "worth watching",
+          "point": "Stem and handlebar installation with torque values (1 Nm lower, 6 Nm upper) and width considerations for bike handling",
+          "ts": 238
+        },
+        {
+          "label": "worth watching",
+          "point": "Bottom bracket installation with spacer positioning (3 mm left, 7.5 mm right) and 54 Nm torque specification",
+          "ts": 375
+        },
+        {
+          "label": "simple",
+          "point": "Derailleur and cage lock assembly — straightforward component attachment similar to Lego building",
+          "ts": 584
+        },
+        {
+          "label": "worth watching",
+          "point": "Common setup challenges: missing specialized tools forces mid-build parts ordering; having the right tool makes pressing operations much easier",
+          "ts": 239
+        }
+      ],
+      "tags": {
+        "context": [
+          "deep dive"
+        ],
+        "type": [
+          "tutorial",
+          "entertainment"
+        ]
+      },
+      "sentiment": {
+        "positive": 85,
+        "neutral": 12,
+        "critical": 3,
+        "themes": [
+          {
+            "tone": "positive",
+            "theme": "Entertainment value and humor throughout build process",
+            "quote": "Geiles Video. Hab mich kaputt gelacht, aber es ist mega informativ."
+          },
+          {
+            "tone": "positive",
+            "theme": "Educational and informative despite first-time build and relatable mistakes",
+            "quote": "Schön zu wissen daß du auch zur Truppe \"ich bestell nochmal was nach\" gehörst"
+          },
+          {
+            "tone": "positive",
+            "theme": "Inspiring viewers to attempt their own bike builds and enthusiasm for the process",
+            "quote": "Das Aufbauen von neuen Bikes macht fast schön süchtig, dieser ganze Prozess...einfach herrlich."
+          },
+          {
+            "tone": "positive",
+            "theme": "Interest in final bike configuration and performance (wheel size debate: 29er vs Mullet setup)",
+            "quote": "Ich würde es in Mullet aufbauen."
+          }
+        ]
+      }
+    }
+  },
+  {
+    "videoId": "zbmuiaPuiNM",
+    "title": "Google Just Dropped a Masterclass on Agentic Engineering (It's SO Good)",
+    "channel": "Cole Medin",
+    "duration": "21:56",
+    "uploadDate": "",
+    "thumbnail": "https://i.ytimg.com/vi/zbmuiaPuiNM/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBrFdsD0bJX0hUdwQokmAy3-q34kg",
+    "analysis": {
+      "summary": "Cole Medin breaks down Google's 51-page masterclass on agentic engineering, covering the AI-driven software development lifecycle, the concept that AI coding is a spectrum (not binary), and the critical role of the 'harness'—the rules, tools, and workflows that make up 90% of an effective AI coding system, with the LLM itself being only 10%.",
+      "clickbait": "Google's masterclass on agentic engineering is genuinely high-quality and well-structured; Cole confirms it aligns closely with industry best practices and his own teaching, making it worth engaging with.",
+      "takeaways": [
+        {
+          "label": "simple",
+          "point": "AI-driven SDLC shifts the bottleneck from implementation (now minutes/hours with AI) to specification quality and validation, where human involvement remains essential.",
+          "ts": 120
+        },
+        {
+          "label": "worth watching",
+          "point": "AI coding exists on a spectrum from 'vibe coding' (casual prompts, minimal validation) to 'agentic engineering' (engineered specs, automated evals, CI gates)—pick the right level for the job, not always the most rigorous.",
+          "ts": 253
+        },
+        {
+          "label": "simple",
+          "point": "The 'harness' (context, rules, tools, workflows, orchestration) comprises 90% of an effective AI coding system; the LLM model is only 10%—focus engineering effort on what you control, not model choice.",
+          "ts": 418
+        },
+        {
+          "label": "worth watching",
+          "point": "Harness components include global rules, deterministic hooks, packaged skills/workflows, codebase search methods, MCP servers, and sub-agents—these are reusable primitives for any AI coding assistant.",
+          "ts": 500
+        },
+        {
+          "label": "simple",
+          "point": "Agentic engineering achieves high reliability through systematic verification at every stage, separate code review processes, and LLM judges—essential for production code, unnecessary for disposable POCs.",
+          "ts": 363
+        }
+      ],
+      "tags": {
+        "context": [
+          "deep dive"
+        ],
+        "type": [
+          "commentary",
+          "tutorial"
+        ]
+      },
+      "sentiment": {
+        "positive": 85,
+        "neutral": 10,
+        "critical": 5,
+        "themes": [
+          {
+            "tone": "positive",
+            "theme": "Video clarity and educational value—viewers appreciate Cole's distillation of complex material.",
+            "quote": "That's a fantastic distillation of a ton of ideas. You are a pro, sir!"
+          },
+          {
+            "tone": "positive",
+            "theme": "Validation of practical experience—viewers confirm harness-first, model-agnostic approach works in practice.",
+            "quote": "Been saying this. We're better off building specialized agents with proper harnesses than obsessing over which model you use."
+          },
+          {
+            "tone": "positive",
+            "theme": "Spectrum framing resolves confusion—viewers found the vibe-coding-to-agentic spectrum helpful for self-assessment.",
+            "quote": "this video helped me understand the difference, or more precise where in the spectrum I currently sit."
+          },
+          {
+            "tone": "negative",
+            "theme": "Model regression concern—some viewers note recent LLM updates (Gemini 3.5) have degraded performance despite harness improvements.",
+            "quote": "why did antigravity / gemini recently got so much worse with the updates to antigravity and the switch to gemini 3.5"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "videoId": "VbqaL_eHhKY",
+    "title": "YC's Head of Design Shows You How To Design With AI",
+    "channel": "Y Combinator",
+    "duration": "30:55",
+    "uploadDate": "",
+    "thumbnail": "https://i.ytimg.com/vi/VbqaL_eHhKY/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBQuJwPJc5YyQWupsZhVoECYP1D3w",
+    "analysis": {
+      "summary": "YC's head of design E Bufar demonstrates her AI-native design workflow and process, showcasing how she uses tools like Claude, Conductor, and Aqua to design products end-to-end. She walks through three projects (Paxel, Sodazine, and Startup School), explaining design decisions, emerging AI-native patterns like human vs. machine versions of websites, and how voice-to-code workflows are changing her design practice.",
+      "clickbait": null,
+      "takeaways": [
+        {
+          "label": "simple",
+          "point": "Bufar works almost exclusively in Conductor and paper design, using voice (via Aqua) instead of typing to communicate with AI models.",
+          "ts": 27
+        },
+        {
+          "label": "worth watching",
+          "point": "Paxel is a YC experiment to understand how developers code with AI agents, inspired by Spotify Wrapped; the design emphasizes playfulness and fun insights.",
+          "ts": 99
+        },
+        {
+          "label": "worth watching",
+          "point": "Building custom fine-tuning modals (like the dithering effect controller) is a design pattern that lets you iterate and perfect details instead of accepting AI-generated defaults.",
+          "ts": 315
+        },
+        {
+          "label": "worth watching",
+          "point": "Emerging pattern: websites now need dual versions—one optimized for human consumption (visual design) and one for AI agents (markdown, copy-to-clipboard, safety warnings).",
+          "ts": 427
+        },
+        {
+          "label": "simple",
+          "point": "Feature request forms can serve dual purpose: collecting bug reports and feature ideas, inspired by Conductor's approach.",
+          "ts": 511
+        }
+      ],
+      "tags": {
+        "context": [
+          "deep dive"
+        ],
+        "type": [
+          "talk",
+          "tutorial"
+        ]
+      },
+      "sentiment": {
+        "positive": 75,
+        "neutral": 15,
+        "critical": 10,
+        "themes": [
+          {
+            "tone": "positive",
+            "theme": "Appreciation for sharing cutting-edge design workflows and AI-native patterns",
+            "quote": "Thank you so much for creating and sharing this content. I felt privileged to listen and learn."
+          },
+          {
+            "tone": "positive",
+            "theme": "Enthusiasm about new design possibilities and AI tools enabling creative work",
+            "quote": "These workflows and tools makes me use AI more and more and i am excited now."
+          },
+          {
+            "tone": "negative",
+            "theme": "Skepticism about YC bias—video promotes YC portfolio companies rather than objective tools",
+            "quote": "So this is a commercial for the startups you invest in, not the actual best tools?"
+          },
+          {
+            "tone": "negative",
+            "theme": "Gap between ambitious process and actual design output quality",
+            "quote": "One would think that with such advanced tools that design output would be of high-quality and instead it's subpar."
+          }
+        ]
+      }
+    }
+  },
+  {
+    "videoId": "TjELwAwigXc",
+    "title": "How to Make 500k/mo With AI Websites",
+    "channel": "Pavlo",
+    "duration": "1:09:44",
+    "uploadDate": "",
+    "thumbnail": "https://i.ytimg.com/vi/TjELwAwigXc/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDgGrG2HN1zxXlLZ8GmMgc-F7oT5Q",
+    "analysis": {
+      "summary": "Pavlo interviews Michael, co-founder of a web design agency that scaled to $500k/month in one year through cold calling/SMS to contractors and strategic partnership. The episode covers Michael's journey from failed agency attempts to finding product-market fit with a $300/month website + automation model, his meeting and partnership with Kai, and tactical details on client acquisition and business operations.",
+      "clickbait": "Achievable but requires significant hustle and niche focus—the title suggests a proven blueprint but the core mechanics are cold calling contractors, offering cheap websites, and strategic partnership; not a passive AI-automated income stream.",
+      "takeaways": [
+        {
+          "label": "simple",
+          "point": "Start with cold calling/cold SMS targeting businesses with poor online presence (found via Google Maps)",
+          "ts": 65
+        },
+        {
+          "label": "worth watching",
+          "point": "Shift from service-based ($1,500/mo ad management) to product-based ($300/mo website + automation) model for better unit economics and faster client acquisition",
+          "ts": 196
+        },
+        {
+          "label": "simple",
+          "point": "Pick a specific niche (contractors worked; real estate and gyms didn't) and master cold calling in that niche",
+          "ts": 152
+        },
+        {
+          "label": "worth watching",
+          "point": "Strategic partnership matters—Michael + Kai (10x'd from $50k to $500k/month in one year by combining Michael's operations strength with Kai's marketing/face expertise)",
+          "ts": 390
+        },
+        {
+          "label": "simple",
+          "point": "High-volume execution is critical: Michael makes 400–700 dials per day to generate clients",
+          "ts": 248
+        },
+        {
+          "label": "simple",
+          "point": "Base package ($300/mo website + hosting + basic automation) is the entry point; upsells and retention drive revenue",
+          "ts": 31
+        }
+      ],
+      "tags": {
+        "context": [
+          "deep dive"
+        ],
+        "type": [
+          "talk",
+          "tutorial"
+        ]
+      },
+      "sentiment": {
+        "positive": 95,
+        "neutral": 5,
+        "critical": 0,
+        "themes": [
+          {
+            "tone": "positive",
+            "theme": "High value and tactical insights; viewers praise the interview quality and actionable takeaways",
+            "quote": "literally the best, and most valuable interview i have ever seen"
+          },
+          {
+            "tone": "positive",
+            "theme": "Inspiration and motivation; viewers feel reinvigorated to pursue agency/scaling business models",
+            "quote": "Amazing exchange ! Re boosted me to grind on this business model."
+          },
+          {
+            "tone": "positive",
+            "theme": "Credibility and respect for hustle; viewers acknowledge the work required (cold calling volume) as legitimate",
+            "quote": "Mike, you're a gangster for 400-700 dials a day my mind cannot fathom!"
+          },
+          {
+            "tone": "negative",
+            "theme": "Minor gap: lack of detail on AI tools/platforms used to build websites",
+            "quote": "Referring to the title, would have been nice to learn which AI platforms build the websites"
+          }
+        ]
+      }
+    }
+  }
+]

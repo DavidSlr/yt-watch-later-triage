@@ -11,6 +11,8 @@ For each video it offers
 - a few key takeaways or a list of things mentioned in the title (e.g. "7 ways to do X")
 - a general comment sentiment, with examples of what people say
 
+**[View a demo version →](https://davidslr.github.io/yt-watch-later-triage/demo/)** (static preview with pre-generated AI output, no install required)
+
 ![Example screenshot of the YT Watch Later Triage extension showing an analyzed video about weight-lifting science with a click-baity title](readme_screenshot.png)
 
 ---

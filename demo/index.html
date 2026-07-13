@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watch Later — Demo</title>
+  <meta name="description" content="Interactive demo of YT Watch Later Triage — a Firefox extension with AI-powered video summaries, takeaways, and sentiment analysis." />
+  <link rel="stylesheet" href="../pages/watchlater.css" />
+  <link rel="stylesheet" href="demo.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <svg class="logo" viewBox="0 0 32 32" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <g clip-path="url(#wla-logo-clip)">
+          <path d="M32 32H-1V0H32V32ZM22.9375 6.53418C22.6152 5.6641 21.3848 5.6641 21.0625 6.53418L19.459 10.8682C19.3577 11.1417 19.1417 11.3577 18.8682 11.459L14.5342 13.0625C13.6641 13.3848 13.6641 14.6152 14.5342 14.9375L18.8682 16.541C19.1417 16.6423 19.3577 16.8583 19.459 17.1318L21.0625 21.4658C21.3848 22.3359 22.6152 22.3359 22.9375 21.4658L24.541 17.1318C24.6423 16.8583 24.8583 16.6423 25.1318 16.541L29.4658 14.9375C30.3359 14.6152 30.3359 13.3848 29.4658 13.0625L25.1318 11.459C24.8583 11.3577 24.6423 11.1417 24.541 10.8682L22.9375 6.53418Z" fill="#28ADA0"/>
+          <path d="M10.2185 9.83193C10.0753 10.0857 9.99992 10.3738 10 10.6671V22.3329C9.99992 22.6262 10.0753 22.9143 10.2185 23.1681C10.3616 23.4219 10.5676 23.6325 10.8155 23.7785C11.0634 23.9246 11.3445 24.001 11.6304 24C11.9163 23.999 12.1969 23.9206 12.4438 23.7729L22.1931 17.9399C22.4388 17.7931 22.6426 17.5827 22.7842 17.3297C22.9258 17.0768 23.0002 16.7901 23 16.4984C22.9998 16.2068 22.9249 15.9203 22.7828 15.6676C22.6408 15.4149 22.4366 15.2048 22.1906 15.0584L12.4438 9.22715C12.1969 9.07935 11.9163 9.00101 11.6304 9.00001C11.3445 8.99901 11.0634 9.07541 10.8155 9.22148C10.5676 9.36754 10.3616 9.57812 10.2185 9.83193Z" fill="white"/>
+        </g>
+        <defs>
+          <clipPath id="wla-logo-clip">
+            <rect width="32" height="32" rx="6" fill="white"/>
+          </clipPath>
+        </defs>
+      </svg>
+      <h1>Watch Later</h1>
+      <wla-chip id="video-count" hidden></wla-chip>
+    </div>
+    <div class="header-right">
+      <a class="demo-badge" href="https://github.com/DavidSlr/yt-watch-later-triage" target="_blank" rel="noopener">Demo · View source ↗</a>
+    </div>
+    <wla-chip id="demo-warning-chip" state="warning" value="This is a static demo with pre-generated AI output. List management functions are disabled."></wla-chip>
+  </header>
+
+  <!-- ── Player view — always visible; this is a fixed demo dataset, no loading/error states needed ── -->
+  <div id="player-view">
+
+    <div class="player-section">
+
+      <div class="player-wrapper">
+        <iframe id="yt-player"
+          src="about:blank"
+          title="YouTube video player"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+      <!-- Info panel: sticky info + actions on top, scrollable accordion below -->
+      <aside class="info-panel">
+
+        <div class="info-sticky">
+          <h2 id="info-title" class="info-title"></h2>
+          <div class="info-channel-row">
+            <span id="info-channel" class="info-channel"></span>
+            <span id="info-video-duration" class="info-video-duration"></span>
+          </div>
+          <div class="info-actions">
+            <wla-button id="btn-remove-next" icon="close" class="info-btn-remove">Remove &amp; Next</wla-button>
+            <wla-button id="btn-keep" variant="secondary" icon="arrow-right" class="info-btn-flex">Keep</wla-button>
+            <a id="btn-open-yt" href="#" target="_blank" rel="noopener">
+              <wla-button variant="secondary" class="info-btn-flex" title="Open on YouTube">Open</wla-button>
+            </a>
+          </div>
+        </div>
+
+        <wla-accordion-group class="acc-group">
+          <wla-accordion title="Summary" open>
+            <div class="ai-content" data-section="summary"></div>
+          </wla-accordion>
+          <wla-accordion title="Key Takeaways" open>
+            <div class="ai-content" data-section="takeaways"></div>
+          </wla-accordion>
+          <wla-accordion title="Comment Sentiment" open>
+            <div class="ai-content" data-section="sentiment"></div>
+          </wla-accordion>
+          <wla-accordion title="Contextual Tags" open>
+            <div class="ai-content" data-section="tags"></div>
+          </wla-accordion>
+        </wla-accordion-group>
+
+      </aside>
+    </div><!-- /player-section -->
+
+    <!-- Queue -->
+    <div class="queue-section" id="queue-section">
+      <div class="queue-header" id="queue-collapse-toggle" role="button" tabindex="0" aria-expanded="true" aria-label="Toggle queue visibility">
+        <div class="queue-title-left">
+          <span class="queue-label">Queue</span>
+          <span id="queue-count" class="queue-count"></span>
+        </div>
+
+        <span class="queue-collapse-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <path d="M12 15.5 6 9.5l1.41-1.41L12 12.67l4.59-4.58L18 9.5z"/>
+            <path d="M12 21 6 15l1.41-1.41L12 18.17l4.59-4.58L18 15z"/>
+          </svg>
+        </span>
+
+        <div class="queue-nav">
+          <wla-button id="queue-prev" variant="secondary" size="sm" icon-only icon="arrow-left" label="Scroll left"></wla-button>
+          <wla-button id="queue-next" variant="secondary" size="sm" icon-only icon="arrow-right" label="Scroll right"></wla-button>
+        </div>
+      </div>
+      <div id="queue-scroll" class="queue-scroll"></div>
+    </div>
+
+  </div><!-- /player-view -->
+
+  <script type="module" src="../pages/components.bundle.js"></script>
+  <script src="demo.js"></script>
+</body>
+</html>

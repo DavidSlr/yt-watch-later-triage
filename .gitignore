@@ -11,3 +11,7 @@ pages/components.bundle.js
 
 # web-ext build/sign output
 web-ext-artifacts/
+
+# Personal draft material for portfolio case study (not project docs)
+case-study/
+prompts-condensed.md
