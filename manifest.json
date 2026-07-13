@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YT Watch Later Triage",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "View and manage your YouTube Watch Later list in a dedicated tab.",
   "browser_specific_settings": {
     "gecko": {
