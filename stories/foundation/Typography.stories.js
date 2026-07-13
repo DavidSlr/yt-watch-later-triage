@@ -1,4 +1,7 @@
 import { html } from 'lit';
+import tokensRaw from '../../tokens/tokens.css?raw';
+import tokensJson from '../../tokens/tokens.json';
+import { parseTokenGroups } from './_parseTokens.js';
 
 export default {
   title: 'Foundation/Typography',
@@ -6,28 +9,40 @@ export default {
   parameters: { layout: 'padded' },
 };
 
-const SCALE = [
-  { token: '--font-size-xl',  size: '20px', rem: '1.25rem',   weight: 700, label: 'xl · Bold',     sample: 'Watch Later' },
-  { token: '--font-size-lg',  size: '17px', rem: '1.0625rem', weight: 600, label: 'lg · Semibold', sample: 'Modal heading' },
-  { token: '--font-size-base',size: '14px', rem: '0.875rem',  weight: 400, label: 'base · Normal', sample: 'Default body text and descriptions' },
-  { token: '--font-size-sm',  size: '12px', rem: '0.75rem',   weight: 400, label: 'sm · Normal',   sample: 'Timestamps, hints, badges' },
-];
+// Primitive scale (size/weight/line-height) comes straight from tokens.css —
+// it's what the app actually renders with, so it's the more authoritative
+// source between the two token files for these raw values.
+const SCALE = parseTokenGroups(tokensRaw, '--font-size-')[0]?.tokens ?? [];
+const WEIGHTS = parseTokenGroups(tokensRaw, '--font-weight-')[0]?.tokens ?? [];
+const LINE_HEIGHTS = parseTokenGroups(tokensRaw, '--line-height-')[0]?.tokens ?? [];
 
-const TEXT_STYLES = [
-  { name: 'title',   token: '--text-title-size',   weight: 700, color: 'text',          lineHeight: 'tight', size: 'xl · 20px · bold',      sample: 'Watch Later',                                            description: 'Page / extension title' },
-  { name: 'heading', token: '--text-heading-size',  weight: 600, color: 'text',          lineHeight: 'tight', size: 'lg · 17px · semibold',  sample: 'AI Settings',                                            description: 'Panel headings, modal titles' },
-  { name: 'ui',      token: '--text-body-size',     weight: 600, color: 'text',          lineHeight: 'tight', size: 'base · 14px · semibold',sample: 'Refresh list',                                           description: 'Interactive elements — buttons, menu items' },
-  { name: 'body',    token: '--text-body-size',     weight: 400, color: 'text',          lineHeight: 'base',  size: 'base · 14px · normal',  sample: 'A clear explanation of what this video covers and why.',  description: 'Default body text, descriptions, inputs' },
-  { name: 'label',   token: '--text-label-size',    weight: 600, color: 'text',          lineHeight: 'tight', size: 'base · 14px · semibold',sample: 'API Key',                                                description: 'Form labels, section headings, tab text' },
-  { name: 'hint',    token: '--text-caption-size',  weight: 400, color: 'text-muted',    lineHeight: 'base',  size: 'sm · 12px · normal',    sample: 'Paste your Gemini API key here. It is stored locally.',   description: 'Form hints, helper text, secondary content' },
-  { name: 'caption', token: '--text-caption-size',  weight: 400, color: 'text-disabled', lineHeight: 'base',  size: 'sm · 12px · normal',    sample: '28:14 · 2 weeks ago',                                    description: 'Timestamps, badges, inline metadata' },
-];
+// The named text styles (title, heading, body, ...) are composite
+// size+weight+line-height combinations with no equivalent in tokens.css —
+// that mapping only exists in tokens.json's textStyle group, so that's the
+// source of truth for this table specifically.
+function resolveAlias(value) {
+  const m = typeof value === 'string' && value.match(/^\{([\w.]+)\}$/);
+  if (!m) return value;
+  return m[1].split('.').reduce((node, key) => node?.[key], tokensJson)?.$value ?? value;
+}
 
-const LINE_HEIGHT_MAP = {
-  tight: 'var(--line-height-tight, 1.25)',
-  base: 'var(--line-height-base, 1.45)',
-  relaxed: 'var(--line-height-relaxed, 1.6)',
+// Sample text and which text-color token to demo each style with are
+// presentation choices with nothing to derive them from — those stay
+// hand-authored. Everything else (size, weight, line-height, description)
+// is read from tokens.json, so it can't drift from the actual token values.
+const SAMPLES = {
+  title:   { color: 'text',          sample: 'Watch Later' },
+  heading: { color: 'text',          sample: 'AI Settings' },
+  ui:      { color: 'text',          sample: 'Refresh list' },
+  body:    { color: 'text',          sample: 'A clear explanation of what this video covers and why.' },
+  label:   { color: 'text',          sample: 'API Key' },
+  hint:    { color: 'text-muted',    sample: 'Paste your Gemini API key here. It is stored locally.' },
+  caption: { color: 'text-disabled', sample: '28:14 · 2 weeks ago' },
 };
+// Display order only — if a new textStyle is added to tokens.json without
+// updating this, it still appears (sorted to the end), just without a
+// curated sample; nothing silently goes missing.
+const ORDER = ['title', 'heading', 'ui', 'body', 'label', 'hint', 'caption'];
 
 const COLOR_MAP = {
   'text':          { css: 'var(--color-text, #e8e8e8)',          hex: '#e8e8e8', token: '--color-text' },
@@ -35,34 +50,40 @@ const COLOR_MAP = {
   'text-disabled': { css: 'var(--color-text-disabled, #555)',    hex: '#555555', token: '--color-text-disabled' },
 };
 
-const WEIGHTS = [
-  { token: '--font-weight-normal',   value: 400, label: 'Normal 400' },
-  { token: '--font-weight-semibold', value: 600, label: 'Semibold 600' },
-  { token: '--font-weight-bold',     value: 700, label: 'Bold 700' },
-];
-
-const LINE_HEIGHTS = [
-  { token: '--line-height-tight',   value: '1.25', label: 'tight',   sample: 'A tight line height used for headings and compact UI. The quick brown fox.' },
-  { token: '--line-height-base',    value: '1.45', label: 'base',    sample: 'The default line height for body copy and most interface text. The quick brown fox.' },
-  { token: '--line-height-relaxed', value: '1.6',  label: 'relaxed', sample: 'More breathing room for longer paragraphs and readable content. The quick brown fox.' },
-];
+const TEXT_STYLES = Object.entries(tokensJson.textStyle)
+  .map(([name, def]) => ({
+    name,
+    description: def.$description ?? '',
+    size: resolveAlias(def.fontSize.$value),
+    weight: resolveAlias(def.fontWeight.$value),
+    lineHeight: resolveAlias(def.lineHeight.$value),
+    color: SAMPLES[name]?.color ?? 'text',
+    sample: SAMPLES[name]?.sample ?? 'The quick brown fox jumps over the lazy dog.',
+  }))
+  .sort((a, b) => {
+    const ia = ORDER.indexOf(a.name), ib = ORDER.indexOf(b.name);
+    if (ia === -1 && ib === -1) return a.name.localeCompare(b.name);
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
 
 export const TypeScale = {
   name: 'Type Scale',
   render: () => html`
     <div style="max-width:700px">
       <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-muted,#aaa);margin-bottom:16px">Size scale</div>
-      ${SCALE.map(({ token, size, rem, weight, label, sample }) => html`
+      ${SCALE.map(({ name, value, note }) => html`
         <div style="
           display:flex;align-items:baseline;gap:16px;padding:10px 0;
           border-bottom:1px solid var(--color-border,#2e2e2e);
         ">
           <div style="width:220px;flex-shrink:0">
-            <div style="font-size:var(${token});font-weight:${weight};color:var(--color-text,#e8e8e8);line-height:1.3">${sample}</div>
+            <div style="font-size:var(${name});font-weight:600;color:var(--color-text,#e8e8e8);line-height:1.3">${name.replace('--font-size-', '')}</div>
           </div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:12px;font-weight:600;color:var(--color-text,#e8e8e8)">${label}</div>
-            <div style="font-size:11px;color:var(--color-text-muted,#aaa);font-family:monospace">${token} · ${size} / ${rem}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--color-text,#e8e8e8)">${name.replace('--font-size-', '')}</div>
+            <div style="font-size:11px;color:var(--color-text-muted,#aaa);font-family:monospace">${name} · ${value}${note ? ` / ${note}` : ''}</div>
           </div>
         </div>
       `)}
@@ -76,24 +97,24 @@ export const TextStyles = {
     <div style="max-width:700px">
       <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-muted,#aaa);margin-bottom:4px">Text styles</div>
       <p style="font-size:12px;color:var(--color-text-muted,#aaa);margin:0 0 20px;line-height:1.5">
-        Semantic roles combining size, weight, and color. Semantic size aliases (<code style="font-size:11px;background:#222;padding:1px 4px;border-radius:3px">--text-*-size</code>) are available as CSS custom properties. Full composite tokens are in <code style="font-size:11px;background:#222;padding:1px 4px;border-radius:3px">tokens.json → textStyle</code> for Figma.
+        Semantic roles combining size, weight, and line-height. Defined once in <code style="font-size:11px;background:#222;padding:1px 4px;border-radius:3px">tokens.json → textStyle</code> (also the format Figma Variables consume) — sample text and color role are the only parts authored here.
       </p>
-      ${TEXT_STYLES.map(({ name, token, size, color, lineHeight, sample, description, weight }) => html`
+      ${TEXT_STYLES.map(({ name, size, weight, lineHeight, color, sample, description }) => html`
         <div style="
           display:flex;align-items:flex-start;gap:20px;padding:14px 0;
           border-bottom:1px solid var(--color-border,#2e2e2e);
         ">
           <div style="width:220px;flex-shrink:0">
             <div style="
-              font-size:var(${token});
+              font-size:${size};
               font-weight:${weight};
               color:${COLOR_MAP[color].css};
-              line-height:${LINE_HEIGHT_MAP[lineHeight]};
+              line-height:${lineHeight};
             ">${sample}</div>
           </div>
           <div style="flex:1">
             <div style="font-size:12px;font-weight:600;color:var(--color-text,#e8e8e8)">${name}</div>
-            <div style="font-size:11px;color:var(--color-text-muted,#aaa);font-family:monospace;margin-top:2px">${size}</div>
+            <div style="font-size:11px;color:var(--color-text-muted,#aaa);font-family:monospace;margin-top:2px">${size} · ${weight} · ${lineHeight}</div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
               <div style="
                 width:10px;height:10px;border-radius:50%;flex-shrink:0;
@@ -115,15 +136,15 @@ export const FontWeights = {
   render: () => html`
     <div style="max-width:500px">
       <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-muted,#aaa);margin-bottom:16px">Weights</div>
-      ${WEIGHTS.map(({ token, value, label }) => html`
+      ${WEIGHTS.map(({ name, value }) => html`
         <div style="
           display:flex;align-items:center;gap:24px;padding:12px 0;
           border-bottom:1px solid var(--color-border,#2e2e2e);
         ">
           <div style="font-size:16px;font-weight:${value};color:var(--color-text,#e8e8e8);width:200px">The quick brown fox</div>
           <div>
-            <div style="font-size:12px;font-weight:600;color:var(--color-text,#e8e8e8)">${label}</div>
-            <div style="font-size:11px;color:var(--color-text-muted,#aaa);font-family:monospace">${token}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--color-text,#e8e8e8)">${name.replace('--font-weight-', '')} ${value}</div>
+            <div style="font-size:11px;color:var(--color-text-muted,#aaa);font-family:monospace">${name}</div>
           </div>
         </div>
       `)}
@@ -136,15 +157,15 @@ export const LineHeights = {
   render: () => html`
     <div style="max-width:600px">
       <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-muted,#aaa);margin-bottom:16px">Line heights</div>
-      ${LINE_HEIGHTS.map(({ token, value, label, sample }) => html`
+      ${LINE_HEIGHTS.map(({ name, value }) => html`
         <div style="
           display:flex;gap:24px;padding:16px 0;
           border-bottom:1px solid var(--color-border,#2e2e2e);
         ">
-          <div style="width:280px;flex-shrink:0;font-size:14px;line-height:${value};color:var(--color-text,#e8e8e8)">${sample}</div>
+          <div style="width:280px;flex-shrink:0;font-size:14px;line-height:${value};color:var(--color-text,#e8e8e8)">The quick brown fox jumps over the lazy dog. Used here to preview how this line height reads across a couple of lines.</div>
           <div style="padding-top:2px">
-            <div style="font-size:12px;font-weight:600;color:var(--color-text,#e8e8e8)">${label} · ${value}</div>
-            <div style="font-size:11px;color:var(--color-text-muted,#aaa);font-family:monospace">${token}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--color-text,#e8e8e8)">${name.replace('--line-height-', '')} · ${value}</div>
+            <div style="font-size:11px;color:var(--color-text-muted,#aaa);font-family:monospace">${name}</div>
           </div>
         </div>
       `)}

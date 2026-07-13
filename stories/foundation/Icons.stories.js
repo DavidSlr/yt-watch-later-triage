@@ -1,4 +1,5 @@
-import { html } from 'lit';
+import { html, svg } from 'lit';
+import { ICONS } from '../../components/wla-button.js';
 
 export default {
   title: 'Foundation/Icons',
@@ -29,52 +30,48 @@ const APP_ICONS = [
   },
 ];
 
-// ── UI icons (inline SVG, embedded in components) ────────────────────────────
+// ── Shared action icons (from wla-button.js's ICONS map) ─────────────────────
+// Rendered from the live map, not copied — an icon added, changed, or
+// removed there shows up (or disappears) here automatically.
 
-const UI_ICONS = [
-  {
-    name: 'Close',
-    usage: 'Modal dismiss, accordion collapse',
-    svg: html`<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`,
-  },
-  {
-    name: 'Play / Chevron',
-    usage: 'Accordion expand, queue card seek',
-    svg: html`<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M8 5v14l11-7z"/></svg>`,
-  },
+const SHARED_USAGE = {
+  refresh:       'Reload Watch Later list',
+  settings:      'AI settings button',
+  close:         'Buttons, modal dismiss, queue-card remove',
+  play:          'Accordion expand, queue card seek',
+  'arrow-left':  'Queue scroll previous',
+  'arrow-right': 'Queue scroll next, button icon',
+};
+
+const SHARED_ICONS = Object.entries(ICONS).map(([name, path]) => ({
+  name,
+  usage: SHARED_USAGE[name] ?? '',
+  svg: svg`<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">${path}</svg>`,
+}));
+
+// ── Component-local icons ─────────────────────────────────────────────────────
+// Each of these is a one-off inline SVG inside its own component, not
+// centralized anywhere — unlike the shared list above, there's no live
+// source to render these from, so they're copied by hand and can drift if
+// the component's own icon changes without this being updated too.
+
+const LOCAL_ICONS = [
   {
     name: 'Play (small)',
-    usage: 'Timestamp hover indicator',
+    usage: 'Timestamp hover indicator — wla-takeaway',
     svg: html`<svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16"><path d="M3 2.5l10 5.5-10 5.5V2.5z"/></svg>`,
   },
   {
-    name: 'Arrow up',
-    usage: 'Queue collapse toggle',
-    svg: html`<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M7.41 15.41 12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>`,
-  },
-  {
-    name: 'Arrow left',
-    usage: 'Queue scroll previous',
-    svg: html`<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>`,
-  },
-  {
-    name: 'Arrow right',
-    usage: 'Queue scroll next, button icon',
-    svg: html`<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>`,
-  },
-  {
-    name: 'Refresh',
-    usage: 'Reload Watch Later list',
-    svg: html`<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>`,
-  },
-  {
-    name: 'Settings',
-    usage: 'AI settings button',
-    svg: html`<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.484.484 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.61 3.61 0 0 1 8.4 12c0-1.98 1.62-3.6 3.6-3.6s3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>`,
+    name: 'Double chevron',
+    usage: 'Queue collapse/expand toggle — watchlater.html',
+    svg: html`<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+      <path d="M12 15.5 6 9.5l1.41-1.41L12 12.67l4.59-4.58L18 9.5z"/>
+      <path d="M12 21 6 15l1.41-1.41L12 18.17l4.59-4.58L18 15z"/>
+    </svg>`,
   },
   {
     name: 'Eye (visible)',
-    usage: 'Password field — show password',
+    usage: 'Password field — show password — wla-form-field',
     svg: html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
       <circle cx="12" cy="12" r="3"/>
@@ -82,7 +79,7 @@ const UI_ICONS = [
   },
   {
     name: 'Eye (hidden)',
-    usage: 'Password field — hide password',
+    usage: 'Password field — hide password — wla-form-field',
     svg: html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
       <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
       <line x1="1" y1="1" x2="23" y2="23"/>
@@ -130,12 +127,20 @@ export const AllIcons = {
         ${APP_ICONS.map(({ content, name, label, usage }) => card(content, label, name, usage))}
       </div>
 
-      ${sectionLabel('UI Icons')}
+      ${sectionLabel('Shared action icons')}
       <p style="font-size:13px;color:var(--color-text-muted,#aaa);margin:0 0 16px;line-height:1.5">
-        Inline SVG only — no icon library. Each icon is embedded directly in the component that uses it.
+        Rendered live from <code style="font-size:11px;background:#222;padding:1px 4px;border-radius:3px">wla-button.js</code>'s <code style="font-size:11px;background:#222;padding:1px 4px;border-radius:3px">ICONS</code> map — add or change an icon there and it updates here automatically.
+      </p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:40px">
+        ${SHARED_ICONS.map(({ svg, name, usage }) => card(svg, name, '', usage))}
+      </div>
+
+      ${sectionLabel('Component-local icons')}
+      <p style="font-size:13px;color:var(--color-text-muted,#aaa);margin:0 0 16px;line-height:1.5">
+        One-off inline SVGs, each local to a single component — no shared map to render these from, so they're copied by hand here and can go stale if the source changes.
       </p>
       <div style="display:flex;flex-wrap:wrap;gap:12px">
-        ${UI_ICONS.map(({ svg, name, usage }) => card(svg, name, '', usage))}
+        ${LOCAL_ICONS.map(({ svg, name, usage }) => card(svg, name, '', usage))}
       </div>
 
     </div>

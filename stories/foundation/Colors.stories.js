@@ -4,40 +4,13 @@ import { html } from 'lit';
 // directly, instead of a hand-maintained copy that drifts out of sync
 // every time a token is added, renamed, or removed.
 import tokensRaw from '../../tokens/tokens.css?raw';
+import { parseTokenGroups } from './_parseTokens.js';
 
 export default {
   title: 'Foundation/Colors',
   tags: ['autodocs'],
   parameters: { layout: 'padded' },
 };
-
-// Walks the :root block and buckets every --color-* declaration under the
-// nearest preceding comment (e.g. "/* Borders */", "/* ── Colors ── */").
-// Any new --color-* token shows up automatically under whatever heading
-// precedes it in tokens.css — no second list to remember to update.
-function parseColorGroups(css) {
-  const body = css.slice(css.indexOf(':root'));
-  const groups = [];
-  let current = null;
-
-  for (const raw of body.split('\n')) {
-    const line = raw.trim();
-
-    if (line.startsWith('/*') && line.endsWith('*/')) {
-      const label = line.slice(2, -2).replace(/─/g, '').trim();
-      if (label) current = { label, tokens: [] };
-      if (label) groups.push(current);
-      continue;
-    }
-
-    const match = line.match(/^(--color-[a-zA-Z0-9-]+)\s*:\s*([^;]+);/);
-    if (match && current) {
-      current.tokens.push({ name: match[1], value: match[2].trim() });
-    }
-  }
-
-  return groups.filter(g => g.tokens.length > 0);
-}
 
 const swatch = ({ name, value }) => html`
   <div style="display:flex;flex-direction:column;gap:6px;min-width:100px">
@@ -68,7 +41,7 @@ const group = ({ label, tokens }) => html`
   </div>
 `;
 
-const GROUPS = parseColorGroups(tokensRaw);
+const GROUPS = parseTokenGroups(tokensRaw, '--color-');
 
 export const AllColors = {
   name: 'All Colors',
