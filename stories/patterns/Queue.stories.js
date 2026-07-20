@@ -1,12 +1,13 @@
 import { html } from 'lit';
 import '../../components/wla-queue-card.js';
+import '../../components/wla-button.js';
 
 export default {
   title: 'Patterns/Queue',
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
-    docs: { description: { component: 'Composes [`wla-queue-card`](?path=/story/components-queuecard--default) for each video item in the scrollable row.' } },
+    docs: { description: { component: 'The bottom queue bar from `pages/watchlater.html` — composes [`wla-queue-card`](?path=/story/components-queuecard--default) for each video, plus real [`wla-button`](?path=/story/components-button--default) instances for refresh and prev/next. The whole header row is a collapse toggle (`role="button"`, keyboard-operable), and the chevron is a centered decoration, not a separate control.' } },
   },
 };
 
@@ -25,33 +26,38 @@ const VIDEOS = [
   { title: 'TypeScript Generics Are Not That Hard',                  channel: 'Matt Pocock',              duration: '15:29', date: '4 days ago',  active: false },
 ];
 
-const arrowLeft  = html`<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>`;
-const arrowRight = html`<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>`;
-const arrowUp    = html`<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M7.41 15.41 12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>`;
+const chevronDouble = html`<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+  <path d="M12 15.5 6 9.5l1.41-1.41L12 12.67l4.59-4.58L18 9.5z"/>
+  <path d="M12 21 6 15l1.41-1.41L12 18.17l4.59-4.58L18 15z"/>
+</svg>`;
 
 const queueStyles = html`
   <style>
+    /* Layout only — colors/spacing/type come from tokens.css, same as the
+       real page (pages/watchlater.css). */
     .queue-shell {
       height: 260px;
       display: flex;
       flex-direction: column;
-      background: #111;
+      background: var(--color-bg, #0f0f0f);
       border-top: 1px solid var(--color-border, #2e2e2e);
       overflow: hidden;
     }
     .queue-shell.collapsed { height: auto; }
     .queue-shell.collapsed .queue-scroll { display: none; }
-    .queue-shell.collapsed .collapse-icon { transform: rotate(180deg); }
+    .queue-shell.collapsed .queue-collapse-icon { transform: translate(-50%, -50%) rotate(180deg); }
 
     .queue-header {
+      position: relative;
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 5px 16px 4px;
+      gap: var(--space-2, 8px);
+      padding: 5px var(--space-4, 16px) 4px;
       flex-shrink: 0;
       border-bottom: 1px solid var(--color-border, #2e2e2e);
-      user-select: none;
+      cursor: pointer;
     }
+    .queue-title-left { display: flex; align-items: center; gap: var(--space-2, 8px); }
     .queue-label {
       font-size: var(--font-size-sm, 0.75rem);
       font-weight: var(--font-weight-bold, 700);
@@ -61,62 +67,88 @@ const queueStyles = html`
     }
     .queue-count {
       font-size: var(--font-size-sm, 0.75rem);
-      color: var(--color-text-disabled, #555);
+      color: var(--color-text-tertiary, #777);
     }
-    .queue-nav { display: flex; gap: 4px; margin-left: auto; }
+    .queue-sync { display: flex; align-items: center; gap: var(--space-2, 8px); }
+    .sync-status {
+      font-size: var(--font-size-sm, 0.75rem);
+      color: var(--color-text-tertiary, #777);
+      white-space: nowrap;
+    }
+    /* Vertical divider between the count and the refresh/sync group */
+    .queue-title-sep {
+      width: 1px;
+      height: 16px;
+      flex-shrink: 0;
+      background: var(--color-border, #2e2e2e);
+      margin: 0 var(--space-3, 12px);
+    }
 
-    .queue-nav-btn, .queue-collapse-btn {
-      width: 26px; height: 26px;
-      border-radius: var(--radius-sm, 4px);
-      color: var(--color-text-muted, #aaa);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      padding: 0;
-      transition: border-color var(--transition-fast, 0.12s),
-                  color var(--transition-fast, 0.12s);
+    /* Purely decorative — pinned to the true bar center regardless of how
+       wide the left/right groups are. The whole header row is the click
+       target for collapse, not this icon specifically. */
+    .queue-collapse-icon {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      color: var(--color-text, #e8e8e8);
+      pointer-events: none;
+      transition: color var(--transition-fast, 0.12s), transform var(--transition-base, 0.2s);
     }
-    .queue-nav-btn {
-      background: var(--color-surface, #1a1a1a);
-      border: 1px solid var(--color-border, #2e2e2e);
-    }
-    .queue-nav-btn:hover:not(:disabled) { border-color: #444; color: var(--color-text, #e8e8e8); }
-    .queue-nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .queue-header:hover .queue-collapse-icon { color: var(--color-accent, #28ada0); }
 
-    .queue-collapse-btn {
-      background: transparent;
-      border: none;
-      margin-left: 4px;
-    }
-    .queue-collapse-btn:hover { color: var(--color-text, #e8e8e8); }
-    .collapse-icon { transition: transform 0.2s; display: flex; }
+    .queue-nav { display: flex; gap: var(--space-1, 4px); margin-left: auto; }
 
     .queue-scroll {
       flex: 1;
       display: flex;
-      gap: 8px;
-      padding: 8px 14px;
+      gap: var(--space-2, 8px);
+      padding: var(--space-2, 8px) 14px;
       overflow-x: auto;
       overflow-y: hidden;
       align-items: stretch;
       scrollbar-width: thin;
       scrollbar-color: #333 transparent;
     }
+
+    .queue-load-more-card { width: 80px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .queue-load-more-btn {
+      width: 100%;
+      height: 100%;
+      background: var(--color-surface, #1a1a1a);
+      border: 1px solid var(--color-border, #2e2e2e);
+      border-radius: var(--radius-sm, 4px);
+      color: var(--color-text-muted, #aaa);
+      font-size: var(--font-size-sm, 0.75rem);
+      cursor: pointer;
+      padding: var(--space-2, 8px) var(--space-1, 4px);
+      text-align: center;
+    }
   </style>
 `;
 
-const queue = ({ videos = VIDEOS, collapsed = false, prevDisabled = true } = {}) => html`
+const queue = ({ videos = VIDEOS, collapsed = false, prevDisabled = true, syncStatus = null, showLoadMore = false } = {}) => html`
   ${queueStyles}
   <div class="queue-shell${collapsed ? ' collapsed' : ''}">
-    <div class="queue-header">
-      <span class="queue-label">Queue</span>
-      <span class="queue-count">${videos.length}</span>
-      <div class="queue-nav">
-        <button class="queue-nav-btn" aria-label="Scroll left" ?disabled=${prevDisabled}>${arrowLeft}</button>
-        <button class="queue-nav-btn" aria-label="Scroll right">${arrowRight}</button>
+    <div class="queue-header" role="button" tabindex="0" aria-expanded=${!collapsed} aria-label="Toggle queue visibility">
+      <div class="queue-title-left">
+        <span class="queue-label">Queue</span>
+        <span class="queue-count">${videos.length}</span>
+        <div class="queue-title-sep" aria-hidden="true"></div>
+        <div class="queue-sync">
+          <wla-button variant="secondary" size="sm" icon="refresh" title="Reload your Watch Later list">Refresh</wla-button>
+          ${syncStatus ? html`<span class="sync-status">${syncStatus}</span>` : ''}
+        </div>
       </div>
-      <button class="queue-collapse-btn" aria-label="Toggle queue">
-        <span class="collapse-icon">${arrowUp}</span>
-      </button>
+
+      <span class="queue-collapse-icon" aria-hidden="true">${chevronDouble}</span>
+
+      <div class="queue-nav">
+        <wla-button variant="secondary" size="sm" icon-only icon="arrow-left" label="Scroll left" ?disabled=${prevDisabled}></wla-button>
+        <wla-button variant="secondary" size="sm" icon-only icon="arrow-right" label="Scroll right"></wla-button>
+      </div>
     </div>
     <div class="queue-scroll">
       ${videos.map(v => html`
@@ -129,6 +161,11 @@ const queue = ({ videos = VIDEOS, collapsed = false, prevDisabled = true } = {})
           ?active=${v.active}
         ></wla-queue-card>
       `)}
+      ${showLoadMore ? html`
+        <div class="queue-load-more-card">
+          <button class="queue-load-more-btn">Load more…</button>
+        </div>
+      ` : ''}
     </div>
   </div>
 `;
@@ -136,6 +173,18 @@ const queue = ({ videos = VIDEOS, collapsed = false, prevDisabled = true } = {})
 export const Default = {
   parameters: { docs: { story: { height: '300px' } } },
   render: () => queue(),
+};
+
+export const Syncing = {
+  name: 'Syncing',
+  parameters: { docs: { story: { height: '300px' } } },
+  render: () => queue({ syncStatus: 'Syncing 12 / 47…' }),
+};
+
+export const Synced = {
+  name: 'Synced (relative time)',
+  parameters: { docs: { story: { height: '300px' } } },
+  render: () => queue({ syncStatus: 'Synced 2 minutes ago' }),
 };
 
 export const Scrolled = {
@@ -153,4 +202,10 @@ export const ShortQueue = {
   name: 'Short queue (3 items)',
   parameters: { docs: { story: { height: '300px' } } },
   render: () => queue({ videos: VIDEOS.slice(0, 3) }),
+};
+
+export const WithLoadMore = {
+  name: 'With "Load more" (pagination continuation)',
+  parameters: { docs: { story: { height: '300px' } } },
+  render: () => queue({ showLoadMore: true }),
 };

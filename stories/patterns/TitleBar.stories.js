@@ -1,110 +1,81 @@
 import { html } from 'lit';
+import '../../components/wla-chip.js';
+import '../../components/wla-button.js';
 
 export default {
   title: 'Patterns/Title Bar',
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
-    docs: { story: { height: '72px' } },
+    docs: {
+      story: { height: '72px' },
+      description: { component: 'The extension\'s top bar — logo, title, video-count [`wla-chip`](?path=/story/components-chip--default), and a settings [`wla-button`](?path=/story/components-button--default). Mirrors the real markup in `pages/watchlater.html`. The debug button only appears after a fetch error, so it\'s off by default here.' },
+    },
   },
 };
 
-const refreshIcon = html`<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15" aria-hidden="true"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>`;
-
-const settingsIcon = html`<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.484.484 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.61 3.61 0 0 1 8.4 12c0-1.98 1.62-3.6 3.6-3.6s3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>`;
-
-const logoIcon = html`<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26" style="color:var(--color-accent,#ff0000);flex-shrink:0" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>`;
+const logoIcon = html`<svg viewBox="0 0 32 32" fill="none" width="26" height="26" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <g clip-path="url(#wla-logo-clip-story)">
+    <path d="M32 32H-1V0H32V32ZM22.9375 6.53418C22.6152 5.6641 21.3848 5.6641 21.0625 6.53418L19.459 10.8682C19.3577 11.1417 19.1417 11.3577 18.8682 11.459L14.5342 13.0625C13.6641 13.3848 13.6641 14.6152 14.5342 14.9375L18.8682 16.541C19.1417 16.6423 19.3577 16.8583 19.459 17.1318L21.0625 21.4658C21.3848 22.3359 22.6152 22.3359 22.9375 21.4658L24.541 17.1318C24.6423 16.8583 24.8583 16.6423 25.1318 16.541L29.4658 14.9375C30.3359 14.6152 30.3359 13.3848 29.4658 13.0625L25.1318 11.459C24.8583 11.3577 24.6423 11.1417 24.541 10.8682L22.9375 6.53418Z" fill="#28ADA0"/>
+    <path d="M10.2185 9.83193C10.0753 10.0857 9.99992 10.3738 10 10.6671V22.3329C9.99992 22.6262 10.0753 22.9143 10.2185 23.1681C10.3616 23.4219 10.5676 23.6325 10.8155 23.7785C11.0634 23.9246 11.3445 24.001 11.6304 24C11.9163 23.999 12.1969 23.9206 12.4438 23.7729L22.1931 17.9399C22.4388 17.7931 22.6426 17.5827 22.7842 17.3297C22.9258 17.0768 23.0002 16.7901 23 16.4984C22.9998 16.2068 22.9249 15.9203 22.7828 15.6676C22.6408 15.4149 22.4366 15.2048 22.1906 15.0584L12.4438 9.22715C12.1969 9.07935 11.9163 9.00101 11.6304 9.00001C11.3445 8.99901 11.0634 9.07541 10.8155 9.22148C10.5676 9.36754 10.3616 9.57812 10.2185 9.83193Z" fill="white"/>
+  </g>
+  <defs><clipPath id="wla-logo-clip-story"><rect width="32" height="32" rx="6" fill="white"/></clipPath></defs>
+</svg>`;
 
 const barStyles = html`
   <style>
+    /* Layout only — colors/spacing/type come from tokens.css via the
+       component styles and CSS custom properties, same as the real page. */
     .title-bar {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: space-between;
       height: var(--header-h, 56px);
-      padding: 0 20px;
+      padding: 0 var(--space-5, 20px);
       background: var(--color-bg, #0f0f0f);
       border-bottom: 1px solid var(--color-border, #2e2e2e);
-      gap: 16px;
+      gap: var(--space-4, 16px);
       box-sizing: border-box;
     }
-    .bar-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .bar-title {
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-right { display: flex; align-items: center; gap: var(--space-3, 12px); }
+    h1 {
       font-size: var(--font-size-xl, 1.25rem);
       font-weight: var(--font-weight-bold, 700);
       color: var(--color-text, #e8e8e8);
       white-space: nowrap;
+      margin: 0;
     }
-    .count-badge {
-      background: var(--color-surface, #1a1a1a);
-      border: 1px solid var(--color-border, #2e2e2e);
-      border-radius: 99px;
-      padding: 2px 10px;
-      font-size: var(--font-size-base, 0.875rem);
-      color: var(--color-text-muted, #aaa);
-      white-space: nowrap;
-    }
-    .bar-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .sync-status {
-      font-size: var(--font-size-base, 0.875rem);
-      color: var(--color-text-muted, #aaa);
-      white-space: nowrap;
-    }
-    .btn-primary, .btn-secondary {
+    .debug-btn {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 7px 14px;
+      gap: var(--space-2, 8px);
+      padding: var(--space-2, 8px) var(--space-4, 16px);
       border-radius: var(--radius, 8px);
       cursor: pointer;
       font-size: var(--font-size-base, 0.875rem);
       font-weight: var(--font-weight-semibold, 600);
+      font-family: inherit;
       white-space: nowrap;
-      border: none;
-      transition: background var(--transition-fast, 0.12s);
-    }
-    .btn-primary {
-      background: var(--color-accent, #ff0000);
-      color: #fff;
-    }
-    .btn-primary:hover { background: var(--color-accent-hover, #cc0000); }
-    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn-secondary {
       background: var(--color-surface, #1a1a1a);
-      color: var(--color-text, #e8e8e8);
-      border: 1px solid var(--color-border, #2e2e2e);
-    }
-    .btn-secondary:hover { background: var(--color-surface-hover, #222); }
-    .btn-icon {
-      padding: 7px 10px;
+      color: #eab308;
+      border: 1px solid #6b5a20;
     }
   </style>
 `;
 
-const bar = ({ count = null, syncStatus = null, refreshDisabled = false } = {}) => html`
+const bar = ({ count = null, showDebug = false } = {}) => html`
   ${barStyles}
   <header class="title-bar">
-    <div class="bar-left">
+    <div class="header-left">
       ${logoIcon}
-      <span class="bar-title">Watch Later</span>
-      ${count != null ? html`<span class="count-badge">${count} videos</span>` : ''}
+      <h1>Watch Later</h1>
+      ${count != null ? html`<wla-chip value=${`${count} video${count !== 1 ? 's' : ''}`}></wla-chip>` : ''}
     </div>
-    <div class="bar-right">
-      ${syncStatus ? html`<span class="sync-status">${syncStatus}</span>` : ''}
-      <button class="btn-primary" ?disabled=${refreshDisabled}>
-        ${refreshIcon} Refresh
-      </button>
-      <button class="btn-secondary btn-icon" title="AI settings">
-        ${settingsIcon}
-      </button>
+    <div class="header-right">
+      ${showDebug ? html`<button class="debug-btn">⚠ Copy debug info</button>` : ''}
+      <wla-button variant="secondary" icon="settings" icon-only label="AI settings" title="AI settings"></wla-button>
     </div>
   </header>
 `;
@@ -114,14 +85,9 @@ export const Default = {
   render: () => bar({ count: 47 }),
 };
 
-export const Loading = {
-  name: 'Loading',
-  render: () => bar({ syncStatus: 'Loading…', refreshDisabled: true }),
-};
-
-export const Syncing = {
-  name: 'Syncing',
-  render: () => bar({ count: 47, syncStatus: 'Syncing 12 / 47…' }),
+export const Initial = {
+  name: 'Initial (no count yet)',
+  render: () => bar(),
 };
 
 export const Empty = {
@@ -129,7 +95,8 @@ export const Empty = {
   render: () => bar({ count: 0 }),
 };
 
-export const NoCount = {
-  name: 'Initial (no count yet)',
-  render: () => bar(),
+export const WithDebugButton = {
+  name: 'After a fetch error',
+  parameters: { docs: { description: { story: 'The debug button appears in the header only once a fetch/parse error has occurred, so its data can be copied for a bug report.' } } },
+  render: () => bar({ count: 47, showDebug: true }),
 };

@@ -9,3 +9,4 @@ import '../components/wla-tabs.js';
 import '../components/wla-queue-card.js';
 import '../components/wla-menu.js';
 import '../components/wla-takeaway.js';
+import '../components/wla-sentiment-bar.js';

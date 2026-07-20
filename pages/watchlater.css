@@ -361,25 +361,6 @@ h1 {
   color: var(--color-text);
 }
 
-/* Compact sentiment bar + legend */
-.sentiment-mini {
-  display: flex;
-  height: 8px;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  margin-bottom: 5px;
-  background: var(--color-surface);
-}
-.sentiment-mini .seg-pos { background: var(--color-accent); }
-.sentiment-mini .seg-neu { background: var(--color-text-tertiary); }
-.sentiment-mini .seg-neg { background: var(--color-critical); }
-
-.sentiment-legend {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-3);
-}
-
 /* Comment themes */
 .theme-list { display: flex; flex-direction: column; gap: var(--space-3); }
 .theme-item {

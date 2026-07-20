@@ -517,12 +517,12 @@ function renderAnalysis(data, transcriptStatus) {
     </div>`;
   }).join("");
   aiContent("sentiment").innerHTML = `
-    <div class="sentiment-mini">
-      <div class="seg-pos" style="width:${Number(s.positive) || 0}%"></div>
-      <div class="seg-neu" style="width:${Number(s.neutral) || 0}%"></div>
-      <div class="seg-neg" style="width:${Number(s.critical) || 0}%"></div>
-    </div>
-    <div class="sentiment-legend">${Number(s.positive) || 0}% positive · ${Number(s.neutral) || 0}% neutral · ${Number(s.critical) || 0}% critical</div>
+    <wla-sentiment-bar
+      positive="${Number(s.positive) || 0}"
+      neutral="${Number(s.neutral) || 0}"
+      negative="${Number(s.critical) || 0}"
+      style="margin-bottom:var(--space-3)"
+    ></wla-sentiment-bar>
     <div class="theme-list">${themes || `<p class="placeholder-note">No clear themes found.</p>`}</div>`;
 }
 
