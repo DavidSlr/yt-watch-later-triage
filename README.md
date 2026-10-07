@@ -49,6 +49,8 @@ It's one line so it works as-is in PowerShell, Command Prompt, or Git Bash/WSL. 
 
 Either way, this starts a local service on `http://localhost:47823`. Point the extension at it in **Settings → Transcript harvester** (this is the default URL, so usually nothing to change). Check `http://localhost:47823/status` for diagnostics if transcripts aren't coming through. Without the harvester running, AI analysis still works — it just relies on metadata and comments instead of the transcript.
 
+**Harvester on another machine** (a home server, a NAS): run the same container there and enter its address, e.g. `http://my-server.local:47823`, as the Service URL. When you save, Firefox asks once whether the extension may contact that host; nothing beyond that host is granted. The harvester has no login, so only expose it on a network you trust.
+
 ### 3. AI provider
 
 Open the extension's settings (gear icon) and add an API key for either:
@@ -100,6 +102,7 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for local setup, the build/release process,
 | `*://*.youtube.com/*`, `*://*.youtube-nocookie.com/*` (host) | Fetch the Watch Later playlist, call InnerTube (remove/comments/player), embed the video player |
 | `https://generativelanguage.googleapis.com/*`, `https://api.anthropic.com/*` (host) | Send analysis requests to your configured AI provider |
 | `http://localhost:47823/*` (host) | Talk to the local transcript harvester, if running |
+| `http://*/*`, `https://*/*` (optional host) | Not granted at install. Requested at runtime, for one host only, when you set a harvester URL that isn't localhost |
 | `cookies` | Read the `SAPISID` cookie to authenticate InnerTube requests |
 | `tabs` | Open the Watch Later tab when the toolbar icon is clicked |
 | `webRequest`, `webRequestBlocking` | Fix the video embed's `Referer` header (works around YouTube embed error 152/153) |

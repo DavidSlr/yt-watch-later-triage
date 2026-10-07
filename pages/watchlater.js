@@ -599,18 +599,47 @@ async function initAiUi() {
   document.getElementById("settings-btn").addEventListener("click", openModal);
   modal.addEventListener("wla-close", closeModal);
 
+  // The default harvester (localhost) is covered by the manifest. A harvester on another
+  // machine is allowed per host at runtime: the browser asks the user once for exactly that
+  // origin. Must be the first await in the click handler, or the browser refuses the prompt.
+  async function ensureHarvesterPermission() {
+    let origin;
+    try { origin = new URL(allSettings().harvesterUrl).origin; }
+    catch (_) { return "Service URL is not a valid URL"; }
+    try {
+      const granted = await browser.permissions.request({ origins: [`${origin}/*`] });
+      return granted ? null : `Permission to reach ${origin} was not granted, so transcripts will not load from there`;
+    } catch (err) {
+      return `Could not request permission for ${origin}: ${err.message}`;
+    }
+  }
+
   document.getElementById("ai-save").addEventListener("click", async () => {
+    const permissionError = await ensureHarvesterPermission();
+    // Save regardless, so declining the harvester prompt never loses the API key.
     await WLA_AI.saveAllProviderSettings(allSettings());
     dbg("INFO", `AI settings saved (provider: ${activeProvider})`);
+    if (permissionError) {
+      testResult.hidden = false;
+      testResult.className = "form-test-result err";
+      testResult.textContent = `✗ ${permissionError}`;
+      return;
+    }
     closeModal();
     if (currentVideoId) ensureAnalysis(currentVideoId);
   });
 
   document.getElementById("ai-test").addEventListener("click", async () => {
+    const permissionError = await ensureHarvesterPermission();
     await WLA_AI.saveAllProviderSettings(allSettings());
     testResult.hidden = false;
     testResult.className = "form-test-result";
     testResult.textContent = "Testing…";
+    if (permissionError) {
+      testResult.classList.add("err");
+      testResult.textContent = `✗ ${permissionError}`;
+      return;
+    }
     try {
       await WLA_AI.test();
       testResult.classList.add("ok");
