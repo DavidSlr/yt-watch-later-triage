@@ -16,6 +16,10 @@
     "https://api.anthropic.com/*",
     "http://localhost:47823/*"
   ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
   "background": {
     "scripts": ["background.js"]
   },
