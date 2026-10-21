@@ -141,7 +141,7 @@ const DEFAULT_HARVESTER_URL = "http://localhost:47823";
 
 // ---------------------------------------------------------------------------
 // Transcript fetch via the local yt-caption-kit harvester service.
-// Returns { ok, transcript, status } where status is "ok" | "none" | "offline".
+// Returns { ok, transcript, language, status } where status is "ok" | "none" | "offline".
 // ---------------------------------------------------------------------------
 async function fetchTranscriptViaHarvester(videoId, harvesterUrl) {
   const base = (harvesterUrl || DEFAULT_HARVESTER_URL).replace(/\/$/, "");
@@ -155,7 +155,7 @@ async function fetchTranscriptViaHarvester(videoId, harvesterUrl) {
   }
   if (resp.ok) {
     const json = await resp.json().catch(() => ({}));
-    return { ok: true, transcript: json.transcript || null, status: "ok" };
+    return { ok: true, transcript: json.transcript || null, language: json.language || null, status: "ok" };
   }
   if (resp.status === 404) {
     return { ok: true, transcript: null, status: "none" };

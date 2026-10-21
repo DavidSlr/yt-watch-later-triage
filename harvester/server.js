@@ -1,5 +1,5 @@
 // Tiny HTTP server exposing the transcript microservice.
-//   GET /transcript?v=VIDEO_ID  → 200 {videoId, transcript} | 404 {error} | 5xx {error}
+//   GET /transcript?v=VIDEO_ID  → 200 {videoId, transcript, language} | 404 {error} | 5xx {error}
 //   GET /health                 → 200 {ok:true}
 //   GET /status                 → diagnostics + recent jobs
 //   GET /jobs                   → recent-jobs ring buffer
@@ -88,7 +88,7 @@ const server = http.createServer(async (req, res) => {
     recordJob(result.job);
 
     if (result.status === "ok") {
-      return sendJson(res, 200, { videoId, transcript: result.transcript });
+      return sendJson(res, 200, { videoId, transcript: result.transcript, language: result.language });
     }
     if (result.status === "none") {
       return sendJson(res, 404, { error: "no transcript available", reason: result.job.message });

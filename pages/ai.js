@@ -63,12 +63,12 @@ const WLA_AI = {
   // --------------------------------------------------------------------------
   // Main entry: analyze a video. Returns the parsed JSON analysis object.
   // --------------------------------------------------------------------------
-  async analyze(video, comments, transcript = null) {
+  async analyze(video, comments, transcript = null, transcriptLang = null) {
     const settings = await this.getSettings();
     if (!settings.apiKey) throw new Error("NO_API_KEY");
 
     const model = settings.model || this.DEFAULTS[settings.provider]?.model;
-    const prompt = WLA_PROMPTS.buildPrompt(video, comments, transcript);
+    const prompt = WLA_PROMPTS.buildPrompt(video, comments, transcript, transcriptLang);
 
     const raw = settings.provider === "claude"
       ? await this.callClaude(settings.apiKey, model, prompt)

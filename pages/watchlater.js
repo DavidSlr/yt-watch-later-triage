@@ -236,6 +236,7 @@ async function ensureAnalysis(videoId, force = false) {
     // Transcript and comments are both best-effort; fetch in parallel
     let comments = [];
     let transcript = null;
+    let transcriptLang = null;   // caption track language code from the harvester, e.g. "de"
     let transcriptStatus = null; // "ok" | "none" | "offline"
     let transcriptError = null;
 
@@ -250,9 +251,13 @@ async function ensureAnalysis(videoId, force = false) {
 
       (async () => {
         // Check transcript cache first — "ok" and "none" are stable, never re-fetch.
+        // "ok" entries without a `language` key predate original-language track
+        // selection and may hold a dubbed track, so fetch those again.
         const cached = await getCachedTranscript(videoId);
-        if (cached && (cached.status === "ok" || cached.status === "none")) {
+        const stale = cached?.status === "ok" && !("language" in cached);
+        if (cached && !stale && (cached.status === "ok" || cached.status === "none")) {
           transcript = cached.transcript;
+          transcriptLang = cached.language ?? null;
           transcriptStatus = cached.status;
           dbg("INFO", `Transcript cache hit for ${videoId}: ${cached.status}`);
           return;
@@ -260,12 +265,13 @@ async function ensureAnalysis(videoId, force = false) {
         try {
           const r = await sendMessage({ type: "fetch_transcript", videoId, harvesterUrl });
           transcript = r.transcript ?? null;
+          transcriptLang = r.language ?? null;
           transcriptStatus = r.status ?? (transcript ? "ok" : "offline");
           if (r.error) {
             transcriptError = r.error;
             dbg("WARN", `Transcript unavailable for ${videoId} (${transcriptStatus}): ${r.error}`);
           }
-          await setCachedTranscript(videoId, { transcript, status: transcriptStatus });
+          await setCachedTranscript(videoId, { transcript, language: transcriptLang, status: transcriptStatus });
         } catch (e) {
           transcriptStatus = "offline";
           transcriptError = e.message;
@@ -277,11 +283,11 @@ async function ensureAnalysis(videoId, force = false) {
 
     // Build and persist the prompt + transcript BEFORE calling the AI so the
     // inspect modal works even if the AI call fails.
-    const builtPrompt = WLA_PROMPTS.buildPrompt(video, comments, transcript);
+    const builtPrompt = WLA_PROMPTS.buildPrompt(video, comments, transcript, transcriptLang);
     await setCachedDebugInfo(videoId, { transcript, transcriptStatus, transcriptError, prompt: builtPrompt });
     if (currentVideoId === videoId) showInspectBtn(videoId);
 
-    const data = await WLA_AI.analyze(video, comments, transcript);
+    const data = await WLA_AI.analyze(video, comments, transcript, transcriptLang);
     await setCachedAnalysis(videoId, data);
     dbg("INFO", `Analysis complete for ${videoId}`);
 
@@ -316,7 +322,7 @@ async function setCachedDebugInfo(videoId, info) {
 }
 
 // ── Transcript cache (storage.local, persistent) ─────────────────────────────
-// Keyed by `transcript:${videoId}`. Stores { transcript, status, fetchedAt }.
+// Keyed by `transcript:${videoId}`. Stores { transcript, language, status, fetchedAt }.
 // "ok" and "none" are stable facts → always reuse. "offline" is transient →
 // never cache so the harvester is retried once it's back up.
 async function getCachedTranscript(videoId) {
@@ -325,10 +331,10 @@ async function getCachedTranscript(videoId) {
   return obj[key] ?? null;
 }
 
-async function setCachedTranscript(videoId, { transcript, status }) {
+async function setCachedTranscript(videoId, { transcript, language, status }) {
   if (status === "offline") return; // don't persist transient failures
   await browser.storage.local.set({
-    [`transcript:${videoId}`]: { transcript, status, fetchedAt: Date.now() },
+    [`transcript:${videoId}`]: { transcript, language, status, fetchedAt: Date.now() },
   });
 }
 

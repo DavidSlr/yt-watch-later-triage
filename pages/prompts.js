@@ -6,6 +6,7 @@
 //
 // Placeholders available in section prompts (filled by buildPrompt):
 //   {{title}} {{channel}} {{duration}} {{uploadDate}} {{description}}
+//   {{languageHint}} (transcript language note, or empty)
 // ============================================================================
 
 const WLA_PROMPTS = {
@@ -30,6 +31,16 @@ no commentary. Use exactly this shape:
 }`,
 
   sections: {
+
+    // Always included — generated text follows the video, fixed values stay English
+    language: `## Output language
+Write all free-text values in the language spoken in the video, not in the language of these
+instructions. That covers "summary", "clickbait", each takeaway "point", and each sentiment
+"theme". Determine the language from the transcript first, then the title and description.
+{{languageHint}}
+Keep these exactly as specified (in English) regardless of the video's language: the JSON keys,
+takeaway "label" values, "tags" values, and sentiment "tone" values. Keep comment "quote" values
+verbatim in their original language.`,
 
     // Used when a transcript is available
     summary_transcript: `## Summary
@@ -94,14 +105,19 @@ If NO comments are provided, set the entire "sentiment" field to null.`,
   // --------------------------------------------------------------------------
   // Assembles the section prompts + video data into the final user prompt.
   // Selects the appropriate summary prompt based on transcript availability.
+  // transcriptLang is the caption track's language code (e.g. "de"), if known.
   // --------------------------------------------------------------------------
-  buildPrompt(video, comments, transcript = null) {
+  buildPrompt(video, comments, transcript = null, transcriptLang = null) {
+    const languageHint = transcript && transcriptLang
+      ? `The transcript's caption track has language code "${transcriptLang}".`
+      : "";
     const fill = (tpl) => tpl
       .replaceAll("{{title}}", video.title ?? "")
       .replaceAll("{{channel}}", video.channel ?? "")
       .replaceAll("{{duration}}", video.duration ?? "")
       .replaceAll("{{uploadDate}}", video.uploadDate ?? "")
-      .replaceAll("{{description}}", video.description ?? "");
+      .replaceAll("{{description}}", video.description ?? "")
+      .replaceAll("{{languageHint}}\n", languageHint ? `${languageHint}\n` : "");
 
     const summaryPrompt = transcript
       ? this.sections.summary_transcript
@@ -114,6 +130,8 @@ If NO comments are provided, set the entire "sentiment" field to null.`,
       `Duration: ${video.duration ?? "(unknown)"}`,
       `Uploaded: ${video.uploadDate ?? "(unknown)"}`,
       `Description snippet: ${video.description || "(none)"}`,
+      ``,
+      fill(this.sections.language),
       ``,
       fill(summaryPrompt),
       ``,
