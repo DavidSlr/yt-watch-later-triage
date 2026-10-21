@@ -106,7 +106,7 @@ async function fetchContinuation(continuation) {
 // ---------------------------------------------------------------------------
 async function handleRemoveVideo(videoId, setVideoId, removeEndpoint) {
   const cfg = getConfig();
-  const sapisidhash = await buildSapisidhash();
+  const sapisidhash = await buildSapisidhash(cfg.userSessionId);
 
   console.log("[WLA content] remove_video input:", { videoId, setVideoId, removeEndpoint });
 
@@ -144,7 +144,7 @@ async function handleRemoveVideo(videoId, setVideoId, removeEndpoint) {
     "Content-Type": "application/json",
     "Authorization": sapisidhash,
     "X-Origin": "https://www.youtube.com",
-    "X-Goog-AuthUser": "0",
+    "X-Goog-AuthUser": cfg.sessionIndex || "0",
     "X-YouTube-Client-Name": "1",
     "X-YouTube-Client-Version": cfg.clientVersion,
     "X-YouTube-Bootstrap-Logged-In": cfg.loggedIn || "true",
@@ -267,8 +267,13 @@ const delay = (ms) => new Promise(r => setTimeout(r, ms));
 // SAPISID cookies and concatenates them into a single Authorization header.
 // Mutation endpoints (like edit_playlist) validate against the 1P/3P hashes,
 // so sending only one is what was causing the FAILED_PRECONDITION 400.
+//
+// When ytcfg has USER_SESSION_ID, YouTube also binds the hash to the session:
+// the session ID is prepended to the hashed message and "_u" is appended to
+// each part. Mutation endpoints now reject the older unbound format with the
+// same FAILED_PRECONDITION 400.
 // ---------------------------------------------------------------------------
-async function buildSapisidhash(suffix = "") {
+async function buildSapisidhash(userSessionId = "") {
   const cookieMap = parseCookies(document.cookie);
   const pairs = [
     ["SAPISID", "SAPISIDHASH"],
@@ -281,11 +286,12 @@ async function buildSapisidhash(suffix = "") {
   for (const [cookieName, hashLabel] of pairs) {
     const value = cookieMap[cookieName];
     if (!value) continue;
-    const message = `${timestamp} ${value} https://www.youtube.com`;
+    const message = userSessionId
+      ? `${userSessionId} ${timestamp} ${value} https://www.youtube.com`
+      : `${timestamp} ${value} https://www.youtube.com`;
     const buf = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(message));
     const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
-    // YouTube's newer requests append a scheme suffix (e.g. "_u") to each hash.
-    parts.push(`${hashLabel} ${timestamp}_${hex}${suffix}`);
+    parts.push(`${hashLabel} ${timestamp}_${hex}${userSessionId ? "_u" : ""}`);
   }
 
   if (parts.length === 0) {
@@ -322,27 +328,33 @@ function readLiveYtcfg() {
         visitorData: window.ytcfg.get("VISITOR_DATA") || "",
         pageId: window.ytcfg.get("DELEGATED_SESSION_ID") || "",
         loggedIn: window.ytcfg.get("LOGGED_IN") ? "true" : "false",
+        userSessionId: window.ytcfg.get("USER_SESSION_ID") || "",
+        sessionIndex: String(window.ytcfg.get("SESSION_INDEX") ?? "0"),
       };
     }
   } catch (_) {}
-  return { clientVersion: "2.20250101.00.00", visitorData: "", pageId: "", loggedIn: "true" };
+  return {
+    clientVersion: "2.20250101.00.00", visitorData: "", pageId: "", loggedIn: "true",
+    userSessionId: "", sessionIndex: "0",
+  };
 }
 
+// The page calls ytcfg.set() several times; merge every block that parses,
+// since USER_SESSION_ID isn't guaranteed to sit next to the client version.
 function parseYtcfgFromHtml(html) {
+  const obj = {};
   for (const m of html.matchAll(/ytcfg\.set\s*\((\{[\s\S]+?\})\)\s*;/g)) {
-    try {
-      const obj = JSON.parse(m[1]);
-      if (obj.INNERTUBE_CLIENT_VERSION) {
-        return {
-          clientVersion: obj.INNERTUBE_CLIENT_VERSION,
-          visitorData: obj.VISITOR_DATA ?? "",
-          pageId: obj.DELEGATED_SESSION_ID ?? "",
-          loggedIn: obj.LOGGED_IN ? "true" : "false",
-        };
-      }
-    } catch (_) {}
+    try { Object.assign(obj, JSON.parse(m[1])); } catch (_) {}
   }
-  return null;
+  if (!obj.INNERTUBE_CLIENT_VERSION) return null;
+  return {
+    clientVersion: obj.INNERTUBE_CLIENT_VERSION,
+    visitorData: obj.VISITOR_DATA ?? "",
+    pageId: obj.DELEGATED_SESSION_ID ?? "",
+    loggedIn: obj.LOGGED_IN ? "true" : "false",
+    userSessionId: obj.USER_SESSION_ID ?? "",
+    sessionIndex: String(obj.SESSION_INDEX ?? "0"),
+  };
 }
 
 function buildContext(cfg) {
