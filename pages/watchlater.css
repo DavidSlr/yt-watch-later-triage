@@ -259,6 +259,18 @@ h1 {
   flex: 1;
   min-height: 0;
 }
+.acc-group[hidden] { display: none; }
+
+/* Analysis in progress: one animation centred in the space the accordions use */
+.ai-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--color-bg);
+}
+.ai-loading[hidden] { display: none; }
 
 /* Give accordion bodies the bg-level background for visual depth */
 .acc-group wla-accordion {

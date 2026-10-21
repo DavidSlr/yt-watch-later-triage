@@ -85,6 +85,23 @@ const LOCAL_ICONS = [
       <line x1="1" y1="1" x2="23" y2="23"/>
     </svg>`,
   },
+  {
+    name: 'YouTube',
+    usage: 'Analysis source — wla-analyzing',
+    svg: html`<svg viewBox="4 4 34 32" fill="currentColor" width="22" height="20">
+      <mask id="icons-yt-cutout"><rect x="0" y="0" width="40" height="40" fill="white"/><path d="M17 13.5 L27 20 L17 26.5 Z" fill="black"/></mask>
+      <rect x="4" y="8" width="34" height="24" rx="7" mask="url(#icons-yt-cutout)"/>
+    </svg>`,
+  },
+  {
+    name: 'AI sparkle',
+    usage: 'Analysis target — wla-analyzing',
+    svg: html`<svg viewBox="164 2 34 32" fill="currentColor" width="22" height="20">
+      <path d="M178 7 C179.6 15.4 181.6 17.4 190 19 C181.6 20.6 179.6 22.6 178 31 C176.4 22.6 174.4 20.6 166 19 C174.4 17.4 176.4 15.4 178 7 Z"/>
+      <path d="M192 4 C192.5 6.5 193.5 7.5 196 8 C193.5 8.5 192.5 9.5 192 12 C191.5 9.5 190.5 8.5 188 8 C190.5 7.5 191.5 6.5 192 4 Z"/>
+      <path d="M191 27 C191.4 29 192 29.6 194 30 C192 30.4 191.4 31 191 33 C190.6 31 190 30.4 188 30 C190 29.6 190.6 29 191 27 Z"/>
+    </svg>`,
+  },
 ];
 
 // ── Card renderers ────────────────────────────────────────────────────────────

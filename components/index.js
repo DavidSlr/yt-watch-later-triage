@@ -1,5 +1,6 @@
 export { WlaButton }       from './wla-button.js';
 export { WlaSpinner }      from './wla-spinner.js';
+export { WlaAnalyzing }    from './wla-analyzing.js';
 export { WlaChip }         from './wla-chip.js';
 export { WlaModal }        from './wla-modal.js';
 export { WlaAccordion }    from './wla-accordion.js';

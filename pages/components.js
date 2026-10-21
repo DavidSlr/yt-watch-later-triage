@@ -1,5 +1,6 @@
 import '../components/wla-button.js';
 import '../components/wla-spinner.js';
+import '../components/wla-analyzing.js';
 import '../components/wla-chip.js';
 import '../components/wla-modal.js';
 import '../components/wla-accordion-group.js';

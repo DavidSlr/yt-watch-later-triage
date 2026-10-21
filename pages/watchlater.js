@@ -226,7 +226,7 @@ async function ensureAnalysis(videoId, force = false) {
 
   if (analysisInFlightFor === videoId) return;
   analysisInFlightFor = videoId;
-  setAiStatus("Analyzing…");
+  setAiStatus("");
   setAiPanelsLoading();
 
   try {
@@ -302,6 +302,7 @@ async function ensureAnalysis(videoId, force = false) {
       if (err.message === "NO_API_KEY") {
         setAiPanelsNoKey();
       } else {
+        setAiLoading(false);
         setAiStatus(`Analysis failed: ${err.message}`, { error: true, refresh: videoId });
       }
     }
@@ -386,6 +387,7 @@ function setAiStatus(text, opts = {}) {
 }
 
 function setAiPanelsNoKey() {
+  setAiLoading(false);
   setAiStatus("");
   for (const [section, label] of [
     ["summary",   "Generate a summary"],
@@ -458,13 +460,23 @@ async function openInspectModal(videoId) {
   inspectModal.open = true;
 }
 
+// While analysis runs, the accordions are hidden and a single centred
+// animation takes their place. Clear the sections so a failed run doesn't
+// reveal the previous video's results.
 function setAiPanelsLoading() {
   for (const s of ["summary", "takeaways", "sentiment", "tags"]) {
-    aiContent(s).innerHTML = `<p class="placeholder-note">Analyzing…</p>`;
+    aiContent(s).innerHTML = "";
   }
+  setAiLoading(true);
+}
+
+function setAiLoading(loading) {
+  document.querySelector(".acc-group").hidden = loading;
+  document.getElementById("ai-loading").hidden = !loading;
 }
 
 function renderAnalysis(data, transcriptStatus) {
+  setAiLoading(false);
   // Summary — paragraphs, optional no-transcript note, optional clickbait answer
   const summaryParts = data.summary
     .split(/\n+/)
